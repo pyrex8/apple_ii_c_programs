@@ -5,7 +5,7 @@
 
 #include <peekpoke.h>
 
-#define STROBE(addr) __asm__ ("sta %w", addr)
+#define STROBE(addr) __asm__ ("bit %w", addr)
 
 #define CASSETTE_OUT_ADDR 0xC020
 #define TEST_PIN_ADDR CASSETTE_OUT_ADDR

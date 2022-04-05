@@ -3,14 +3,7 @@
 #include <stdint.h>
 #include "../test_pin/test_pin.h"
 
-
 #include <string.h>
-#include <conio.h>
-#include <apple2.h>
-#include <peekpoke.h>
-
-// peeks, pokes, and strobes
-#define STROBE(addr)       __asm__ ("sta %w", addr)
 
 /// HIRES LOOKUP TABLE
 
