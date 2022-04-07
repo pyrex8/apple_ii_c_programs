@@ -19,7 +19,9 @@
 
 #define DATA1         0x26
 #define DATA1_P       *((uint8_t*)DATA1)
-#define ADDR16_L      0x27
+#define DATA2         0x27
+#define DATA2_P       *((uint8_t*)DATA1)
+#define ADDR16_L      0x28
 #define ADDR16_L_P    *((uint8_t*)ADDR16_L)
 #define ADDR16_H      ADDR16_L + 1
 #define ADDR16_H_P    *((uint8_t*)ADDR16_H)
@@ -73,22 +75,24 @@
 // };
 
 
-//static void memset16(uint16 addr, uint8_t c, uint16_t n)
-static void pageset(uint8_t page, uint8_t value)
+static void pageset(uint8_t page, uint8_t value, uint8_t length)
 {
     // this method takes 114ms
     ADDR16_L_P = 0x00;
     ADDR16_H_P = page;
     DATA1_P = value;
+    DATA2_P = length;
 
     STROBE(HIRES);
     STROBE(TXTCLR);
     TEST_PIN_TOGGLE;
 
-    __asm__ ("ldx %b", ADDR16_H);
-    __asm__ ("ldy %b", ADDR16_L);
-    __asm__ ("lda %b", DATA1);
+    // init registers with memory
+    __asm__ ("ldx %b", DATA2);    // number of pages
+    __asm__ ("ldy %b", ADDR16_L); // address two bytes
+    __asm__ ("lda %b", DATA1);    // value to fill page(s) with
 
+    // nested loops
     __asm__ ("hclr1: sta (%b),y", ADDR16_L);
     __asm__ ("iny");
     __asm__ ("bne hclr1");
@@ -102,7 +106,7 @@ static void pageset(uint8_t page, uint8_t value)
 
 void main(void)
 {
-    pageset(0x20, 0xFF);
+    pageset(0x20, 0xFF, 0x20);
 
     while(1)
     {
