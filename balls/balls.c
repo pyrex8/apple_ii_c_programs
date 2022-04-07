@@ -68,13 +68,16 @@
 
 static void hclear(void)
 {
+    // this method takes 3120ms (27x times slower than ASM)
     uint16_t y = 0;
+    TEST_PIN_TOGGLE;
     STROBE(HIRES);
     STROBE(TXTCLR);
     for (y = 0x3FFF; y > 0x1FFF; y--)
     {
         POKE(y, 0xCC);
     }
+    TEST_PIN_TOGGLE;
 }
 
 
@@ -84,7 +87,6 @@ void main(void)
 
    while(1)
    {
-       TEST_PIN_TOGGLE;
-       TEST_PIN_TOGGLE;
+
    }
 }
