@@ -14,13 +14,13 @@
 #define BOTTOM      0xB700
 #define BOTTOM2     0x6E00         // Bottom * 2, for bouncing
 
-#define BALL        *((uint8_t*)0x06))            // Current ball number
-#define GBAS        *((uint16_t*)0x26))           // Graphics base address
-#define GBASL       *((uint8_t*)0x26))           // Graphics base address
-#define GBASH       *((uint8_t*)0x27))
-#define HCOLOR1     *((uint8_t*)0x1C))           // Color value
-#define HGRX        *((uint8_t*)0xE0))           // two-byte value
-#define HGRY        *((uint8_t*)0xE2))
+#define BALL       0x06            // Current ball number
+#define GBAS       *((uint16_t*)0x26)         // Graphics base address
+#define GBASL      0x26           // Graphics base address
+#define GBASH      0x27
+#define HCOLOR1    0x1C           // Color value
+#define HGRX       0xE0           // two-byte value
+#define HGRY       0xE2
 
 #define HGR1SCRN    0x2000         // Start of hires page 1
 #define HGR1SCRN_H  0x20
@@ -68,25 +68,35 @@
 
 static void hclear(void)
 {
-    // this method takes 3120ms (27x times slower than ASM)
-    uint16_t y = 0;
-    TEST_PIN_TOGGLE;
+    // this method takes 114ms
+
     STROBE(HIRES);
     STROBE(TXTCLR);
-    for (y = 0x3FFF; y > 0x1FFF; y--)
-    {
-        POKE(y, 0xCC);
-    }
+    TEST_PIN_TOGGLE;
+
+    __asm__ ("ldx #%b", HGR1SCRN_H);
+    __asm__ ("stx %b", GBASH);
+    __asm__ ("lda #%b", 20);
+    __asm__ ("sta %b", GBASL);
+    __asm__ ("tay");
+
+    __asm__ ("hclr1: sta (%b),y", GBASL);
+    __asm__ ("iny");
+    __asm__ ("bne hclr1");
+    __asm__ ("inc %b", GBASH);
+    __asm__ ("dex");
+    __asm__ ("bne hclr1");
+
     TEST_PIN_TOGGLE;
 }
 
 
 void main(void)
 {
-   hclear();
+    hclear();
 
-   while(1)
-   {
+    while(1)
+    {
 
-   }
+    }
 }
