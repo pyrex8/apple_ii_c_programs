@@ -14,13 +14,19 @@
 #define BOTTOM      0xB700
 #define BOTTOM2     0x6E00         // Bottom * 2, for bouncing
 
-#define BALL       0x06            // Current ball number
-#define GBAS       *((uint16_t*)0x26)         // Graphics base address
-#define GBASL      0x26           // Graphics base address
-#define GBASH      0x27
-#define HCOLOR1    0x1C           // Color value
-#define HGRX       0xE0           // two-byte value
-#define HGRY       0xE2
+// Addresses
+#define BALL        0x06            // Current ball number
+
+#define DATA1         0x26
+#define DATA1_P       *((uint8_t*)DATA1)
+#define ADDR16_L      0x27
+#define ADDR16_L_P    *((uint8_t*)ADDR16_L)
+#define ADDR16_H      ADDR16_L + 1
+#define ADDR16_H_P    *((uint8_t*)ADDR16_H)
+
+#define HCOLOR1     0x1C           // Color value
+#define HGRX        0xE0           // two-byte value
+#define HGRY        0xE2
 
 #define HGR1SCRN    0x2000         // Start of hires page 1
 #define HGR1SCRN_H  0x20
@@ -66,24 +72,27 @@
 //     0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0,
 // };
 
-static void hclear(void)
+
+//static void memset16(uint16 addr, uint8_t c, uint16_t n)
+static void pageset(uint8_t page, uint8_t value)
 {
     // this method takes 114ms
+    ADDR16_L_P = 0x00;
+    ADDR16_H_P = page;
+    DATA1_P = value;
 
     STROBE(HIRES);
     STROBE(TXTCLR);
     TEST_PIN_TOGGLE;
 
-    __asm__ ("ldx #%b", HGR1SCRN_H);
-    __asm__ ("stx %b", GBASH);
-    __asm__ ("lda #%b", 20);
-    __asm__ ("sta %b", GBASL);
-    __asm__ ("tay");
+    __asm__ ("ldx %b", ADDR16_H);
+    __asm__ ("ldy %b", ADDR16_L);
+    __asm__ ("lda %b", DATA1);
 
-    __asm__ ("hclr1: sta (%b),y", GBASL);
+    __asm__ ("hclr1: sta (%b),y", ADDR16_L);
     __asm__ ("iny");
     __asm__ ("bne hclr1");
-    __asm__ ("inc %b", GBASH);
+    __asm__ ("inc %b", ADDR16_H);
     __asm__ ("dex");
     __asm__ ("bne hclr1");
 
@@ -93,7 +102,7 @@ static void hclear(void)
 
 void main(void)
 {
-    hclear();
+    pageset(0x20, 0xFF);
 
     while(1)
     {
