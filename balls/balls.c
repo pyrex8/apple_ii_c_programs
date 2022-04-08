@@ -27,14 +27,6 @@
 #define ADDR1_L_P      *((uint8_t*)ADDR1_L)
 #define ADDR1_H        ADDR1_L + 1
 #define ADDR1_H_P      *((uint8_t*)ADDR1_H)
-#define ADDR2_L        0x2A
-#define ADDR2_L_P      *((uint8_t*)ADDR2_L)
-#define ADDR2_H        ADDR2_L + 1
-#define ADDR2_H_P      *((uint8_t*)ADDR2_H)
-#define ADDR3_L        0x2C
-#define ADDR3_L_P      *((uint8_t*)ADDR3_L)
-#define ADDR3_H        ADDR3_L + 1
-#define ADDR3_H_P      *((uint8_t*)ADDR3_H)
 
 #define HCOLOR1         0x1C           // Color value
 #define HGRX            0xE0           // two-byte value
@@ -118,27 +110,17 @@ static void pageset(uint8_t page, uint8_t value, uint8_t length)
 static void hline(void)
 {
     // 580us
-    ADDR2_L_P = (uint8_t)LKLO;
-    ADDR2_H_P = (uint8_t)(((uint16_t)LKLO)>> 8);
-    ADDR3_L_P = (uint8_t)LKHI;
-    ADDR3_H_P = (uint8_t)(((uint16_t)LKHI) >> 8);
+    ADDR1_L_P = LKLO[0];
+    ADDR1_H_P = LKHI[0];
 
     // init
+    __asm__ ("ldy #%b", COLUMN_LAST); // Width of screen in bytes
     __asm__ ("lda #%b", WHITE);
-    __asm__ ("ldy #%b", 0);
-    __asm__ ("pha");
-    __asm__ ("lda %b,y", ADDR2_L);//     lda LKLO,y
-    __asm__ ("sta %b", ADDR1_L);//     sta GBASL
-    __asm__ ("lda %b,y", ADDR3_L);//     lda LKHI,y
-    __asm__ ("sta %b", ADDR1_H);//     sta GBASH
-    __asm__ ("ldy #%b", COLUMN_LAST);//     ldy #COLUMN_LAST  ; Width of screen in bytes
-    __asm__ ("pla");//     pla
 
     // loop
-    __asm__ ("hl1: sta (%b),y", ADDR1_L);// hl1:    sta (GBASL),y
-    __asm__ ("dey"); //     dey
-    __asm__ ("bpl hl1");//     bpl hl1
-//     rts
+    __asm__ ("hl1: sta (%b),y", ADDR1_L);
+    __asm__ ("dey");
+    __asm__ ("bpl hl1");
 }
 
 
