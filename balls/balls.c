@@ -20,7 +20,7 @@
 #define DATA1         0x26
 #define DATA1_P       *((uint8_t*)DATA1)
 #define DATA2         0x27
-#define DATA2_P       *((uint8_t*)DATA1)
+#define DATA2_P       *((uint8_t*)DATA2)
 #define ADDR16_L      0x28
 #define ADDR16_L_P    *((uint8_t*)ADDR16_L)
 #define ADDR16_H      ADDR16_L + 1
