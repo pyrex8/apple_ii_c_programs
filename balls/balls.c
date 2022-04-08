@@ -5,6 +5,7 @@
 
 #define ROWS            192	// number of scanlines
 #define ROW_LAST        ROWS - 1
+#define ROW_SECOND_LAST 190
 #define NBALLS          30            // Number of balls to bounce
 #define COLUMNS         40            // Number of columns/bytes per row
 #define COLUMN_LAST     COLUMNS - 1
@@ -23,10 +24,20 @@
 #define DATA1_P         *((uint8_t*)DATA1)
 #define DATA2           0x27
 #define DATA2_P         *((uint8_t*)DATA2)
-#define ADDR1_L        0x28
+#define DATA3           0x28
+#define DATA3_P         *((uint8_t*)DATA3)
+#define ADDR1_L        0x29
 #define ADDR1_L_P      *((uint8_t*)ADDR1_L)
 #define ADDR1_H        ADDR1_L + 1
 #define ADDR1_H_P      *((uint8_t*)ADDR1_H)
+#define ADDR2_L        0x2B
+#define ADDR2_L_P      *((uint8_t*)ADDR2_L)
+#define ADDR2_H        ADDR2_L + 1
+#define ADDR2_H_P      *((uint8_t*)ADDR2_H)
+#define ADDR3_L        0x2D
+#define ADDR3_L_P      *((uint8_t*)ADDR3_L)
+#define ADDR3_H        ADDR3_L + 1
+#define ADDR3_H_P      *((uint8_t*)ADDR3_H)
 
 #define HCOLOR1         0x1C           // Color value
 #define HGRX            0xE0           // two-byte value
@@ -106,10 +117,10 @@ static void pageset(uint8_t page, uint8_t value, uint8_t length)
 // ;
 // ; Uses GBASL, GBASH
 
-static void hline(uint8_t line, uint8_t color)
+static void hline(uint8_t line, uint8_t pixels)
 {
     // Assembly = 580us, C = 850us
-    DATA1_P = color;
+    DATA1_P = pixels;
     ADDR1_L_P = LKLO[line];
     ADDR1_H_P = LKHI[line];
 
@@ -124,6 +135,56 @@ static void hline(uint8_t line, uint8_t color)
 }
 
 
+// Draw a vertical line on all but the topmost and bottom most rows
+// ; A = byte to write in each position
+// ; Y = column
+// ;
+// ; Uses GBASL, GBASH, HCOLOR1
+//
+//        lda #%00000011
+//        ldy #0
+// vline:
+//        sta HCOLOR1
+//        ldx #190        ; Start at second-to-last row
+// vl1:
+//        lda LKLO,x      ; Get the row address
+//        sta GBASL
+//        lda LKHI,x
+//        sta GBASH
+//        lda HCOLOR1
+//        sta (GBASL),y   ; Write the color byte
+//        dex             ; Previous row
+//        bne vl1
+//        rts
+
+static void vline(uint8_t column, uint8_t pixels)
+{
+    // Assembly = 6700us, C = xxxxus
+    DATA1_P = pixels;
+    DATA2_P = column;
+    DATA3_P = 190;
+    ADDR1_L_P = LKLO[190];
+    ADDR1_H_P = LKHI[190];
+    ADDR2_L_P = (uint8_t)LKLO;
+    ADDR2_H_P = (uint8_t)(((uint16_t)LKLO)>> 8);
+    ADDR3_L_P = (uint8_t)LKHI;
+    ADDR3_H_P = (uint8_t)(((uint16_t)LKHI) >> 8);
+
+    // init
+    __asm__ ("ldy %b", DATA2);     //        ldy #0
+    __asm__ ("ldx %b", DATA3); //        ldx #190        ; Start at second-to-last row
+
+    // loop
+    __asm__ ("vl1: lda %b,x", ADDR2_L); //     ; Get the row address
+    __asm__ ("sta %b", ADDR1_L);
+    __asm__ ("lda %b,x", ADDR3_L);//        lda LKHI,x
+    __asm__ ("sta %b", ADDR1_H);
+    __asm__ ("lda %b", DATA1);
+    __asm__ ("sta (%b),y", ADDR1_L);
+    __asm__ ("dex");
+    __asm__ ("bne vl1");
+}
+
 static void hclear(void)
 {
     pageset(HGR1SCRN_PAGE, BLACK, HGRSCRN_LENGTH);
@@ -135,12 +196,12 @@ void main(void)
 {
 
     hclear();
-
-    TEST_PIN_TOGGLE;
     hline(0, WHITE);
-    TEST_PIN_TOGGLE;
     hline(ROW_LAST, WHITE);
 
+    TEST_PIN_TOGGLE;
+    vline(0, 0x03);
+    TEST_PIN_TOGGLE;
 
     while(1)
     {
