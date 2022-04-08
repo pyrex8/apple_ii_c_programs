@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include "../test_pin/test_pin.h"
 
-#define VHEIGHT 192	// number of scanlines
-
+#define ROWS            192	// number of scanlines
+#define ROW_LAST        ROWS - 1
 #define NBALLS          30            // Number of balls to bounce
 #define COLUMNS         40            // Number of columns/bytes per row
 #define COLUMN_LAST     COLUMNS - 1
@@ -44,7 +44,7 @@
 #define HIRES           0xC057         // hires mode
 
 
-static const uint8_t LKLO[VHEIGHT] =
+static const uint8_t LKLO[ROWS] =
 {
     0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80,
     0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80,
@@ -60,7 +60,7 @@ static const uint8_t LKLO[VHEIGHT] =
     0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0,
 };
 
-static const uint8_t LKHI[VHEIGHT] =
+static const uint8_t LKHI[ROWS] =
 {
     0X20, 0X24, 0X28, 0X2C, 0X30, 0X34, 0X38, 0X3C, 0X20, 0X24, 0X28, 0X2C, 0X30, 0X34, 0X38, 0X3C,
     0X21, 0X25, 0X29, 0X2D, 0X31, 0X35, 0X39, 0X3D, 0X21, 0X25, 0X29, 0X2D, 0X31, 0X35, 0X39, 0X3D,
@@ -106,16 +106,16 @@ static void pageset(uint8_t page, uint8_t value, uint8_t length)
 // ;
 // ; Uses GBASL, GBASH
 
-//static void hline(uint8_t line, uint8_t color)
-static void hline(void)
+static void hline(uint8_t line, uint8_t color)
 {
-    // 580us
-    ADDR1_L_P = LKLO[0];
-    ADDR1_H_P = LKHI[0];
+    // Assembly = 580us, C = 850us
+    DATA1_P = color;
+    ADDR1_L_P = LKLO[line];
+    ADDR1_H_P = LKHI[line];
 
     // init
     __asm__ ("ldy #%b", COLUMN_LAST); // Width of screen in bytes
-    __asm__ ("lda #%b", WHITE);
+    __asm__ ("lda %b", DATA1);
 
     // loop
     __asm__ ("hl1: sta (%b),y", ADDR1_L);
@@ -137,9 +137,9 @@ void main(void)
     hclear();
 
     TEST_PIN_TOGGLE;
-    hline();
+    hline(0, WHITE);
     TEST_PIN_TOGGLE;
-
+    hline(ROW_LAST, WHITE);
 
 
     while(1)
