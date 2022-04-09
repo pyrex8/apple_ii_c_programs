@@ -26,18 +26,18 @@
 #define DATA2_P         *((uint8_t*)DATA2)
 #define DATA3           0x28
 #define DATA3_P         *((uint8_t*)DATA3)
-#define ADDR1_L        0x29
-#define ADDR1_L_P      *((uint8_t*)ADDR1_L)
-#define ADDR1_H        ADDR1_L + 1
-#define ADDR1_H_P      *((uint8_t*)ADDR1_H)
-#define ADDR2_L        0x2B
-#define ADDR2_L_P      *((uint8_t*)ADDR2_L)
-#define ADDR2_H        ADDR2_L + 1
-#define ADDR2_H_P      *((uint8_t*)ADDR2_H)
-#define ADDR3_L        0x2D
-#define ADDR3_L_P      *((uint8_t*)ADDR3_L)
-#define ADDR3_H        ADDR3_L + 1
-#define ADDR3_H_P      *((uint8_t*)ADDR3_H)
+#define ADDR1_L         0x29
+#define ADDR1_L_P       *((uint8_t*)ADDR1_L)
+#define ADDR1_H         ADDR1_L + 1
+#define ADDR1_H_P       *((uint8_t*)ADDR1_H)
+#define ADDR2_L         0x2B
+#define ADDR2_L_P       *((uint8_t*)ADDR2_L)
+#define ADDR2_H         ADDR2_L + 1
+#define ADDR2_H_P       *((uint8_t*)ADDR2_H)
+#define ADDR3_L         0x2D
+#define ADDR3_L_P       *((uint8_t*)ADDR3_L)
+#define ADDR3_H         ADDR3_L + 1
+#define ADDR3_H_P       *((uint8_t*)ADDR3_H)
 
 #define HCOLOR1         0x1C           // Color value
 #define HGRX            0xE0           // two-byte value
@@ -53,6 +53,9 @@
 #define TXTSET          0xC051         // text mode
 #define LOWSCR          0xC054         // page 1
 #define HIRES           0xC057         // hires mode
+
+
+static const uint8_t filler[0xFF] = {0};
 
 
 static const uint8_t LKLO[ROWS] =
@@ -159,27 +162,27 @@ static void hline(uint8_t line, uint8_t pixels)
 
 static void vline(uint8_t column, uint8_t pixels)
 {
-    // Assembly = 6700us, C = xxxxus
+    // Assembly = 6700us, C = 9400us
     DATA1_P = pixels;
     DATA2_P = column;
     DATA3_P = 190;
-    ADDR1_L_P = LKLO[190];
-    ADDR1_H_P = LKHI[190];
     ADDR2_L_P = (uint8_t)LKLO;
     ADDR2_H_P = (uint8_t)(((uint16_t)LKLO)>> 8);
     ADDR3_L_P = (uint8_t)LKHI;
     ADDR3_H_P = (uint8_t)(((uint16_t)LKHI) >> 8);
 
     // init
-    __asm__ ("ldy %b", DATA2);     //        ldy #0
-    __asm__ ("ldx %b", DATA3); //        ldx #190        ; Start at second-to-last row
+    __asm__ ("ldx %b", DATA3);          // Start at second-to-last row
 
     // loop
-    __asm__ ("vl1: lda %b,x", ADDR2_L); //     ; Get the row address
+    __asm__ ("vl1: txa");               // row to a
+    __asm__ ("tay");                    // row to y
+    __asm__ ("lda (%b),y", ADDR2_L); // Get the row address
     __asm__ ("sta %b", ADDR1_L);
-    __asm__ ("lda %b,x", ADDR3_L);//        lda LKHI,x
+    __asm__ ("lda (%b),y", ADDR3_L);//        lda LKHI,x
     __asm__ ("sta %b", ADDR1_H);
     __asm__ ("lda %b", DATA1);
+    __asm__ ("ldy %b", DATA2);          // column
     __asm__ ("sta (%b),y", ADDR1_L);
     __asm__ ("dex");
     __asm__ ("bne vl1");
@@ -187,6 +190,7 @@ static void vline(uint8_t column, uint8_t pixels)
 
 static void hclear(void)
 {
+    uint8_t f = filler[0];
     pageset(HGR1SCRN_PAGE, BLACK, HGRSCRN_LENGTH);
     STROBE(HIRES);
     STROBE(TXTCLR);
@@ -202,6 +206,7 @@ void main(void)
     TEST_PIN_TOGGLE;
     vline(0, 0x03);
     TEST_PIN_TOGGLE;
+    vline(39, 0x60);
 
     while(1)
     {
