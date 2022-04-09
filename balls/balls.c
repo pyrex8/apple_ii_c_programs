@@ -25,36 +25,59 @@ enum Zero_page
     DATA1 = 0x26,
     DATA2,
     DATA3,
+
     ADDR1L,
     ADDR1H,
     ADDR2L,
     ADDR2H,
     ADDR3L,
     ADDR3H,
-    ADDR4L,
-    ADDR4H,
-    ADDR5L,
-    ADDR5H,
+
+    GBASL,
+    GBASH,
+
+    LKLOL,
+    LKLOH,
+    LKHIL,
+    LHHIH,
+
+    BALL0L,
+    BALL0H,
+    BALL1L,
+    BALL1H,
 };
+
+// low byte is used for some instructions, alias so that it maps to assembly version
+#define LKLO  LKLOL
+#define LKHI  LKHIL
+#define BALL0  BALL0L
+#define BALL1  BALL1L
 
 // pointers to zero page memory
 #define DATA1_P         *((uint8_t*)DATA1)
 #define DATA2_P         *((uint8_t*)DATA2)
 #define DATA3_P         *((uint8_t*)DATA3)
-#define ADDR1L_P       *((uint8_t*)ADDR1L)
-#define ADDR1H_P       *((uint8_t*)ADDR1H)
-#define ADDR2L_P       *((uint8_t*)ADDR2L)
-#define ADDR2H_P       *((uint8_t*)ADDR2H)
-#define ADDR3L_P       *((uint8_t*)ADDR3L)
-#define ADDR3H_P       *((uint8_t*)ADDR3H)
-#define ADDR4L_P       *((uint8_t*)ADDR4L)
-#define ADDR4H_P       *((uint8_t*)ADDR4H)
-#define ADDR5L_P       *((uint8_t*)ADDR5L)
-#define ADDR5H_P       *((uint8_t*)ADDR5H)
+#define ADDR1L_P        *((uint8_t*)ADDR1L)
+#define ADDR1H_P        *((uint8_t*)ADDR1H)
+#define ADDR2L_P        *((uint8_t*)ADDR2L)
+#define ADDR2H_P        *((uint8_t*)ADDR2H)
+#define ADDR3L_P        *((uint8_t*)ADDR3L)
+#define ADDR3H_P        *((uint8_t*)ADDR3H)
+
+#define GBASL_P         *((uint8_t*)GBASL)
+#define GBASH_P         *((uint8_t*)GBASH)
+
+#define LKLOL_P         *((uint8_t*)LKLOL)
+#define LKLOH_P         *((uint8_t*)LKLOH)
+#define LKHIL_P         *((uint8_t*)LKHIL)
+#define LKHIH_P         *((uint8_t*)LHHIH)
+
+#define BALL0L_P         *((uint8_t*)BALL0L)
+#define BALL0H_P         *((uint8_t*)BALL0H)
+#define BALL1L_P         *((uint8_t*)BALL1L)
+#define BALL1H_P         *((uint8_t*)BALL1H)
 
 #define HCOLOR1         0x1C           // Color value
-#define HGRX            0xE0           // two-byte value
-#define HGRY            0xE2
 
 #define HGR1SCRN        0x2000         // Start of hires page 1
 #define HGR1SCRN_PAGE   0x20
@@ -132,6 +155,19 @@ static const uint8_t ball1[] =
     0X1E, 0X7F, 0X7F, 0X7F, 0X7F, 0X7F, 0X7F, 0X1E,
 };
 
+static void pointers_init(void)
+{
+    LKLOL_P = (uint8_t)lklo;
+    LKLOH_P = (uint8_t)(((uint16_t)lklo)>> 8);
+    LKHIL_P = (uint8_t)lkhi;
+    LKHIH_P = (uint8_t)(((uint16_t)lkhi) >> 8);
+
+    BALL0L_P = (uint8_t)ball0;
+    BALL0H_P = (uint8_t)(((uint16_t)ball0)>> 8);
+    BALL1L_P = (uint8_t)ball1;
+    BALL1H_P = (uint8_t)(((uint16_t)ball1) >> 8);
+}
+
 static void pageset(uint8_t page, uint8_t value, uint8_t length)
 {
     // this method takes 114ms
@@ -177,10 +213,6 @@ static void vline(uint8_t column, uint8_t pixels)
     DATA1_P = pixels;
     DATA2_P = column;
     DATA3_P = ROW_SECOND_LAST;
-    ADDR2L_P = (uint8_t)lklo;
-    ADDR2H_P = (uint8_t)(((uint16_t)lklo)>> 8);
-    ADDR3L_P = (uint8_t)lkhi;
-    ADDR3H_P = (uint8_t)(((uint16_t)lkhi) >> 8);
 
     // init
     __asm__ ("ldx %b", DATA3);          // Start at second-to-last row
@@ -188,9 +220,9 @@ static void vline(uint8_t column, uint8_t pixels)
     // loop
     __asm__ ("vl1: txa");               // row to a
     __asm__ ("tay");                    // row to y
-    __asm__ ("lda (%b),y", ADDR2L); // Get the row address
+    __asm__ ("lda (%b),y", LKLO);       // Get the row address
     __asm__ ("sta %b", ADDR1L);
-    __asm__ ("lda (%b),y", ADDR3L);//        lda lkhi,x
+    __asm__ ("lda (%b),y", LKHI);//        lda lkhi,x
     __asm__ ("sta %b", ADDR1H);
     __asm__ ("lda %b", DATA1);
     __asm__ ("ldy %b", DATA2);          // column
@@ -199,19 +231,16 @@ static void vline(uint8_t column, uint8_t pixels)
     __asm__ ("bne vl1");
 }
 
-// xsplot:
-//         ldy HGRY        ; Get the row address
-//         lda lklo,y
-//         sta GBASL
-//         lda lkhi,y
-//         sta GBASH
-//         iny
-//         sty HGRY
-//
-//         ldy HGRX        ; XOR the two bytes onto the screen
-
 void xorball(uint8_t ball)
 {
+    #define BALL DATA1
+    #define HGRY DATA2
+    #define HGRX DATA3
+
+    #define BALLYH ADDR1L
+    #define BALLXH ADDR2L
+    #define BALLXL ADDR3L
+
     // Assembly = 720us, C = xxxxus
     DATA1_P = ball;
     ADDR1L_P = (uint8_t)ballyh;
@@ -222,19 +251,37 @@ void xorball(uint8_t ball)
     ADDR3H_P = (uint8_t)(((uint16_t)ballxl)>> 8);
 
     // init
-    __asm__ ("ldy %b", DATA1);          // BALL
-    __asm__ ("lda %b, y", ADDR1L);      // ballyh
-    __asm__ ("sta %b", DATA2);          // HGRY
-    __asm__ ("lda %b, y", ADDR2L);      // ballxh
-    __asm__ ("sta %b", DATA3);          // HGRX
-    __asm__ ("lda %b, y", ADDR3L);      // ballxl
+    __asm__ ("ldy %b", BALL);
+    __asm__ ("lda %b, y", BALLYH);
+    __asm__ ("sta %b", HGRY);
+    __asm__ ("lda %b, y", BALLXH);
+    __asm__ ("sta %b", HGRX);
+    __asm__ ("lda %b, y", BALLXL);
     __asm__ ("and #%b", 0x38);
     __asm__ ("tax");
 
     // loop
-    __asm__ ("xsplot: ldy %b", DATA2);  // HGRY
-    __asm__ ("lda %b, y", ADDR1L);      // lklo
+    __asm__ ("xsplot: ldy %b", HGRY);
+    __asm__ ("lda %b, y", LKLO);
+    __asm__ ("sta %b", GBASL);
+    __asm__ ("lda %b, y", LKHI);
+    __asm__ ("sta %b", GBASH);
+    __asm__ ("iny");
+    __asm__ ("sty %b", HGRY);
 
+    __asm__ ("ldy %b", HGRX);
+
+    __asm__ ("lda (%b),y", GBASL);
+    __asm__ ("eor %b, x", BALL0);
+    __asm__ ("sta (%b),y", GBASL);
+    __asm__ ("iny");
+    __asm__ ("lda (%b),y", GBASL);
+    __asm__ ("eor %b, x", BALL1);
+    __asm__ ("sta (%b),y", GBASL);
+    __asm__ ("inx");
+    __asm__ ("tax");
+    __asm__ ("and %b", 7);
+    __asm__ ("bne xsplot");
 }
 
 
@@ -255,17 +302,18 @@ static void hbox(void)
 
 void main(void)
 {
-    ballxl[0] = ball0[0];
-    ballxh[0] = 0;
+    ballxl[0] = 10;
+    ballxh[0] = 10;
 
-    ballyl[0] = ball1[0];
-    ballyh[0] = 0;
+    ballyl[0] = 10;
+    ballyh[0] = 10;
 
     balldyl[0] = 0;
     balldyh[0] = 0;
 
     balldx[0] = 0;
 
+    pointers_init();
     hclear();
     hbox();
 
