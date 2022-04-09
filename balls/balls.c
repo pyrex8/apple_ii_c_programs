@@ -67,18 +67,18 @@ enum Zero_page
 #define LOWSCR          0xC054         // page 1
 #define HIRES           0xC057         // hires mode
 
-static uint8_t BALLXL[] = {0x00, 0x00};
-static uint8_t BALLXH[] = {0x00, 0x00};
+static uint8_t ballxl[] = {0x00, 0x00};
+static uint8_t ballxh[] = {0x00, 0x00};
 
-static uint8_t BALLYL[] = {0x00, 0x00};
-static uint8_t BALLYH[] = {0x00, 0x00};
+static uint8_t ballyl[] = {0x00, 0x00};
+static uint8_t ballyh[] = {0x00, 0x00};
 
-static uint8_t BALLDYL[] = {0x00, 0x00};
-static uint8_t BALLDYH[] = {0x00, 0x00};
+static uint8_t balldyl[] = {0x00, 0x00};
+static uint8_t balldyh[] = {0x00, 0x00};
 
-static uint8_t BALLDX[] = {0x00, 0x00};
+static uint8_t balldx[] = {0x00, 0x00};
 
-static const uint8_t LKLO[ROWS] =
+static const uint8_t lklo[ROWS] =
 {
     0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80,
     0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80,
@@ -94,7 +94,7 @@ static const uint8_t LKLO[ROWS] =
     0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0,
 };
 
-static const uint8_t LKHI[ROWS] =
+static const uint8_t lkhi[ROWS] =
 {
     0X20, 0X24, 0X28, 0X2C, 0X30, 0X34, 0X38, 0X3C, 0X20, 0X24, 0X28, 0X2C, 0X30, 0X34, 0X38, 0X3C,
     0X21, 0X25, 0X29, 0X2D, 0X31, 0X35, 0X39, 0X3D, 0X21, 0X25, 0X29, 0X2D, 0X31, 0X35, 0X39, 0X3D,
@@ -110,7 +110,7 @@ static const uint8_t LKHI[ROWS] =
     0X23, 0X27, 0X2B, 0X2F, 0X33, 0X37, 0X3B, 0X3F, 0X23, 0X27, 0X2B, 0X2F, 0X33, 0X37, 0X3B, 0X3F,
 };
 
-static const uint8_t BALL0[] =
+static const uint8_t ball0[] =
 {
     0X3C, 0X7F, 0X7F, 0X7F, 0X7F, 0X7F, 0X7F, 0X3C,
     0X78, 0X7E, 0X7E, 0X7E, 0X7E, 0X7E, 0X7E, 0X78,
@@ -121,7 +121,7 @@ static const uint8_t BALL0[] =
     0X00, 0X40, 0X40, 0X40, 0X40, 0X40, 0X40, 0X00,
 };
 
-static const uint8_t BALL1[] =
+static const uint8_t ball1[] =
 {
     0X00, 0X01, 0X01, 0X01, 0X01, 0X01, 0X01, 0X00,
     0X00, 0X03, 0X03, 0X03, 0X03, 0X03, 0X03, 0X00,
@@ -135,10 +135,10 @@ static const uint8_t BALL1[] =
 static void pageset(uint8_t page, uint8_t value, uint8_t length)
 {
     // this method takes 114ms
-    ADDR1L_P = 0x00;
-    ADDR1H_P = page;
     DATA1_P = value;
     DATA2_P = length;
+    ADDR1L_P = 0x00;
+    ADDR1H_P = page;
 
     // init registers with memory
     __asm__ ("lda %b", DATA1);    // value to fill page(s) with
@@ -158,8 +158,8 @@ static void hline(uint8_t line, uint8_t pixels)
 {
     // Assembly = 580us, C = 850us
     DATA1_P = pixels;
-    ADDR1L_P = LKLO[line];
-    ADDR1H_P = LKHI[line];
+    ADDR1L_P = lklo[line];
+    ADDR1H_P = lkhi[line];
 
     // init
     __asm__ ("ldy #%b", COLUMN_LAST); // Width of screen in bytes
@@ -177,10 +177,10 @@ static void vline(uint8_t column, uint8_t pixels)
     DATA1_P = pixels;
     DATA2_P = column;
     DATA3_P = ROW_SECOND_LAST;
-    ADDR2L_P = (uint8_t)LKLO;
-    ADDR2H_P = (uint8_t)(((uint16_t)LKLO)>> 8);
-    ADDR3L_P = (uint8_t)LKHI;
-    ADDR3H_P = (uint8_t)(((uint16_t)LKHI) >> 8);
+    ADDR2L_P = (uint8_t)lklo;
+    ADDR2H_P = (uint8_t)(((uint16_t)lklo)>> 8);
+    ADDR3L_P = (uint8_t)lkhi;
+    ADDR3H_P = (uint8_t)(((uint16_t)lkhi) >> 8);
 
     // init
     __asm__ ("ldx %b", DATA3);          // Start at second-to-last row
@@ -190,7 +190,7 @@ static void vline(uint8_t column, uint8_t pixels)
     __asm__ ("tay");                    // row to y
     __asm__ ("lda (%b),y", ADDR2L); // Get the row address
     __asm__ ("sta %b", ADDR1L);
-    __asm__ ("lda (%b),y", ADDR3L);//        lda LKHI,x
+    __asm__ ("lda (%b),y", ADDR3L);//        lda lkhi,x
     __asm__ ("sta %b", ADDR1H);
     __asm__ ("lda %b", DATA1);
     __asm__ ("ldy %b", DATA2);          // column
@@ -201,9 +201,9 @@ static void vline(uint8_t column, uint8_t pixels)
 
 // xsplot:
 //         ldy HGRY        ; Get the row address
-//         lda LKLO,y
+//         lda lklo,y
 //         sta GBASL
-//         lda LKHI,y
+//         lda lkhi,y
 //         sta GBASH
 //         iny
 //         sty HGRY
@@ -214,25 +214,27 @@ void xorball(uint8_t ball)
 {
     // Assembly = 720us, C = xxxxus
     DATA1_P = ball;
-    ADDR1L_P = (uint8_t)BALLYH;
-    ADDR1H_P = (uint8_t)(((uint16_t)BALLYH)>> 8);
-    ADDR2L_P = (uint8_t)BALLXH;
-    ADDR2H_P = (uint8_t)(((uint16_t)BALLXH)>> 8);
-    ADDR3L_P = (uint8_t)BALLXL;
-    ADDR3H_P = (uint8_t)(((uint16_t)BALLXL)>> 8);
+    ADDR1L_P = (uint8_t)ballyh;
+    ADDR1H_P = (uint8_t)(((uint16_t)ballyh)>> 8);
+    ADDR2L_P = (uint8_t)ballxh;
+    ADDR2H_P = (uint8_t)(((uint16_t)ballxh)>> 8);
+    ADDR3L_P = (uint8_t)ballxl;
+    ADDR3H_P = (uint8_t)(((uint16_t)ballxl)>> 8);
 
     // init
     __asm__ ("ldy %b", DATA1);          // BALL
-    __asm__ ("lda %b, y", ADDR1L);     // BALLYH
+    __asm__ ("lda %b, y", ADDR1L);      // ballyh
     __asm__ ("sta %b", DATA2);          // HGRY
-    __asm__ ("lda %b, y", ADDR2L);     // BALLXH
+    __asm__ ("lda %b, y", ADDR2L);      // ballxh
     __asm__ ("sta %b", DATA3);          // HGRX
-    __asm__ ("lda %b, y", ADDR3L);     // BALLXL
+    __asm__ ("lda %b, y", ADDR3L);      // ballxl
     __asm__ ("and #%b", 0x38);
     __asm__ ("tax");
 
     // loop
-    __asm__ ("xsplot: ldy %b", DATA2); // HGRY
+    __asm__ ("xsplot: ldy %b", DATA2);  // HGRY
+    __asm__ ("lda %b, y", ADDR1L);      // lklo
+
 }
 
 
@@ -253,16 +255,16 @@ static void hbox(void)
 
 void main(void)
 {
-    BALLXL[0] = BALL0[0];
-    BALLXH[0] = 0;
+    ballxl[0] = ball0[0];
+    ballxh[0] = 0;
 
-    BALLYL[0] = BALL1[0];
-    BALLYH[0] = 0;
+    ballyl[0] = ball1[0];
+    ballyh[0] = 0;
 
-    BALLDYL[0] = 0;
-    BALLDYH[0] = 0;
+    balldyl[0] = 0;
+    balldyh[0] = 0;
 
-    BALLDX[0] = 0;
+    balldx[0] = 0;
 
     hclear();
     hbox();
