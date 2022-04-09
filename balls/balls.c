@@ -4,10 +4,12 @@
 #include "../test_pin/test_pin.h"
 
 #define ROWS            192	// number of scanlines
+#define ROW_FIRST       0
 #define ROW_LAST        ROWS - 1
-#define ROW_SECOND_LAST 190
+#define ROW_SECOND_LAST ROW_LAST - 1
 #define NBALLS          30            // Number of balls to bounce
 #define COLUMNS         40            // Number of columns/bytes per row
+#define COLUMN_FIRST    0
 #define COLUMN_LAST     COLUMNS - 1
 #define WHITE           0x7F           // White hires byte
 #define BLACK           0x00
@@ -55,9 +57,6 @@
 #define HIRES           0xC057         // hires mode
 
 
-static const uint8_t filler[0xFF] = {0};
-
-
 static const uint8_t LKLO[ROWS] =
 {
     0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80,
@@ -92,6 +91,50 @@ static const uint8_t LKHI[ROWS] =
 
 
 
+
+static const uint8_t BALL0[] =
+{
+    0X3C, 0X7F, 0X7F, 0X7F, 0X7F, 0X7F, 0X7F, 0X3C,
+    0X78, 0X7E, 0X7E, 0X7E, 0X7E, 0X7E, 0X7E, 0X78,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+};
+//     00111100, 01111111, 01111111, 01111111, 01111111, 01111111, 01111111, 00111100,
+//     01111000, 01111110, 01111110, 01111110, 01111110, 01111110, 01111110, 01111000,
+//     01110000, 01111100, 01111100, 01111100, 01111100, 01111100, 01111100, 01110000,
+//     01100000, 01111000, 01111000, 01111000, 01111000, 01111000, 01111000, 01100000,
+//     01000000, 01110000, 01110000, 01110000, 01110000, 01110000, 01110000, 01000000,
+//     00000000, 01100000, 01100000, 01100000, 01100000, 01100000, 01100000, 00000000,
+//     00000000, 01000000, 01000000, 01000000, 01000000, 01000000, 01000000, 00000000,
+// };
+
+static const uint8_t BALL1[] =
+{
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+};
+// static const uint8_t BALL1[8]
+// {
+//     0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+// };
+//     00000000, 00000001, 00000001, 00000001, 00000001, 00000001, 00000001, 00000000,
+//     00000000, 00000011, 00000011, 00000011, 00000011, 00000011, 00000011, 00000000,
+//     00000001, 00000111, 00000111, 00000111, 00000111, 00000111, 00000111, 00000001,
+//     00000011, 00001111, 00001111, 00001111, 00001111, 00001111, 00001111, 00000011,
+//     00000111, 00011111, 00011111, 00011111, 00011111, 00011111, 00011111, 00000111,
+//     00001111, 00111111, 00111111, 00111111, 00111111, 00111111, 00111111, 00001111,
+//     00011110, 01111111, 01111111, 01111111, 01111111, 01111111, 01111111, 00011110,
+// };
+
+
 static void pageset(uint8_t page, uint8_t value, uint8_t length)
 {
     // this method takes 114ms
@@ -114,12 +157,6 @@ static void pageset(uint8_t page, uint8_t value, uint8_t length)
     __asm__ ("bne hclr1");
 }
 
-// ; Draw a horizontal line
-// ; A = color byte to repeat, e.g., $7F
-// ; Y = row (0-191) ($FF on exit)
-// ;
-// ; Uses GBASL, GBASH
-
 static void hline(uint8_t line, uint8_t pixels)
 {
     // Assembly = 580us, C = 850us
@@ -137,35 +174,12 @@ static void hline(uint8_t line, uint8_t pixels)
     __asm__ ("bpl hl1");
 }
 
-
-// Draw a vertical line on all but the topmost and bottom most rows
-// ; A = byte to write in each position
-// ; Y = column
-// ;
-// ; Uses GBASL, GBASH, HCOLOR1
-//
-//        lda #%00000011
-//        ldy #0
-// vline:
-//        sta HCOLOR1
-//        ldx #190        ; Start at second-to-last row
-// vl1:
-//        lda LKLO,x      ; Get the row address
-//        sta GBASL
-//        lda LKHI,x
-//        sta GBASH
-//        lda HCOLOR1
-//        sta (GBASL),y   ; Write the color byte
-//        dex             ; Previous row
-//        bne vl1
-//        rts
-
 static void vline(uint8_t column, uint8_t pixels)
 {
     // Assembly = 6700us, C = 9400us
     DATA1_P = pixels;
     DATA2_P = column;
-    DATA3_P = 190;
+    DATA3_P = ROW_SECOND_LAST;
     ADDR2_L_P = (uint8_t)LKLO;
     ADDR2_H_P = (uint8_t)(((uint16_t)LKLO)>> 8);
     ADDR3_L_P = (uint8_t)LKHI;
@@ -188,25 +202,58 @@ static void vline(uint8_t column, uint8_t pixels)
     __asm__ ("bne vl1");
 }
 
+// ; Draw or erase a ball
+// ; BALL = ball number
+// ; BALLYH+BALL = top row
+// ; BALLXH+BALL = left column (byte offset)
+// ; BALLXL+BALL = bits 4-6 select one of the 7 shifted versions
+// ;
+// ; Uses GBASL, GBASH, HGRY, HGRX
+//
+// ; draw ball 20us long
+//
+// xorball:
+//         ldy BALL
+//         lda BALLYH,y    ; Get row
+//         sta HGRY
+//         lda BALLXH,y    ; Get column
+//         sta HGRX
+//         lda BALLXL,y    ; Get Shift (0,8,...,48)
+//         and #$38
+//         tax             ; Offset into sprite table (pixel * 8)
+
+
+void xorball(void)
+{
+    DATA1_P = BALL0[0];
+    DATA2_P = BALL1[0];
+}
+
+
 static void hclear(void)
 {
-    uint8_t f = filler[0];
     pageset(HGR1SCRN_PAGE, BLACK, HGRSCRN_LENGTH);
     STROBE(HIRES);
     STROBE(TXTCLR);
+}
+
+static void hbox(void)
+{
+    hline(ROW_FIRST, WHITE);
+    hline(ROW_LAST, WHITE);
+    vline(COLUMN_FIRST, 0x03);
+    vline(COLUMN_LAST, 0x60);
 }
 
 void main(void)
 {
 
     hclear();
-    hline(0, WHITE);
-    hline(ROW_LAST, WHITE);
+    hbox();
 
     TEST_PIN_TOGGLE;
-    vline(0, 0x03);
+    xorball();
     TEST_PIN_TOGGLE;
-    vline(39, 0x60);
 
     while(1)
     {
