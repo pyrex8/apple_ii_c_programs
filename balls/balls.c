@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "../test_pin/test_pin.h"
 
+#define BYTE_FULL       0xFF
 #define ROWS            192	// number of scanlines
 #define ROW_FIRST       0
 #define ROW_LAST        ROWS - 1
@@ -45,6 +46,8 @@ enum Zero_page
     BALL0H,
     BALL1L,
     BALL1H,
+
+    TEST,
 };
 
 // low byte is used for some instructions, alias so that it maps to assembly version
@@ -76,6 +79,8 @@ enum Zero_page
 #define BALL0H_P         *((uint8_t*)BALL0H)
 #define BALL1L_P         *((uint8_t*)BALL1L)
 #define BALL1H_P         *((uint8_t*)BALL1H)
+
+#define TEST_P         *((uint8_t*)TEST)
 
 #define HCOLOR1         0x1C           // Color value
 
@@ -241,7 +246,7 @@ void xorball(uint8_t ball)
     #define BALLXH ADDR2L
     #define BALLXL ADDR3L
 
-    // Assembly = 720us, C = xxxxus
+    // Assembly = 720us, C = 1110us
     DATA1_P = ball;
     ADDR1L_P = (uint8_t)ballyh;
     ADDR1H_P = (uint8_t)(((uint16_t)ballyh)>> 8);
@@ -249,22 +254,23 @@ void xorball(uint8_t ball)
     ADDR2H_P = (uint8_t)(((uint16_t)ballxh)>> 8);
     ADDR3L_P = (uint8_t)ballxl;
     ADDR3H_P = (uint8_t)(((uint16_t)ballxl)>> 8);
+    TEST_P = BYTE_FULL;
 
     // init
     __asm__ ("ldy %b", BALL);
-    __asm__ ("lda %b, y", BALLYH);
+    __asm__ ("lda (%b), y", BALLYH);
     __asm__ ("sta %b", HGRY);
-    __asm__ ("lda %b, y", BALLXH);
+    __asm__ ("lda (%b), y", BALLXH);
     __asm__ ("sta %b", HGRX);
-    __asm__ ("lda %b, y", BALLXL);
+    __asm__ ("lda (%b), y", BALLXL);
     __asm__ ("and #%b", 0x38);
     __asm__ ("tax");
 
     // loop
     __asm__ ("xsplot: ldy %b", HGRY);
-    __asm__ ("lda %b, y", LKLO);
+    __asm__ ("lda (%b), y", LKLO);
     __asm__ ("sta %b", GBASL);
-    __asm__ ("lda %b, y", LKHI);
+    __asm__ ("lda (%b), y", LKHI);
     __asm__ ("sta %b", GBASH);
     __asm__ ("iny");
     __asm__ ("sty %b", HGRY);
@@ -273,14 +279,18 @@ void xorball(uint8_t ball)
 
     __asm__ ("lda (%b),y", GBASL);
     __asm__ ("eor %b, x", BALL0);
+
+    __asm__ ("ora %b", TEST); // TODO: remove, here for debugging
+
     __asm__ ("sta (%b),y", GBASL);
     __asm__ ("iny");
     __asm__ ("lda (%b),y", GBASL);
     __asm__ ("eor %b, x", BALL1);
     __asm__ ("sta (%b),y", GBASL);
     __asm__ ("inx");
-    __asm__ ("tax");
-    __asm__ ("and %b", 7);
+
+    __asm__ ("txa");
+    __asm__ ("and #%b", 7);
     __asm__ ("bne xsplot");
 }
 
@@ -320,6 +330,7 @@ void main(void)
     TEST_PIN_TOGGLE;
     xorball(0);
     TEST_PIN_TOGGLE;
+    xorball(0);
 
     while(1)
     {
