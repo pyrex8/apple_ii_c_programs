@@ -250,7 +250,7 @@ void xorball(uint8_t ball)
     #define BALLXH ADDR2L
     #define BALLXL ADDR3L
 
-    // Assembly = 720us, C = 1120us
+    // Assembly = 720us, C = 1150us
     DATA1_P = ball;
     ADDR1L_P = (uint8_t)ballyh;
     ADDR1H_P = (uint8_t)(((uint16_t)ballyh)>> 8);
@@ -270,10 +270,6 @@ void xorball(uint8_t ball)
     __asm__ ("and #%b", 0x38);
     __asm__ ("sta %b", BIND); // Offset into sprite table (pixel * 8)
 
-// (GBASL, GBASH) = row address
-// Y = byte offset into the row
-// X = index into sprite tables
-
     // loop
     __asm__ ("xsplot: ldy %b", HGRY); // Get the row address
     __asm__ ("lda (%b), y", LKLO);
@@ -282,7 +278,7 @@ void xorball(uint8_t ball)
     __asm__ ("sta %b", GBASH);
     __asm__ ("iny");
     __asm__ ("sty %b", HGRY);
-
+//-----------------------------------------------------------------------------
     __asm__ ("ldy %b", HGRX);
     __asm__ ("lda (%b),y", GBASL);
 
@@ -291,16 +287,17 @@ void xorball(uint8_t ball)
 
     __asm__ ("ldy %b", HGRX);
     __asm__ ("sta (%b),y", GBASL);
-
+//-----------------------------------------------------------------------------
     __asm__ ("iny");
     __asm__ ("lda (%b),y", GBASL);
 
     __asm__ ("ldy %b", BIND);
     __asm__ ("eor (%b), y", BALL1);
 
+    __asm__ ("ldy %b", HGRX);
     __asm__ ("iny");
     __asm__ ("sta (%b),y", GBASL);
-
+//-----------------------------------------------------------------------------
     __asm__ ("inc %b", BIND);
     __asm__ ("lda %b", BIND);
     __asm__ ("and #%b", 7);
@@ -331,6 +328,13 @@ void main(void)
     ballyl[0] = 0;
     ballyh[0] = 10;
 
+    ballxl[1] = 10;
+    ballxh[1] = 10;
+
+    ballyl[1] = 0;
+    ballyh[1] = 20;
+
+
     balldyl[0] = 0;
     balldyh[0] = 0;
 
@@ -343,6 +347,7 @@ void main(void)
     TEST_PIN_TOGGLE;
     xorball(0);
     TEST_PIN_TOGGLE;
+    xorball(1);
 
     while(1)
     {
