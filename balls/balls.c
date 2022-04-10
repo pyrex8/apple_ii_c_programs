@@ -26,6 +26,8 @@ enum Zero_page
     DATA1 = 0x26,
     DATA2,
     DATA3,
+    DATA4,
+    DATA5,
 
     ADDR1L,
     ADDR1H,
@@ -60,6 +62,8 @@ enum Zero_page
 #define DATA1_P         *((uint8_t*)DATA1)
 #define DATA2_P         *((uint8_t*)DATA2)
 #define DATA3_P         *((uint8_t*)DATA3)
+#define DATA4_P         *((uint8_t*)DATA4)
+#define DATA5_P         *((uint8_t*)DATA5)
 #define ADDR1L_P        *((uint8_t*)ADDR1L)
 #define ADDR1H_P        *((uint8_t*)ADDR1H)
 #define ADDR2L_P        *((uint8_t*)ADDR2L)
@@ -241,6 +245,8 @@ void xorball(uint8_t ball)
     #define BALL DATA1
     #define HGRY DATA2
     #define HGRX DATA3
+    #define ROW  DATA4
+    #define BALL_INDEX  DATA5
 
     #define BALLYH ADDR1L
     #define BALLXH ADDR2L
@@ -258,16 +264,21 @@ void xorball(uint8_t ball)
 
     // init
     __asm__ ("ldy %b", BALL);
-    __asm__ ("lda (%b), y", BALLYH);
+    __asm__ ("lda (%b), y", BALLYH); // Get row
     __asm__ ("sta %b", HGRY);
-    __asm__ ("lda (%b), y", BALLXH);
+    __asm__ ("lda (%b), y", BALLXH); // Get column
     __asm__ ("sta %b", HGRX);
-    __asm__ ("lda (%b), y", BALLXL);
+    __asm__ ("lda (%b), y", BALLXL); // Get Shift (0,8,...,48)
     __asm__ ("and #%b", 0x38);
     __asm__ ("tax");
+    __asm__ ("sta %b", BALL_INDEX); // Offset into sprite table (pixel * 8)
+
+// (GBASL, GBASH) = row address
+// Y = byte offset into the row
+// X = index into sprite tables
 
     // loop
-    __asm__ ("xsplot: ldy %b", HGRY);
+    __asm__ ("xsplot: ldy %b", HGRY); // Get the row address
     __asm__ ("lda (%b), y", LKLO);
     __asm__ ("sta %b", GBASL);
     __asm__ ("lda (%b), y", LKHI);
@@ -276,22 +287,28 @@ void xorball(uint8_t ball)
     __asm__ ("sty %b", HGRY);
 
     __asm__ ("ldy %b", HGRX);
-
     __asm__ ("lda (%b),y", GBASL);
-    __asm__ ("eor %b, x", BALL0);
 
-    __asm__ ("ora %b", TEST); // TODO: remove, here for debugging
+    __asm__ ("ldy %b", BALL_INDEX);
+    __asm__ ("eor (%b), y", BALL0); // XOR the two bytes onto the screen
 
+    __asm__ ("ldy %b", HGRX);
     __asm__ ("sta (%b),y", GBASL);
+
     __asm__ ("iny");
     __asm__ ("lda (%b),y", GBASL);
-    __asm__ ("eor %b, x", BALL1);
-    __asm__ ("sta (%b),y", GBASL);
-    __asm__ ("inx");
 
+    __asm__ ("ldy %b", BALL_INDEX);
+    __asm__ ("eor (%b), y", BALL1);
+
+    __asm__ ("iny");
+    __asm__ ("sta (%b),y", GBASL);
+
+
+    __asm__ ("inx");
     __asm__ ("txa");
     __asm__ ("and #%b", 7);
-    __asm__ ("bne xsplot");
+    __asm__ ("bne xsplot"); // Stop at a multiple of 8 bytes
 }
 
 
@@ -312,10 +329,10 @@ static void hbox(void)
 
 void main(void)
 {
-    ballxl[0] = 10;
+    ballxl[0] = 0;
     ballxh[0] = 10;
 
-    ballyl[0] = 10;
+    ballyl[0] = 0;
     ballyh[0] = 10;
 
     balldyl[0] = 0;
@@ -330,7 +347,6 @@ void main(void)
     TEST_PIN_TOGGLE;
     xorball(0);
     TEST_PIN_TOGGLE;
-    xorball(0);
 
     while(1)
     {
