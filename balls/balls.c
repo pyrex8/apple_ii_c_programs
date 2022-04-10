@@ -1,4 +1,7 @@
 
+// Note all timing is based on the slower emulated apple IIe that is taking
+// approx 1.5us per cycle.
+
 #include <stdio.h>
 #include <stdint.h>
 #include "../test_pin/test_pin.h"
@@ -19,6 +22,7 @@
 #define LWALL           0x0400
 #define BOTTOM          0xB700
 #define BOTTOM2         0x6E00         // Bottom * 2, for bouncing
+#define SPRITE_BUFFER_SIZE 40
 
 // Addresses
 enum Zero_page
@@ -48,6 +52,9 @@ enum Zero_page
     BALL1L,
     BALL1H,
 
+    SBUFRL,
+    SBUFRH,
+
     TEST,
 };
 
@@ -56,6 +63,7 @@ enum Zero_page
 #define LKHI  LKHIL
 #define BALL0  BALL0L
 #define BALL1  BALL1L
+#define SBUFR  SBUFRL // sprint buffer location
 
 // pointers to zero page memory
 #define DATA1_P         *((uint8_t*)DATA1)
@@ -82,6 +90,9 @@ enum Zero_page
 #define BALL0H_P         *((uint8_t*)BALL0H)
 #define BALL1L_P         *((uint8_t*)BALL1L)
 #define BALL1H_P         *((uint8_t*)BALL1H)
+
+#define SBUFRL_P         *((uint8_t*)SBUFRL)
+#define SBUFRH_P         *((uint8_t*)SBUFRH)
 
 #define TEST_P         *((uint8_t*)TEST)
 
@@ -197,6 +208,7 @@ static uint8_t balldx[] = {0x00, 0x00};
 static uint8_t x[] = {0x00, 0x00};
 static uint8_t y[] = {0x00, 0x00};
 
+static uint8_t sprite_buffer[SPRITE_BUFFER_SIZE];
 
 static void pointers_init(void)
 {
@@ -209,6 +221,9 @@ static void pointers_init(void)
     BALL0H_P = (uint8_t)(((uint16_t)ball0)>> 8);
     BALL1L_P = (uint8_t)ball1;
     BALL1H_P = (uint8_t)(((uint16_t)ball1) >> 8);
+
+    SBUFRL_P = (uint8_t)sprite_buffer;
+    SBUFRH_P = (uint8_t)(((uint16_t)sprite_buffer)>> 8);
 }
 
 static void pageset(uint8_t page, uint8_t value, uint8_t length)
@@ -265,7 +280,7 @@ static void vline(uint8_t column, uint8_t pixels)
     __asm__ ("tay");                    // row to y
     __asm__ ("lda (%b),y", LKLO);       // Get the row address
     __asm__ ("sta %b", ADDR1L);
-    __asm__ ("lda (%b),y", LKHI);//        lda lkhi,x
+    __asm__ ("lda (%b),y", LKHI);
     __asm__ ("sta %b", ADDR1H);
     __asm__ ("lda %b", DATA1);
     __asm__ ("ldy %b", DATA2);          // column
@@ -339,6 +354,48 @@ void xorball(uint8_t ball)
     __asm__ ("bne xsplot"); // Stop at a multiple of 8 bytes
 }
 
+static void sprite_hgr_to_buffer(uint8_t row, uint8_t column)
+{
+    // 1580us
+    #define SBUFR_INDEX DATA1
+    #define HGR_COL_START DATA2
+    #define HGR_COL DATA3
+    #define HGR_ROW DATA4
+
+    DATA1_P = 40;
+    DATA2_P = column;
+    DATA3_P = column;
+    DATA4_P = row;
+
+    TEST_PIN_TOGGLE; // adds 2.5us
+    // new row
+    __asm__ ("newrow: lda %b", HGR_COL_START);
+    __asm__ ("sta %b", HGR_COL);
+    __asm__ ("dec %b", HGR_ROW);
+    // Get the row address
+    __asm__ ("ldy %b", HGR_ROW);
+    __asm__ ("lda (%b),y", LKLO);
+    __asm__ ("sta %b", ADDR1L);
+    __asm__ ("lda (%b),y", LKHI);
+    __asm__ ("sta %b", ADDR1H);
+    // get byte from screen memeory
+    __asm__ ("newcol: ldy %b", HGR_COL);
+    __asm__ ("lda (%b),y", ADDR1L);
+    // store in sprite_buffer
+    __asm__ ("ldy %b", SBUFR_INDEX);
+    __asm__ ("sta (%b),y", SBUFR);
+    // decreament counters
+    __asm__ ("dec %b", HGR_COL);
+    __asm__ ("dec %b", SBUFR_INDEX);
+    __asm__ ("bne newcol");
+
+    // test for new row
+    __asm__ ("lda #%b", 4);
+    __asm__ ("and %b", SBUFR_INDEX);
+    __asm__ ("bne newrow");
+
+    TEST_PIN_TOGGLE; // adds 2.5us
+}
 
 static void hclear(void)
 {
@@ -365,6 +422,7 @@ void delay(void)
 
 void main(void)
 {
+    // This is just to keep the compiler from complaining about unused variables
     ballxl[0] = 0;
     ballxh[0] = 10;
 
@@ -382,9 +440,11 @@ void main(void)
     ballyl[1] = 0;
     ballyh[1] = 10;
 
+    sprite_buffer[0] = 0;
 
     y[0] = 30;
     y[1] = 40;
+
     ballyh[0] = y[0];
     ballyh[1] = y[1];
 
@@ -395,24 +455,22 @@ void main(void)
     xorball(0);
     xorball(1);
 
+    sprite_hgr_to_buffer(10, 10);
+
     while(1)
     {
         x[0]++;
         xorball(0);
-        TEST_PIN_TOGGLE;
-        // 124us
+        // 124us to update position
         ballxl[0] = BALLXL_CALC(x[0]);
         ballxh[0] = BALLXH_CALC(x[0]);
-        TEST_PIN_TOGGLE;
         xorball(0);
 
         x[1]++;
         xorball(1);
-        TEST_PIN_TOGGLE;
-        // 124us
+        // 124us to update position
         ballxl[1] = BALLXL_CALC(x[1]);
         ballxh[1] = BALLXH_CALC(x[1]);
-        TEST_PIN_TOGGLE;
         xorball(1);
 
         delay();
