@@ -194,8 +194,8 @@ static uint8_t balldyh[] = {0x00, 0x00};
 
 static uint8_t balldx[] = {0x00, 0x00};
 
-static uint8_t x = 0;
-static uint8_t y = 0;
+static uint8_t x[] = {0x00, 0x00};
+static uint8_t y[] = {0x00, 0x00};
 
 
 static void pointers_init(void)
@@ -376,27 +376,44 @@ void main(void)
 
     balldx[0] = 0;
 
-    y = 30;
-    ballyh[0] = y;
+    ballxl[1] = 0;
+    ballxh[1] = 10;
+
+    ballyl[1] = 0;
+    ballyh[1] = 10;
+
+
+    y[0] = 30;
+    y[1] = 40;
+    ballyh[0] = y[0];
+    ballyh[1] = y[1];
 
     pointers_init();
     hclear();
     hbox();
 
     xorball(0);
+    xorball(1);
 
     while(1)
     {
-        x++;
+        x[0]++;
         xorball(0);
         TEST_PIN_TOGGLE;
         // 124us
-        ballxl[0] = BALLXL_CALC(x);
-        ballxh[0] = BALLXH_CALC(x);
+        ballxl[0] = BALLXL_CALC(x[0]);
+        ballxh[0] = BALLXH_CALC(x[0]);
         TEST_PIN_TOGGLE;
         xorball(0);
 
-
+        x[1]++;
+        xorball(1);
+        TEST_PIN_TOGGLE;
+        // 124us
+        ballxl[1] = BALLXL_CALC(x[1]);
+        ballxh[1] = BALLXH_CALC(x[1]);
+        TEST_PIN_TOGGLE;
+        xorball(1);
 
         delay();
     }
