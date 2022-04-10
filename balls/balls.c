@@ -320,6 +320,14 @@ static void hbox(void)
     vline(COLUMN_LAST, 0x60);
 }
 
+void delay(void)
+{
+    uint8_t i = 0;
+    for (i = 0; i < 200; i++)
+    {
+    }
+}
+
 void main(void)
 {
     ballxl[0] = 0;
@@ -328,17 +336,21 @@ void main(void)
     ballyl[0] = 0;
     ballyh[0] = 10;
 
-    ballxl[1] = 10;
-    ballxh[1] = 10;
-
-    ballyl[1] = 0;
-    ballyh[1] = 20;
-
-
     balldyl[0] = 0;
     balldyh[0] = 0;
 
     balldx[0] = 0;
+
+    ballxl[1] = 0;
+    ballxh[1] = 10;
+
+    ballyl[1] = 0;
+    ballyh[1] = 10;
+
+    balldyl[1] = 0;
+    balldyh[1] = 0;
+
+    balldx[1] = 0;
 
     pointers_init();
     hclear();
@@ -351,6 +363,31 @@ void main(void)
 
     while(1)
     {
+        xorball(0);
+        ballxl[0] += 8;
+        if (ballxl[0] > 48)
+        {
+            ballxl[0] = 0;
+            ballxh[0]++;
+            if (ballxh[0] > 35)
+            {
+                ballxh[0] = 1;
+            }
+        }
+        xorball(0);
 
+        ballyl[1] += 64;
+        if (!ballyl[1])
+        {
+            xorball(1);
+            ballyh[1]++;
+            if (ballyh[1] > 180)
+            {
+                ballyh[1] = 10;
+            }
+            xorball(1);
+        }
+
+        delay();
     }
 }
