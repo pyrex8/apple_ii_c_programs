@@ -22,7 +22,7 @@
 #define LWALL           0x0400
 #define BOTTOM          0xB700
 #define BOTTOM2         0x6E00         // Bottom * 2, for bouncing
-#define SPRITE_BUFFER_SIZE 40
+#define SPRITE_BUFFER_SIZE 45
 
 // Addresses
 enum Zero_page
@@ -407,7 +407,7 @@ static void sprite_buffer_to_hgr(uint8_t column, uint8_t row)
     #define HGR_COL DATA3
     #define HGR_ROW DATA4
 
-    DATA1_P = 39;
+    DATA1_P = 40;
     DATA2_P = column;
     DATA3_P = column;
     DATA4_P = row;
@@ -416,7 +416,7 @@ static void sprite_buffer_to_hgr(uint8_t column, uint8_t row)
     // new row
     __asm__ ("newrow: lda %b", HGR_COL_START);
     __asm__ ("sta %b", HGR_COL);
-    __asm__ ("dec %b", HGR_ROW);
+    __asm__ ("inc %b", HGR_ROW);
     // Get the row address
     __asm__ ("ldy %b", HGR_ROW);
     __asm__ ("lda (%b),y", LKLO);
@@ -425,19 +425,20 @@ static void sprite_buffer_to_hgr(uint8_t column, uint8_t row)
     __asm__ ("sta %b", ADDR1H);
 
     // get byte from sprite_buffer
-    __asm__ ("ldy %b", SBUFR_INDEX);
+    __asm__ ("newcol: ldy %b", SBUFR_INDEX);
     __asm__ ("lda (%b),y", SBUFR);
     // store in  screen memory
-    __asm__ ("newcol: ldy %b", HGR_COL);
+    __asm__ ("ldy %b", HGR_COL);
     __asm__ ("sta (%b),y", ADDR1L);
     // decrement counters
-    __asm__ ("dec %b", HGR_COL);
+    __asm__ ("inc %b", HGR_COL);
     __asm__ ("dec %b", SBUFR_INDEX);
 
     // test for new row
     __asm__ ("lda %b", SBUFR_INDEX);
-    __asm__ ("and #%b", 4);
-    __asm__ ("bne newrow");
+    __asm__ ("and #%b", 3);
+    __asm__ ("cmp #%b", 1);
+    __asm__ ("beq newrow");
 
     __asm__ ("lda %b", SBUFR_INDEX);
     __asm__ ("bne newcol");
@@ -514,7 +515,7 @@ void main(void)
 
     sprite_hgr_to_buffer(20, 100);
     fill();
-    sprite_buffer_to_hgr(20, 90);
+    sprite_buffer_to_hgr(20, 28);
 
     while(1)
     {
