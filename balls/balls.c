@@ -6,6 +6,8 @@
 #include <stdint.h>
 #include "../test_pin/test_pin.h"
 
+#define VERT_BLANK       0xC019
+
 #define BYTE_FULL       0xFF
 #define ROWS            192	// number of scanlines
 #define ROW_FIRST       0
@@ -210,6 +212,8 @@ static uint8_t y[] = {0x00, 0x00};
 
 static uint8_t sprite_buffer[SPRITE_BUFFER_SIZE];
 
+static uint8_t vert_blank;
+
 static void pointers_init(void)
 {
     LKLOL_P = (uint8_t)lklo;
@@ -354,49 +358,6 @@ void xorball(uint8_t ball)
     __asm__ ("bne xsplot"); // Stop at a multiple of 8 bytes
 }
 
-static void sprite_hgr_to_buffer(uint8_t row, uint8_t column)
-{
-    // 1580us
-    #define SBUFR_INDEX DATA1
-    #define HGR_COL_START DATA2
-    #define HGR_COL DATA3
-    #define HGR_ROW DATA4
-
-    DATA1_P = 40;
-    DATA2_P = column;
-    DATA3_P = column;
-    DATA4_P = row;
-
-    TEST_PIN_TOGGLE; // adds 2.5us
-    // new row
-    __asm__ ("newrow: lda %b", HGR_COL_START);
-    __asm__ ("sta %b", HGR_COL);
-    __asm__ ("dec %b", HGR_ROW);
-    // Get the row address
-    __asm__ ("ldy %b", HGR_ROW);
-    __asm__ ("lda (%b),y", LKLO);
-    __asm__ ("sta %b", ADDR1L);
-    __asm__ ("lda (%b),y", LKHI);
-    __asm__ ("sta %b", ADDR1H);
-    // get byte from screen memeory
-    __asm__ ("newcol: ldy %b", HGR_COL);
-    __asm__ ("lda (%b),y", ADDR1L);
-    // store in sprite_buffer
-    __asm__ ("ldy %b", SBUFR_INDEX);
-    __asm__ ("sta (%b),y", SBUFR);
-    // decreament counters
-    __asm__ ("dec %b", HGR_COL);
-    __asm__ ("dec %b", SBUFR_INDEX);
-    __asm__ ("bne newcol");
-
-    // test for new row
-    __asm__ ("lda #%b", 4);
-    __asm__ ("and %b", SBUFR_INDEX);
-    __asm__ ("bne newrow");
-
-    TEST_PIN_TOGGLE; // adds 2.5us
-}
-
 static void hclear(void)
 {
     pageset(HGR1SCRN_PAGE, BLACK, HGRSCRN_LENGTH);
@@ -455,10 +416,16 @@ void main(void)
     xorball(0);
     xorball(1);
 
-    sprite_hgr_to_buffer(10, 10);
-
     while(1)
     {
+        vert_blank = PEEK(VERT_BLANK);
+        while (vert_blank)
+        {
+            vert_blank = PEEK(VERT_BLANK);
+        }
+
+        TEST_PIN_TOGGLE; // adds 2.5us
+
         x[0]++;
         xorball(0);
         // 124us to update position
@@ -474,5 +441,6 @@ void main(void)
         xorball(1);
 
         delay();
+
     }
 }
