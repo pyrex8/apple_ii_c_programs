@@ -207,8 +207,11 @@ static uint8_t balldx[] = {0x00, 0x00};
 
 static uint8_t x[] = {0x00, 0x00};
 static uint8_t y[] = {0x00, 0x00};
+static uint8_t sprite_x;
 
 static uint8_t sprite_buffer[SPRITE_BUFFER_SIZE];
+static uint8_t sprite_before[SPRITE_BUFFER_SIZE];
+static uint8_t sprite_after[SPRITE_BUFFER_SIZE];
 
 static void pointers_init(void)
 {
@@ -505,6 +508,8 @@ void main(void)
     ballyh[1] = 10;
 
     sprite_buffer[0] = 0;
+    sprite_before[0] = 0;
+    sprite_after[0] = 0;
 
     y[0] = 30;
     y[1] = 40;
@@ -535,8 +540,10 @@ void main(void)
         ballxh[1] = BALLXH_CALC(x[1]);
         xorball(1);
 
-        sprite_hgr_to_buffer(20, 28);
-        sprite_buffer_to_hgr(20, 100);
+        sprite_x = BALLXH_CALC(x[0] - 3);
+
+        sprite_hgr_to_buffer(sprite_x, 28);
+        sprite_buffer_to_hgr(sprite_x, 100);
 
         delay();
 
