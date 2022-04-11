@@ -407,7 +407,7 @@ static void sprite_buffer_to_hgr(uint8_t column, uint8_t row)
     #define HGR_COL DATA3
     #define HGR_ROW DATA4
 
-    DATA1_P = 40;
+    DATA1_P = 0;
     DATA2_P = column;
     DATA3_P = column;
     DATA4_P = row;
@@ -432,15 +432,16 @@ static void sprite_buffer_to_hgr(uint8_t column, uint8_t row)
     __asm__ ("sta (%b),y", ADDR1L);
     // decrement counters
     __asm__ ("inc %b", HGR_COL);
-    __asm__ ("dec %b", SBUFR_INDEX);
+    __asm__ ("inc %b", SBUFR_INDEX);
 
     // test for new row
     __asm__ ("lda %b", SBUFR_INDEX);
     __asm__ ("and #%b", 3);
-    __asm__ ("cmp #%b", 1);
+//    __asm__ ("cmp #%b", 3);
     __asm__ ("beq newrow");
 
     __asm__ ("lda %b", SBUFR_INDEX);
+    __asm__ ("cmp #%b", 41);
     __asm__ ("bne newcol");
 
     TEST_PIN_TOGGLE; // adds 2.5us
