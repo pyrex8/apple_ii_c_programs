@@ -362,7 +362,7 @@ static void sprite_hgr_to_buffer(uint8_t column, uint8_t row)
     #define HGR_COL DATA3
     #define HGR_ROW DATA4
 
-    DATA1_P = 39;
+    DATA1_P = 0;
     DATA2_P = column;
     DATA3_P = column;
     DATA4_P = row;
@@ -371,13 +371,14 @@ static void sprite_hgr_to_buffer(uint8_t column, uint8_t row)
     // new row
     __asm__ ("newrow: lda %b", HGR_COL_START);
     __asm__ ("sta %b", HGR_COL);
-    __asm__ ("dec %b", HGR_ROW);
+    __asm__ ("inc %b", HGR_ROW);
     // Get the row address
     __asm__ ("ldy %b", HGR_ROW);
     __asm__ ("lda (%b),y", LKLO);
     __asm__ ("sta %b", ADDR1L);
     __asm__ ("lda (%b),y", LKHI);
     __asm__ ("sta %b", ADDR1H);
+
     // get byte from screen memory
     __asm__ ("newcol: ldy %b", HGR_COL);
     __asm__ ("lda (%b),y", ADDR1L);
@@ -385,16 +386,20 @@ static void sprite_hgr_to_buffer(uint8_t column, uint8_t row)
     __asm__ ("ldy %b", SBUFR_INDEX);
     __asm__ ("sta (%b),y", SBUFR);
     // decrement counters
-    __asm__ ("dec %b", HGR_COL);
-    __asm__ ("dec %b", SBUFR_INDEX);
+    __asm__ ("inc %b", HGR_COL);
+    __asm__ ("inc %b", SBUFR_INDEX);
 
     // test for new row
     __asm__ ("lda %b", SBUFR_INDEX);
-    __asm__ ("and #%b", 4);
-    __asm__ ("bne newrow");
+    __asm__ ("and #%b", 3);
+//    __asm__ ("cmp #%b", 3);
+    __asm__ ("beq newrow");
 
     __asm__ ("lda %b", SBUFR_INDEX);
+    __asm__ ("cmp #%b", 41);
     __asm__ ("bne newcol");
+
+    TEST_PIN_TOGGLE; // adds 2.5us
 
     TEST_PIN_TOGGLE; // adds 2.5us
 }
@@ -427,7 +432,7 @@ static void sprite_buffer_to_hgr(uint8_t column, uint8_t row)
     // get byte from sprite_buffer
     __asm__ ("newcol: ldy %b", SBUFR_INDEX);
     __asm__ ("lda (%b),y", SBUFR);
-    // store in  screen memory
+    // store in screen memory
     __asm__ ("ldy %b", HGR_COL);
     __asm__ ("sta (%b),y", ADDR1L);
     // decrement counters
@@ -514,10 +519,6 @@ void main(void)
     xorball(0);
     xorball(1);
 
-    sprite_hgr_to_buffer(20, 100);
-    fill();
-    sprite_buffer_to_hgr(20, 28);
-
     while(1)
     {
         x[0]++;
@@ -533,6 +534,9 @@ void main(void)
         ballxl[1] = BALLXL_CALC(x[1]);
         ballxh[1] = BALLXH_CALC(x[1]);
         xorball(1);
+
+        sprite_hgr_to_buffer(20, 28);
+        sprite_buffer_to_hgr(20, 100);
 
         delay();
 
