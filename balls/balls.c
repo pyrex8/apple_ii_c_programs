@@ -157,7 +157,7 @@ const uint8_t DIV7[256] =
 };
 
 // modulo-by-7 table
-const uint8_t MOD7[256] =
+const uint8_t MOD56[256] =
 {
     0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24,
     32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0,
@@ -169,8 +169,26 @@ const uint8_t MOD7[256] =
     0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24
 };
 
-#define BALLXH_CALC(x) (DIV7[x])
-#define BALLXL_CALC(x) (MOD7[x])
+// modulo-by-7 table
+const uint8_t MOD7[256] =
+{
+    0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3,
+    4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0,
+    1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4,
+    5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1,
+    2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5,
+    6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2,
+    3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6,
+    0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3,
+};
+
+
+#define SPRITE_XH_CALC(x) (DIV7[x])
+#define SPRITE_XL_CALC(x) (MOD7[x])
+
+#define BALL_XH_CALC(x) (DIV7[x])
+#define BALL_XL_CALC(x) (MOD56[x])
+
 
 static const uint8_t ball0[] =
 {
@@ -207,7 +225,13 @@ static uint8_t balldx[] = {0x00, 0x00};
 
 static uint8_t x[] = {0x00, 0x00};
 static uint8_t y[] = {0x00, 0x00};
+
+
 static uint8_t sprite_x;
+static uint8_t sprite_y;
+
+static uint8_t sprite_xl;
+static uint8_t sprite_xh;
 
 static uint8_t sprite_buffer[SPRITE_BUFFER_SIZE];
 
@@ -487,12 +511,14 @@ static void sprite_buffer_to_hgr(uint8_t column, uint8_t row)
 
 }
 
-void sprite_toggle(void)
+void sprite_toggle(uint8_t x, uint8_t y)
 {
-    sprite_x = 0;
-    sprite_hgr_to_buffer(20, 100);
-    sprite_xorball(1, 1, sprite_x);
-    sprite_buffer_to_hgr(20, 100);
+    sprite_xl = SPRITE_XL_CALC(x);
+    sprite_xh = SPRITE_XH_CALC(x);
+
+    sprite_hgr_to_buffer(sprite_xh, y);
+    sprite_xorball(1, 1, sprite_xl);
+    sprite_buffer_to_hgr(sprite_xh, y);
 }
 
 void sprite_move(void)
@@ -555,18 +581,10 @@ void main(void)
 
     balldx[0] = 0;
 
-    ballxl[1] = 0;
-    ballxh[1] = 10;
-
-    ballyl[1] = 0;
-    ballyh[1] = 10;
-
     sprite_buffer[0] = 0;
 
     y[0] = 30;
-    y[1] = 30;
     x[0] = 120;
-    x[1] = 0;
 
     ballyh[0] = y[0];
     ballyh[1] = y[1];
@@ -576,17 +594,22 @@ void main(void)
     hbox();
 
     xorball(0);
-    xorball(1);
 
-    sprite_toggle();
+    sprite_toggle(x[0], 40);
+
+    sprite_x = 140;
+    sprite_y = 100;
+    sprite_toggle(sprite_x, sprite_y);
 
     while(1)
     {
+        sprite_toggle(x[0], 40);
         x[0]++;
+        sprite_toggle(x[0], 40);
         xorball(0);
         // 124us to update position
-        ballxl[0] = BALLXL_CALC(x[0]);
-        ballxh[0] = BALLXH_CALC(x[0]);
+        ballxl[0] = BALL_XL_CALC(x[0]);
+        ballxh[0] = BALL_XH_CALC(x[0]);
         xorball(0);
 
         sprite_move();
