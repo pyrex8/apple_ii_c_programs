@@ -207,11 +207,9 @@ static uint8_t balldx[] = {0x00, 0x00};
 
 static uint8_t x[] = {0x00, 0x00};
 static uint8_t y[] = {0x00, 0x00};
-//static uint8_t sprite_x;
+static uint8_t sprite_x;
 
 static uint8_t sprite_buffer[SPRITE_BUFFER_SIZE];
-static uint8_t sprite_before[SPRITE_BUFFER_SIZE];
-static uint8_t sprite_after[SPRITE_BUFFER_SIZE];
 
 static void pointers_init(void)
 {
@@ -405,12 +403,14 @@ static void sprite_hgr_to_buffer(uint8_t column, uint8_t row)
 static void sprite_xorball(uint8_t column, uint8_t row, uint8_t shift)
 {
     TEST_PIN_TOGGLE; // adds 2.5us
-    // 1120us
-    #define SBUFR_IND DATA1
-    #define BALL_SHFT DATA2
+    // 1150us
+    #define SPRITE_CNTR DATA1
+    #define SBUFR_IND DATA2
+    #define BALL_SHFT DATA3
 
-    DATA1_P = (row << 2) + column;
-    DATA2_P = shift << 3;
+    DATA1_P = 8;
+    DATA2_P = (row << 2) + column;
+    DATA3_P = shift << 3;
 
     // loop
     __asm__ ("sprite: ldy %b", SBUFR_IND);
@@ -435,8 +435,7 @@ static void sprite_xorball(uint8_t column, uint8_t row, uint8_t shift)
     __asm__ ("inc %b", SBUFR_IND);
     __asm__ ("inc %b", SBUFR_IND);
 
-    __asm__ ("lda %b", SBUFR_IND);
-    __asm__ ("cmp #%b", 32);
+    __asm__ ("dec %b", SPRITE_CNTR);
     __asm__ ("bne sprite");
 
     TEST_PIN_TOGGLE; // adds 2.5us
@@ -509,6 +508,15 @@ void delay(void)
     for (i = 0; i < 200; i++)
     {
     }
+    for (i = 0; i < 200; i++)
+    {
+    }
+    for (i = 0; i < 200; i++)
+    {
+    }
+    for (i = 0; i < 200; i++)
+    {
+    }
 }
 
 void main(void)
@@ -532,8 +540,7 @@ void main(void)
     ballyh[1] = 10;
 
     sprite_buffer[0] = 0;
-    sprite_before[0] = 0;
-    sprite_after[0] = 0;
+    sprite_x = 0;
 
     y[0] = 30;
     y[1] = 40;
@@ -545,9 +552,7 @@ void main(void)
     hclear();
     hbox();
 
-    sprite_hgr_to_buffer(20, 28);
-    sprite_xorball(0, 0, 0);
-    sprite_buffer_to_hgr(20, 100);
+
 
     xorball(0);
     xorball(1);
@@ -567,6 +572,15 @@ void main(void)
         ballxl[1] = BALLXL_CALC(x[1]);
         ballxh[1] = BALLXH_CALC(x[1]);
         xorball(1);
+
+        sprite_hgr_to_buffer(20, 28);
+        sprite_xorball(1, 1, sprite_x);
+        sprite_x ++;
+        if(sprite_x > 6)
+        {
+            sprite_x = 0;
+        }
+        sprite_buffer_to_hgr(20, 100);
 
 
         delay();
