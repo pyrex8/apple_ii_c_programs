@@ -527,6 +527,9 @@ void sprite_toggle(uint8_t x, uint8_t y)
 
 void sprite_move(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
 {
+    uint8_t col_delta = 1;
+    uint8_t row_delta = 1 + y2 - y1;
+
     sprite_xl = SPRITE_XL_CALC(x1);
     sprite_xh = SPRITE_XH_CALC(x1);
 
@@ -534,10 +537,10 @@ void sprite_move(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
     sprite_xorball(1, 1, sprite_xl);
 
     sprite_xl = SPRITE_XL_CALC(x2);
-    sprite_xh = SPRITE_XH_CALC(x2);
+    col_delta += SPRITE_XH_CALC(x2) - sprite_xh;
 
-    sprite_xorball(1, 1, sprite_xl);
-    sprite_buffer_to_hgr(sprite_xh, y2);
+    sprite_xorball(col_delta, row_delta, sprite_xl);
+    sprite_buffer_to_hgr(sprite_xh, y1);
 }
 
 
