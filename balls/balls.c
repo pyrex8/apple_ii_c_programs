@@ -487,6 +487,28 @@ static void sprite_buffer_to_hgr(uint8_t column, uint8_t row)
 
 }
 
+void sprite_toggle(void)
+{
+    sprite_x = 0;
+    sprite_hgr_to_buffer(20, 100);
+    sprite_xorball(1, 1, sprite_x);
+    sprite_buffer_to_hgr(20, 100);
+}
+
+void sprite_move(void)
+{
+    sprite_hgr_to_buffer(20, 100);
+    sprite_xorball(1, 1, sprite_x);
+    sprite_x ++;
+    if(sprite_x > 6)
+    {
+        sprite_x = 0;
+    }
+    sprite_xorball(1, 1, sprite_x);
+    sprite_buffer_to_hgr(20, 100);
+}
+
+
 static void hclear(void)
 {
     pageset(HGR1SCRN_PAGE, BLACK, HGRSCRN_LENGTH);
@@ -540,10 +562,11 @@ void main(void)
     ballyh[1] = 10;
 
     sprite_buffer[0] = 0;
-    sprite_x = 0;
 
     y[0] = 30;
-    y[1] = 40;
+    y[1] = 30;
+    x[0] = 120;
+    x[1] = 0;
 
     ballyh[0] = y[0];
     ballyh[1] = y[1];
@@ -552,10 +575,10 @@ void main(void)
     hclear();
     hbox();
 
-
-
     xorball(0);
     xorball(1);
+
+    sprite_toggle();
 
     while(1)
     {
@@ -566,22 +589,7 @@ void main(void)
         ballxh[0] = BALLXH_CALC(x[0]);
         xorball(0);
 
-        x[1]++;
-        xorball(1);
-        // 124us to update position
-        ballxl[1] = BALLXL_CALC(x[1]);
-        ballxh[1] = BALLXH_CALC(x[1]);
-        xorball(1);
-
-        sprite_hgr_to_buffer(20, 28);
-        sprite_xorball(1, 1, sprite_x);
-        sprite_x ++;
-        if(sprite_x > 6)
-        {
-            sprite_x = 0;
-        }
-        sprite_buffer_to_hgr(20, 100);
-
+        sprite_move();
 
         delay();
 
