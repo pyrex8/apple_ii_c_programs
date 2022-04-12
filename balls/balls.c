@@ -229,6 +229,10 @@ static uint8_t y[] = {0x00, 0x00};
 
 static uint8_t sprite_x;
 static uint8_t sprite_y;
+static uint8_t sprite_x1;
+static uint8_t sprite_y1;
+static uint8_t sprite_x2;
+static uint8_t sprite_y2;
 
 static uint8_t sprite_xl;
 static uint8_t sprite_xh;
@@ -521,17 +525,19 @@ void sprite_toggle(uint8_t x, uint8_t y)
     sprite_buffer_to_hgr(sprite_xh, y);
 }
 
-void sprite_move(void)
+void sprite_move(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
 {
-    sprite_hgr_to_buffer(20, 100);
-    sprite_xorball(1, 1, sprite_x);
-    sprite_x ++;
-    if(sprite_x > 6)
-    {
-        sprite_x = 0;
-    }
-    sprite_xorball(1, 1, sprite_x);
-    sprite_buffer_to_hgr(20, 100);
+    sprite_xl = SPRITE_XL_CALC(x1);
+    sprite_xh = SPRITE_XH_CALC(x1);
+
+    sprite_hgr_to_buffer(sprite_xh, y1);
+    sprite_xorball(1, 1, sprite_xl);
+
+    sprite_xl = SPRITE_XL_CALC(x2);
+    sprite_xh = SPRITE_XH_CALC(x2);
+
+    sprite_xorball(1, 1, sprite_xl);
+    sprite_buffer_to_hgr(sprite_xh, y2);
 }
 
 
@@ -595,7 +601,11 @@ void main(void)
 
     xorball(0);
 
-    sprite_toggle(x[0], 40);
+    sprite_x1 = 140;
+    sprite_y1 = 100;
+    sprite_x2 = sprite_x1;
+    sprite_y2 = sprite_y1;
+    sprite_toggle(sprite_x1, sprite_y1);
 
     sprite_x = 140;
     sprite_y = 100;
@@ -612,7 +622,9 @@ void main(void)
         ballxh[0] = BALL_XH_CALC(x[0]);
         xorball(0);
 
-        sprite_move();
+        sprite_x2++;
+        sprite_move(sprite_x1, sprite_y1, sprite_x2, sprite_y2);
+        sprite_x1++;
 
         delay();
 
