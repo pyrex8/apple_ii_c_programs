@@ -31,9 +31,10 @@ BLUE = (25, 171, 249)
 WHITE = (255, 255, 255)
 GREY = (128, 128, 128)
 
-
 HCOLOR = [BLACK, PURPLE, GREEN, GREEN, PURPLE, BLUE, ORANGE, ORANGE, BLUE, WHITE]
 
+sprite =[ [0] * 8 for _ in range(8)]
+sprite[2][2] = 1
 
 joystick_present = 0
 button_0 = 0
@@ -48,6 +49,16 @@ def pixel(x , y, color):
 
 def pixel_4x(x , y, color):
     pygame.draw.rect(screen, color, (x * SCREEN_SCALE * PIXEL_GRID, y * SCREEN_SCALE * PIXEL_GRID , SCREEN_SCALE * 4, SCREEN_SCALE * 4))
+
+def cursor_4x(x , y, color):
+    x1 = x * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET
+    y1 = y * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET
+    x2 = (x + 1) * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET
+    y2 = (y + 1) * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET
+    pygame.draw.line(screen, color, (x1, y1), (x1, y2), 1)
+    pygame.draw.line(screen, color, (x2, y1), (x2, y2), 1)
+    pygame.draw.line(screen, color, (x1, y1), (x2, y1), 1)
+    pygame.draw.line(screen, color, (x1, y2), (x2, y2), 1)
 
 def line_4x(x1 , y1, x2, y2, color):
     pygame.draw.line(screen, color, (x1 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET, y1 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET), (x2 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET, y2 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET), SCREEN_SCALE)
@@ -100,6 +111,8 @@ while running:
                 keycode = 0x08
             if event.key == pygame.K_RIGHT:
                 keycode = 0x15
+            if event.key == pygame.K_SPACE:
+                keycode = pygame.K_SPACE
 
     pygame.draw.rect(screen, BLACK, (0, 0, SCREEN_X_TOTAL, SCREEN_Y_TOTAL))
 
@@ -114,6 +127,9 @@ while running:
     if paddle_1 < 55  or keycode == 0x0B:
         cursor_y -= 1
 
+    if button_0 or keycode == pygame.K_SPACE:
+        sprite[cursor_x - 10][cursor_y - 10] ^= 1
+
     if cursor_x < 10:
         cursor_x = 17
     if cursor_x > 17:
@@ -125,11 +141,16 @@ while running:
 
 
 
+    for y in range(8):
+        for x in range(8):
+            if sprite[x][y] == 1:
+                pixel_4x(10 + x, 10 + y, WHITE)
 
-    pixel_4x(cursor_x , cursor_y, WHITE)
     for i in range(9):
         line_4x(9, 9 + i, 17, 9 + i, GREY)
         line_4x(9 + i, 9, 9 + i, 17, GREY)
+
+    cursor_4x(cursor_x - 1, cursor_y - 1, WHITE)
 
     pygame.display.flip()
 
