@@ -34,21 +34,19 @@ GREY = (128, 128, 128)
 HCOLOR = [BLACK, PURPLE, GREEN, GREEN, PURPLE, BLUE, ORANGE, ORANGE, BLUE, WHITE]
 
 sprite =[ [0] * 8 for _ in range(8)]
-sprite[2][2] = 1
-
-joystick_present = 0
-button_0 = 0
-paddle_0 = 0
-paddle_1 = 0
 
 cursor_x = 10
 cursor_y = 10
 
 def pixel(x , y, color):
-    pygame.draw.rect(screen, color, (x * SCREEN_SCALE, y * SCREEN_SCALE , SCREEN_SCALE, SCREEN_SCALE))
+    px = x * SCREEN_SCALE
+    py =  y * SCREEN_SCALE
+    pygame.draw.rect(screen, color, (px , py, SCREEN_SCALE, SCREEN_SCALE))
 
 def pixel_4x(x , y, color):
-    pygame.draw.rect(screen, color, (x * SCREEN_SCALE * PIXEL_GRID, y * SCREEN_SCALE * PIXEL_GRID , SCREEN_SCALE * 4, SCREEN_SCALE * 4))
+    x4 = x * SCREEN_SCALE * PIXEL_GRID
+    y4 = y * SCREEN_SCALE * PIXEL_GRID
+    pygame.draw.rect(screen, color, (x4, y4, SCREEN_SCALE * 4, SCREEN_SCALE * 4))
 
 def cursor_4x(x , y, color):
     x1 = x * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET
@@ -61,7 +59,11 @@ def cursor_4x(x , y, color):
     pygame.draw.line(screen, color, (x1, y2), (x2, y2), 1)
 
 def line_4x(x1 , y1, x2, y2, color):
-    pygame.draw.line(screen, color, (x1 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET, y1 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET), (x2 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET, y2 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET), SCREEN_SCALE)
+    lx1 = x1 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET
+    ly1 = y1 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET
+    lx2 = x2 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET
+    ly2 = y2 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET
+    pygame.draw.line(screen, color, (lx1, ly1), (lx2, ly2), SCREEN_SCALE)
 
 pygame.init()
 pygame.display.set_caption('pyrex8')
@@ -72,19 +74,6 @@ clock = pygame.time.Clock()
 running = True
 
 while running:
-
-    if joystick_present:
-        button_0 = int(joystick.get_button(0))
-        paddle_0 = int((joystick.get_axis(0) + 1) * 127)
-        paddle_1 = int((joystick.get_axis(1) + 1) * 127)
-    else:
-        if pygame.joystick.get_count() > 0:
-            joystick = pygame.joystick.Joystick(0)
-            joystick.init()
-            joystick_present = 1
-        button_0 = 0
-        paddle_0 = 128
-        paddle_1 = 128
 
     keycode = 0
 
@@ -98,19 +87,20 @@ while running:
                 running = False
 
             if event.key == pygame.K_F1:
-                keycode = 128
-
-            if event.key == pygame.K_F2:
-                keycode = 129
+                keycode = pygame.K_F1
 
             if event.key == pygame.K_UP:
-                keycode = 0x0B
+                keycode = pygame.K_UP
+
             if event.key == pygame.K_DOWN:
-                keycode = 0x0A
+                keycode = pygame.K_DOWN
+
             if event.key == pygame.K_LEFT:
-                keycode = 0x08
+                keycode = pygame.K_LEFT
+
             if event.key == pygame.K_RIGHT:
-                keycode = 0x15
+                keycode = pygame.K_RIGHT
+
             if event.key == pygame.K_SPACE:
                 keycode = pygame.K_SPACE
 
@@ -118,16 +108,16 @@ while running:
 
     # HCOLOR
     # BLACK, PURPLE, GREEN, GREEN, PURPLE, BLUE, ORANGE, ORANGE, BLUE, WHITE
-    if paddle_0 > 200 or keycode == 0x15:
+    if keycode == pygame.K_RIGHT:
         cursor_x += 1
-    if paddle_0 < 55  or keycode == 0x08:
+    if keycode == pygame.K_LEFT:
         cursor_x -= 1
-    if paddle_1 > 200 or keycode == 0x0A:
+    if keycode == pygame.K_DOWN:
         cursor_y += 1
-    if paddle_1 < 55  or keycode == 0x0B:
+    if keycode == pygame.K_UP:
         cursor_y -= 1
 
-    if button_0 or keycode == pygame.K_SPACE:
+    if keycode == pygame.K_SPACE:
         sprite[cursor_x - 10][cursor_y - 10] ^= 1
 
     if cursor_x < 10:
@@ -138,8 +128,6 @@ while running:
         cursor_y = 17
     if cursor_y > 17:
         cursor_y = 10
-
-
 
     for y in range(8):
         for x in range(8):
