@@ -30,6 +30,7 @@ enum Zero_page
     DATA2,
     DATA3,
     DATA4,
+    DATA5,
 
     ADDR1L,
     ADDR1H,
@@ -59,6 +60,7 @@ enum Zero_page
 #define DATA2_P             *((uint8_t*)DATA2)
 #define DATA3_P             *((uint8_t*)DATA3)
 #define DATA4_P             *((uint8_t*)DATA4)
+#define DATA5_P             *((uint8_t*)DATA5)
 
 #define ADDR1L_P            *((uint8_t*)ADDR1L)
 #define ADDR1H_P            *((uint8_t*)ADDR1H)
@@ -139,6 +141,15 @@ const uint8_t MOD7[256] =
 
 static const uint8_t ball0[] =
 {
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+
     0X3C, 0X00, 0X7F, 0X01, 0X7F, 0X01, 0X7F, 0X01, 0X7F, 0X01, 0X7F, 0X01, 0X7F, 0X01, 0X3C, 0X00,
     0X78, 0X00, 0X7E, 0X03, 0X7E, 0X03, 0X7E, 0X03, 0X7E, 0X03, 0X7E, 0X03, 0X7E, 0X03, 0X78, 0X00,
     0X70, 0X01, 0X7C, 0X07, 0X7C, 0X07, 0X7C, 0X07, 0X7C, 0X07, 0X7C, 0X07, 0X7C, 0X07, 0X70, 0X01,
@@ -146,6 +157,25 @@ static const uint8_t ball0[] =
     0X40, 0X07, 0X70, 0X1F, 0X70, 0X1F, 0X70, 0X1F, 0X70, 0X1F, 0X70, 0X1F, 0X70, 0X1F, 0X40, 0X07,
     0X00, 0X0F, 0X60, 0X3F, 0X60, 0X3F, 0X60, 0X3F, 0X60, 0X3F, 0X60, 0X3F, 0X60, 0X3F, 0X00, 0X0F,
     0X00, 0X1E, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X00, 0X1E,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+
+    0X3C, 0X00, 0X7F, 0X01, 0X7F, 0X01, 0X7F, 0X01, 0X7F, 0X01, 0X7F, 0X01, 0X7F, 0X01, 0X3C, 0X00,
+    0X78, 0X00, 0X7E, 0X03, 0X7E, 0X03, 0X7E, 0X03, 0X7E, 0X03, 0X7E, 0X03, 0X7E, 0X03, 0X78, 0X00,
+    0X70, 0X01, 0X7C, 0X07, 0X7C, 0X07, 0X7C, 0X07, 0X7C, 0X07, 0X7C, 0X07, 0X7C, 0X07, 0X70, 0X01,
+    0X60, 0X03, 0X78, 0X0F, 0X78, 0X0F, 0X78, 0X0F, 0X78, 0X0F, 0X78, 0X0F, 0X78, 0X0F, 0X60, 0X03,
+    0X40, 0X07, 0X70, 0X1F, 0X70, 0X1F, 0X70, 0X1F, 0X70, 0X1F, 0X70, 0X1F, 0X70, 0X1F, 0X40, 0X07,
+    0X00, 0X0F, 0X60, 0X3F, 0X60, 0X3F, 0X60, 0X3F, 0X60, 0X3F, 0X60, 0X3F, 0X60, 0X3F, 0X00, 0X0F,
+    0X00, 0X1E, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X00, 0X1E,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
 };
 
 static uint8_t sprite_x1;
@@ -164,10 +194,6 @@ static void pointers_init(void)
     LKLOH_P = (uint8_t)(((uint16_t)lklo)>> 8);
     LKHIL_P = (uint8_t)lkhi;
     LKHIH_P = (uint8_t)(((uint16_t)lkhi) >> 8);
-
-    BALL0L_P = (uint8_t)ball0;
-    BALL0H_P = (uint8_t)(((uint16_t)ball0)>> 8);
-
     SBUFRL_P = (uint8_t)sprite_buffer;
     SBUFRH_P = (uint8_t)(((uint16_t)sprite_buffer)>> 8);
 }
@@ -280,17 +306,34 @@ static void sprite_hgr_to_buffer(uint8_t column, uint8_t row)
     __asm__ ("bne newcol");
 }
 
-static void sprite_xorball(uint8_t column, uint8_t row, uint8_t shift)
+static void sprite_xorball(uint8_t page, uint8_t sprite, uint8_t column, uint8_t row, uint8_t shift)
 {
 
     // 1150us
     #define SPRITE_CNTR DATA1
     #define SBUFR_IND DATA2
     #define BALL_SHFT DATA3
+    #define SPRITE DATA4
+    #define PAGE DATA5
 
     DATA1_P = 8;
     DATA2_P = (row << 2) + column;
     DATA3_P = shift << 4;
+    DATA4_P = sprite;
+    DATA5_P = page;
+
+    BALL0L_P = (uint8_t)ball0;
+    BALL0H_P = (uint8_t)(((uint16_t)ball0)>> 8);
+
+    // init
+    __asm__ ("lda %b", BALL0L);
+    __asm__ ("clc");
+    __asm__ ("adc %b", SPRITE);
+    __asm__ ("sta %b", BALL0L);
+
+    __asm__ ("lda %b", BALL0H);
+    __asm__ ("adc %b", PAGE);
+    __asm__ ("sta %b", BALL0H);
 
     // loop
     __asm__ ("sprite: ldy %b", SBUFR_IND);
@@ -366,17 +409,7 @@ static void sprite_buffer_to_hgr(uint8_t column, uint8_t row)
 
 }
 
-void sprite_toggle(uint8_t x, uint8_t y)
-{
-    sprite_xl = SPRITE_XL_CALC(x);
-    sprite_xh = SPRITE_XH_CALC(x);
-
-    sprite_hgr_to_buffer(sprite_xh, y);
-    sprite_xorball(1, 1, sprite_xl);
-    sprite_buffer_to_hgr(sprite_xh, y);
-}
-
-void sprite_move(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
+void sprite_update(uint8_t page, uint8_t sprite1, uint8_t x1, uint8_t y1, uint8_t sprite2, uint8_t x2, uint8_t y2)
 {
     // 9200us
     uint8_t col_delta = 1;
@@ -386,12 +419,12 @@ void sprite_move(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
     sprite_xh = SPRITE_XH_CALC(x1);
 
     sprite_hgr_to_buffer(sprite_xh, y1);
-    sprite_xorball(1, 1, sprite_xl);
+    sprite_xorball(page, sprite1, 1, 1, sprite_xl);
 
     sprite_xl = SPRITE_XL_CALC(x2);
     col_delta += SPRITE_XH_CALC(x2) - sprite_xh;
 
-    sprite_xorball(col_delta, row_delta, sprite_xl);
+    sprite_xorball(page, sprite2, col_delta, row_delta, sprite_xl);
     sprite_buffer_to_hgr(sprite_xh, y1);
 }
 
@@ -432,13 +465,13 @@ void main(void)
     sprite_y1 = 100;
     sprite_x2 = sprite_x1;
     sprite_y2 = sprite_y1;
-    sprite_toggle(sprite_x1, sprite_y1);
+    sprite_update(0, 0, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
 
     while(1)
     {
         sprite_x2++;
         TEST_PIN_TOGGLE; // adds 2.5us
-        sprite_move(sprite_x1, sprite_y1, sprite_x2, sprite_y2);
+        sprite_update(1, 128, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
         TEST_PIN_TOGGLE; // adds 2.5us
         sprite_x1++;
 
