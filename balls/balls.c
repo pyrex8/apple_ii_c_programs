@@ -49,8 +49,6 @@ enum Zero_page
 
     BALL0L,
     BALL0H,
-    BALL1L,
-    BALL1H,
 
     SBUFRL,
     SBUFRH,
@@ -62,7 +60,6 @@ enum Zero_page
 #define LKLO  LKLOL
 #define LKHI  LKHIL
 #define BALL0  BALL0L
-#define BALL1  BALL1L
 #define SBUFR  SBUFRL // sprint buffer location
 
 // pointers to zero page memory
@@ -88,8 +85,6 @@ enum Zero_page
 
 #define BALL0L_P         *((uint8_t*)BALL0L)
 #define BALL0H_P         *((uint8_t*)BALL0H)
-#define BALL1L_P         *((uint8_t*)BALL1L)
-#define BALL1H_P         *((uint8_t*)BALL1H)
 
 #define SBUFRL_P         *((uint8_t*)SBUFRL)
 #define SBUFRH_P         *((uint8_t*)SBUFRH)
@@ -182,34 +177,18 @@ const uint8_t MOD7[256] =
     0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3,
 };
 
-
 #define SPRITE_XH_CALC(x) (DIV7[x])
 #define SPRITE_XL_CALC(x) (MOD7[x])
 
-#define BALL_XH_CALC(x) (DIV7[x])
-#define BALL_XL_CALC(x) (MOD56[x])
-
-
 static const uint8_t ball0[] =
 {
-    0X3C, 0X7F, 0X7F, 0X7F, 0X7F, 0X7F, 0X7F, 0X3C,
-    0X78, 0X7E, 0X7E, 0X7E, 0X7E, 0X7E, 0X7E, 0X78,
-    0X70, 0X7C, 0X7C, 0X7C, 0X7C, 0X7C, 0X7C, 0X70,
-    0X60, 0X78, 0X78, 0X78, 0X78, 0X78, 0X78, 0X60,
-    0X40, 0X70, 0X70, 0X70, 0X70, 0X70, 0X70, 0X40,
-    0X00, 0X60, 0X60, 0X60, 0X60, 0X60, 0X60, 0X00,
-    0X00, 0X40, 0X40, 0X40, 0X40, 0X40, 0X40, 0X00,
-};
-
-static const uint8_t ball1[] =
-{
-    0X00, 0X01, 0X01, 0X01, 0X01, 0X01, 0X01, 0X00,
-    0X00, 0X03, 0X03, 0X03, 0X03, 0X03, 0X03, 0X00,
-    0X01, 0X07, 0X07, 0X07, 0X07, 0X07, 0X07, 0X01,
-    0X03, 0X0F, 0X0F, 0X0F, 0X0F, 0X0F, 0X0F, 0X03,
-    0X07, 0X1F, 0X1F, 0X1F, 0X1F, 0X1F, 0X1F, 0X07,
-    0X0F, 0X3F, 0X3F, 0X3F, 0X3F, 0X3F, 0X3F, 0X0F,
-    0X1E, 0X7F, 0X7F, 0X7F, 0X7F, 0X7F, 0X7F, 0X1E,
+    0X3C, 0X00, 0X7F, 0X01, 0X7F, 0X01, 0X7F, 0X01, 0X7F, 0X01, 0X7F, 0X01, 0X7F, 0X01, 0X3C, 0X00,
+    0X78, 0X00, 0X7E, 0X03, 0X7E, 0X03, 0X7E, 0X03, 0X7E, 0X03, 0X7E, 0X03, 0X7E, 0X03, 0X78, 0X00,
+    0X70, 0X01, 0X7C, 0X07, 0X7C, 0X07, 0X7C, 0X07, 0X7C, 0X07, 0X7C, 0X07, 0X7C, 0X07, 0X70, 0X01,
+    0X60, 0X03, 0X78, 0X0F, 0X78, 0X0F, 0X78, 0X0F, 0X78, 0X0F, 0X78, 0X0F, 0X78, 0X0F, 0X60, 0X03,
+    0X40, 0X07, 0X70, 0X1F, 0X70, 0X1F, 0X70, 0X1F, 0X70, 0X1F, 0X70, 0X1F, 0X70, 0X1F, 0X40, 0X07,
+    0X00, 0X0F, 0X60, 0X3F, 0X60, 0X3F, 0X60, 0X3F, 0X60, 0X3F, 0X60, 0X3F, 0X60, 0X3F, 0X00, 0X0F,
+    0X00, 0X1E, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X00, 0X1E,
 };
 
 static uint8_t ballxl[] = {0x00, 0x00};
@@ -248,8 +227,6 @@ static void pointers_init(void)
 
     BALL0L_P = (uint8_t)ball0;
     BALL0H_P = (uint8_t)(((uint16_t)ball0)>> 8);
-    BALL1L_P = (uint8_t)ball1;
-    BALL1H_P = (uint8_t)(((uint16_t)ball1) >> 8);
 
     SBUFRL_P = (uint8_t)sprite_buffer;
     SBUFRH_P = (uint8_t)(((uint16_t)sprite_buffer)>> 8);
@@ -318,71 +295,6 @@ static void vline(uint8_t column, uint8_t pixels)
     __asm__ ("bne vl1");
 }
 
-void xorball(uint8_t ball)
-{
-    #define BALL DATA1
-    #define HGRY DATA2
-    #define HGRX DATA3
-    #define BIND DATA4
-
-    #define BALLYH ADDR1L
-    #define BALLXH ADDR2L
-    #define BALLXL ADDR3L
-
-    // Assembly = 720us, C = 1150us
-    DATA1_P = ball;
-    ADDR1L_P = (uint8_t)ballyh;
-    ADDR1H_P = (uint8_t)(((uint16_t)ballyh)>> 8);
-    ADDR2L_P = (uint8_t)ballxh;
-    ADDR2H_P = (uint8_t)(((uint16_t)ballxh)>> 8);
-    ADDR3L_P = (uint8_t)ballxl;
-    ADDR3H_P = (uint8_t)(((uint16_t)ballxl)>> 8);
-    TEST_P = BYTE_FULL;
-
-    // init
-    __asm__ ("ldy %b", BALL);
-    __asm__ ("lda (%b), y", BALLYH); // Get row
-    __asm__ ("sta %b", HGRY);
-    __asm__ ("lda (%b), y", BALLXH); // Get column
-    __asm__ ("sta %b", HGRX);
-    __asm__ ("lda (%b), y", BALLXL); // Get Shift (0,8,...,48)
-    __asm__ ("and #%b", 0x38);
-    __asm__ ("sta %b", BIND); // Offset into sprite table (pixel * 8)
-
-    // loop
-    __asm__ ("xsplot: ldy %b", HGRY); // Get the row address
-    __asm__ ("lda (%b), y", LKLO);
-    __asm__ ("sta %b", GBASL);
-    __asm__ ("lda (%b), y", LKHI);
-    __asm__ ("sta %b", GBASH);
-    __asm__ ("iny");
-    __asm__ ("sty %b", HGRY);
-//-----------------------------------------------------------------------------
-    __asm__ ("ldy %b", HGRX);
-    __asm__ ("lda (%b),y", GBASL);
-
-    __asm__ ("ldy %b", BIND);
-    __asm__ ("eor (%b), y", BALL0); // XOR the two bytes onto the screen
-
-    __asm__ ("ldy %b", HGRX);
-    __asm__ ("sta (%b),y", GBASL);
-//-----------------------------------------------------------------------------
-    __asm__ ("iny");
-    __asm__ ("lda (%b),y", GBASL);
-
-    __asm__ ("ldy %b", BIND);
-    __asm__ ("eor (%b), y", BALL1);
-
-    __asm__ ("ldy %b", HGRX);
-    __asm__ ("iny");
-    __asm__ ("sta (%b),y", GBASL);
-//-----------------------------------------------------------------------------
-    __asm__ ("inc %b", BIND);
-    __asm__ ("lda %b", BIND);
-    __asm__ ("and #%b", 7);
-    __asm__ ("bne xsplot"); // Stop at a multiple of 8 bytes
-}
-
 static void sprite_hgr_to_buffer(uint8_t column, uint8_t row)
 {
     // 1580us
@@ -430,7 +342,7 @@ static void sprite_hgr_to_buffer(uint8_t column, uint8_t row)
 
 static void sprite_xorball(uint8_t column, uint8_t row, uint8_t shift)
 {
-    TEST_PIN_TOGGLE; // adds 2.5us
+
     // 1150us
     #define SPRITE_CNTR DATA1
     #define SBUFR_IND DATA2
@@ -438,7 +350,7 @@ static void sprite_xorball(uint8_t column, uint8_t row, uint8_t shift)
 
     DATA1_P = 8;
     DATA2_P = (row << 2) + column;
-    DATA3_P = shift << 3;
+    DATA3_P = shift << 4;
 
     // loop
     __asm__ ("sprite: ldy %b", SBUFR_IND);
@@ -448,12 +360,13 @@ static void sprite_xorball(uint8_t column, uint8_t row, uint8_t shift)
     __asm__ ("ldy %b", SBUFR_IND);
     __asm__ ("sta (%b),y", SBUFR);
 
+    __asm__ ("inc %b", BALL_SHFT);
     __asm__ ("inc %b", SBUFR_IND);
 
     __asm__ ("ldy %b", SBUFR_IND);
     __asm__ ("lda (%b),y", SBUFR);
     __asm__ ("ldy %b", BALL_SHFT);
-    __asm__ ("eor (%b), y", BALL1);
+    __asm__ ("eor (%b), y", BALL0);
     __asm__ ("ldy %b", SBUFR_IND);
     __asm__ ("sta (%b),y", SBUFR);
 
@@ -465,8 +378,6 @@ static void sprite_xorball(uint8_t column, uint8_t row, uint8_t shift)
 
     __asm__ ("dec %b", SPRITE_CNTR);
     __asm__ ("bne sprite");
-
-    TEST_PIN_TOGGLE; // adds 2.5us
 }
 
 static void sprite_buffer_to_hgr(uint8_t column, uint8_t row)
@@ -527,6 +438,7 @@ void sprite_toggle(uint8_t x, uint8_t y)
 
 void sprite_move(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
 {
+    // 9200us
     uint8_t col_delta = 1;
     uint8_t row_delta = 1 + y2 - y1;
 
@@ -568,12 +480,6 @@ void delay(void)
     for (i = 0; i < 200; i++)
     {
     }
-    for (i = 0; i < 200; i++)
-    {
-    }
-    for (i = 0; i < 200; i++)
-    {
-    }
 }
 
 void main(void)
@@ -602,8 +508,6 @@ void main(void)
     hclear();
     hbox();
 
-    xorball(0);
-
     sprite_x1 = 140;
     sprite_y1 = 100;
     sprite_x2 = sprite_x1;
@@ -616,17 +520,10 @@ void main(void)
 
     while(1)
     {
-        sprite_toggle(x[0], 40);
-        x[0]++;
-        sprite_toggle(x[0], 40);
-        xorball(0);
-        // 124us to update position
-        ballxl[0] = BALL_XL_CALC(x[0]);
-        ballxh[0] = BALL_XH_CALC(x[0]);
-        xorball(0);
-
         sprite_x2++;
+        TEST_PIN_TOGGLE; // adds 2.5us
         sprite_move(sprite_x1, sprite_y1, sprite_x2, sprite_y2);
+        TEST_PIN_TOGGLE; // adds 2.5us
         sprite_x1++;
 
         delay();
