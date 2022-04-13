@@ -6,23 +6,22 @@
 #include <stdint.h>
 #include "../test_pin/test_pin.h"
 
-#define BYTE_FULL       0xFF
-#define ROWS            192	// number of scanlines
-#define ROW_FIRST       0
-#define ROW_LAST        ROWS - 1
-#define ROW_SECOND_LAST ROW_LAST - 1
-#define NBALLS          30            // Number of balls to bounce
-#define COLUMNS         40            // Number of columns/bytes per row
-#define COLUMN_FIRST    0
-#define COLUMN_LAST     COLUMNS - 1
-#define WHITE           0x7F           // White hires byte
-#define BLACK           0x00
-#define RKEY            0xD2           // Code for when "R" is pressed
-#define RWALL           0xF700
-#define LWALL           0x0400
-#define BOTTOM          0xB700
-#define BOTTOM2         0x6E00         // Bottom * 2, for bouncing
-#define SPRITE_BUFFER_SIZE 45
+#define ROWS                192	// number of scanlines
+#define ROW_FIRST           0
+#define ROW_LAST            ROWS - 1
+#define ROW_SECOND_LAST     ROW_LAST - 1
+#define COLUMNS             40            // Number of columns/bytes per row
+#define COLUMN_FIRST        0
+#define COLUMN_LAST         COLUMNS - 1
+#define WHITE               0x7F           // White hires byte
+#define BLACK               0x00
+#define SPRITE_BUFFER_SIZE  45
+#define HGR1SCRN_PAGE       0x20
+#define HGRSCRN_LENGTH      0x20        // number of pages
+
+#define TXTCLR              0xC050         // graphics mode
+#define HIRES               0xC057         // hires mode
+
 
 // Addresses
 enum Zero_page
@@ -36,75 +35,46 @@ enum Zero_page
     ADDR1H,
     ADDR2L,
     ADDR2H,
-    ADDR3L,
-    ADDR3H,
-
-    GBASL,
-    GBASH,
 
     LKLOL,
     LKLOH,
     LKHIL,
     LHHIH,
 
-    BALL0L,
-    BALL0H,
-
     SBUFRL,
     SBUFRH,
 
-    TEST,
+    BALL0L,
+    BALL0H,
 };
 
 // low byte is used for some instructions, alias so that it maps to assembly version
-#define LKLO  LKLOL
-#define LKHI  LKHIL
-#define BALL0  BALL0L
-#define SBUFR  SBUFRL // sprint buffer location
+#define LKLO                LKLOL
+#define LKHI                LKHIL
+#define BALL0               BALL0L
+#define SBUFR               SBUFRL // sprint buffer location
 
 // pointers to zero page memory
-#define DATA1_P         *((uint8_t*)DATA1)
-#define DATA2_P         *((uint8_t*)DATA2)
-#define DATA3_P         *((uint8_t*)DATA3)
-#define DATA4_P         *((uint8_t*)DATA4)
-#define DATA5_P         *((uint8_t*)DATA5)
-#define ADDR1L_P        *((uint8_t*)ADDR1L)
-#define ADDR1H_P        *((uint8_t*)ADDR1H)
-#define ADDR2L_P        *((uint8_t*)ADDR2L)
-#define ADDR2H_P        *((uint8_t*)ADDR2H)
-#define ADDR3L_P        *((uint8_t*)ADDR3L)
-#define ADDR3H_P        *((uint8_t*)ADDR3H)
+#define DATA1_P             *((uint8_t*)DATA1)
+#define DATA2_P             *((uint8_t*)DATA2)
+#define DATA3_P             *((uint8_t*)DATA3)
+#define DATA4_P             *((uint8_t*)DATA4)
 
-#define GBASL_P         *((uint8_t*)GBASL)
-#define GBASH_P         *((uint8_t*)GBASH)
+#define ADDR1L_P            *((uint8_t*)ADDR1L)
+#define ADDR1H_P            *((uint8_t*)ADDR1H)
+#define ADDR2L_P            *((uint8_t*)ADDR2L)
+#define ADDR2H_P            *((uint8_t*)ADDR2H)
 
-#define LKLOL_P         *((uint8_t*)LKLOL)
-#define LKLOH_P         *((uint8_t*)LKLOH)
-#define LKHIL_P         *((uint8_t*)LKHIL)
-#define LKHIH_P         *((uint8_t*)LHHIH)
+#define LKLOL_P             *((uint8_t*)LKLOL)
+#define LKLOH_P             *((uint8_t*)LKLOH)
+#define LKHIL_P             *((uint8_t*)LKHIL)
+#define LKHIH_P             *((uint8_t*)LHHIH)
 
-#define BALL0L_P         *((uint8_t*)BALL0L)
-#define BALL0H_P         *((uint8_t*)BALL0H)
+#define SBUFRL_P            *((uint8_t*)SBUFRL)
+#define SBUFRH_P            *((uint8_t*)SBUFRH)
 
-#define SBUFRL_P         *((uint8_t*)SBUFRL)
-#define SBUFRH_P         *((uint8_t*)SBUFRH)
-
-#define TEST_P         *((uint8_t*)TEST)
-
-#define HCOLOR1         0x1C           // Color value
-
-#define HGR1SCRN        0x2000         // Start of hires page 1
-#define HGR1SCRN_PAGE   0x20
-#define HGRSCRN_LENGTH  0x20        // number of pages
-
-#define KBD             0xC000         // key code when MSB set
-#define KBDSTRB         0xC010         // clear keyboard buffer
-#define TXTCLR          0xC050         // graphics mode
-#define TXTSET          0xC051         // text mode
-#define LOWSCR          0xC054         // page 1
-#define HIRES           0xC057         // hires mode
-
-
+#define BALL0L_P            *((uint8_t*)BALL0L)
+#define BALL0H_P            *((uint8_t*)BALL0H)
 
 static const uint8_t lklo[ROWS] =
 {
@@ -141,27 +111,14 @@ static const uint8_t lkhi[ROWS] =
 // divide-by 7 table
 const uint8_t DIV7[256] =
 {
- 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4,
- 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 9,
- 9, 9, 9, 9, 9, 9,10,10,10,10,10,10,10,11,11,11,11,11,11,11,12,12,12,12,12,12,12,13,13,13,13,13,
-13,13,14,14,14,14,14,14,14,15,15,15,15,15,15,15,16,16,16,16,16,16,16,17,17,17,17,17,17,17,18,18,
-18,18,18,18,18,19,19,19,19,19,19,19,20,20,20,20,20,20,20,21,21,21,21,21,21,21,22,22,22,22,22,22,
-22,23,23,23,23,23,23,23,24,24,24,24,24,24,24,25,25,25,25,25,25,25,26,26,26,26,26,26,26,27,27,27,
-27,27,27,27,28,28,28,28,28,28,28,29,29,29,29,29,29,29,30,30,30,30,30,30,30,31,31,31,31,31,31,31,
-32,32,32,32,32,32,32,33,33,33,33,33,33,33,34,34,34,34,34,34,34,35,35,35,35,35,35,35,36,36,36,36,
-};
-
-// modulo-by-7 table
-const uint8_t MOD56[256] =
-{
-    0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24,
-    32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0,
-    8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32,
-    40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8,
-    16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40,
-    48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16,
-    24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48,
-    0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24, 32, 40, 48, 0, 8, 16, 24
+     0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4,
+     4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 9,
+     9, 9, 9, 9, 9, 9,10,10,10,10,10,10,10,11,11,11,11,11,11,11,12,12,12,12,12,12,12,13,13,13,13,13,
+    13,13,14,14,14,14,14,14,14,15,15,15,15,15,15,15,16,16,16,16,16,16,16,17,17,17,17,17,17,17,18,18,
+    18,18,18,18,18,19,19,19,19,19,19,19,20,20,20,20,20,20,20,21,21,21,21,21,21,21,22,22,22,22,22,22,
+    22,23,23,23,23,23,23,23,24,24,24,24,24,24,24,25,25,25,25,25,25,25,26,26,26,26,26,26,26,27,27,27,
+    27,27,27,27,28,28,28,28,28,28,28,29,29,29,29,29,29,29,30,30,30,30,30,30,30,31,31,31,31,31,31,31,
+    32,32,32,32,32,32,32,33,33,33,33,33,33,33,34,34,34,34,34,34,34,35,35,35,35,35,35,35,36,36,36,36,
 };
 
 // modulo-by-7 table
@@ -191,23 +148,6 @@ static const uint8_t ball0[] =
     0X00, 0X1E, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X40, 0X7F, 0X00, 0X1E,
 };
 
-static uint8_t ballxl[] = {0x00, 0x00};
-static uint8_t ballxh[] = {0x00, 0x00};
-
-static uint8_t ballyl[] = {0x00, 0x00};
-static uint8_t ballyh[] = {0x00, 0x00};
-
-static uint8_t balldyl[] = {0x00, 0x00};
-static uint8_t balldyh[] = {0x00, 0x00};
-
-static uint8_t balldx[] = {0x00, 0x00};
-
-static uint8_t x[] = {0x00, 0x00};
-static uint8_t y[] = {0x00, 0x00};
-
-
-static uint8_t sprite_x;
-static uint8_t sprite_y;
 static uint8_t sprite_x1;
 static uint8_t sprite_y1;
 static uint8_t sprite_x2;
@@ -484,26 +424,6 @@ void delay(void)
 
 void main(void)
 {
-    // This is just to keep the compiler from complaining about unused variables
-    ballxl[0] = 0;
-    ballxh[0] = 10;
-
-    ballyl[0] = 0;
-    ballyh[0] = 10;
-
-    balldyl[0] = 0;
-    balldyh[0] = 0;
-
-    balldx[0] = 0;
-
-    sprite_buffer[0] = 0;
-
-    y[0] = 30;
-    x[0] = 120;
-
-    ballyh[0] = y[0];
-    ballyh[1] = y[1];
-
     pointers_init();
     hclear();
     hbox();
@@ -513,10 +433,6 @@ void main(void)
     sprite_x2 = sprite_x1;
     sprite_y2 = sprite_y1;
     sprite_toggle(sprite_x1, sprite_y1);
-
-    sprite_x = 140;
-    sprite_y = 100;
-    sprite_toggle(sprite_x, sprite_y);
 
     while(1)
     {
