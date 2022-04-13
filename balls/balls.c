@@ -45,14 +45,14 @@ enum Zero_page
     SBUFRL,
     SBUFRH,
 
-    BALL0L,
-    BALL0H,
+    SPRITEL,
+    SPRITEH,
 };
 
 // low byte is used for some instructions, alias so that it maps to assembly version
 #define LKLO                LKLOL
 #define LKHI                LKHIL
-#define BALL0               BALL0L
+#define SPRITE               SPRITEL
 #define SBUFR               SBUFRL // sprint buffer location
 
 // pointers to zero page memory
@@ -75,8 +75,8 @@ enum Zero_page
 #define SBUFRL_P            *((uint8_t*)SBUFRL)
 #define SBUFRH_P            *((uint8_t*)SBUFRH)
 
-#define BALL0L_P            *((uint8_t*)BALL0L)
-#define BALL0H_P            *((uint8_t*)BALL0H)
+#define SPRITEL_P            *((uint8_t*)SPRITEL)
+#define SPRITEH_P            *((uint8_t*)SPRITEH)
 
 static const uint8_t lklo[ROWS] =
 {
@@ -139,7 +139,7 @@ const uint8_t MOD7[256] =
 #define SPRITE_XH_CALC(x) (DIV7[x])
 #define SPRITE_XL_CALC(x) (MOD7[x])
 
-static const uint8_t ball0[] =
+static const uint8_t sprites[] =
 {
     0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
     0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
@@ -306,14 +306,14 @@ static void sprite_hgr_to_buffer(uint8_t column, uint8_t row)
     __asm__ ("bne newcol");
 }
 
-static void sprite_xorball(uint8_t page, uint8_t sprite, uint8_t column, uint8_t row, uint8_t shift)
+static void sprite_xor(uint8_t page, uint8_t sprite, uint8_t column, uint8_t row, uint8_t shift)
 {
 
     // 1150us
     #define SPRITE_CNTR DATA1
     #define SBUFR_IND DATA2
-    #define BALL_SHFT DATA3
-    #define SPRITE DATA4
+    #define SPRITE_SHFT DATA3
+    #define SPRITE_NUM DATA4
     #define PAGE DATA5
 
     DATA1_P = 8;
@@ -322,38 +322,38 @@ static void sprite_xorball(uint8_t page, uint8_t sprite, uint8_t column, uint8_t
     DATA4_P = sprite;
     DATA5_P = page;
 
-    BALL0L_P = (uint8_t)ball0;
-    BALL0H_P = (uint8_t)(((uint16_t)ball0)>> 8);
+    SPRITEL_P = (uint8_t)sprites;
+    SPRITEH_P = (uint8_t)(((uint16_t)sprites)>> 8);
 
     // init
-    __asm__ ("lda %b", BALL0L);
+    __asm__ ("lda %b", SPRITEL);
     __asm__ ("clc");
-    __asm__ ("adc %b", SPRITE);
-    __asm__ ("sta %b", BALL0L);
+    __asm__ ("adc %b", SPRITE_NUM);
+    __asm__ ("sta %b", SPRITEL);
 
-    __asm__ ("lda %b", BALL0H);
+    __asm__ ("lda %b", SPRITEH);
     __asm__ ("adc %b", PAGE);
-    __asm__ ("sta %b", BALL0H);
+    __asm__ ("sta %b", SPRITEH);
 
     // loop
     __asm__ ("sprite: ldy %b", SBUFR_IND);
     __asm__ ("lda (%b),y", SBUFR);
-    __asm__ ("ldy %b", BALL_SHFT);
-    __asm__ ("eor (%b), y", BALL0);
+    __asm__ ("ldy %b", SPRITE_SHFT);
+    __asm__ ("eor (%b), y", SPRITE);
     __asm__ ("ldy %b", SBUFR_IND);
     __asm__ ("sta (%b),y", SBUFR);
 
-    __asm__ ("inc %b", BALL_SHFT);
+    __asm__ ("inc %b", SPRITE_SHFT);
     __asm__ ("inc %b", SBUFR_IND);
 
     __asm__ ("ldy %b", SBUFR_IND);
     __asm__ ("lda (%b),y", SBUFR);
-    __asm__ ("ldy %b", BALL_SHFT);
-    __asm__ ("eor (%b), y", BALL0);
+    __asm__ ("ldy %b", SPRITE_SHFT);
+    __asm__ ("eor (%b), y", SPRITE);
     __asm__ ("ldy %b", SBUFR_IND);
     __asm__ ("sta (%b),y", SBUFR);
 
-    __asm__ ("inc %b", BALL_SHFT);
+    __asm__ ("inc %b", SPRITE_SHFT);
 
     __asm__ ("inc %b", SBUFR_IND);
     __asm__ ("inc %b", SBUFR_IND);
@@ -419,12 +419,12 @@ void sprite_update(uint8_t page, uint8_t sprite1, uint8_t x1, uint8_t y1, uint8_
     sprite_xh = SPRITE_XH_CALC(x1);
 
     sprite_hgr_to_buffer(sprite_xh, y1);
-    sprite_xorball(page, sprite1, 1, 1, sprite_xl);
+    sprite_xor(page, sprite1, 1, 1, sprite_xl);
 
     sprite_xl = SPRITE_XL_CALC(x2);
     col_delta += SPRITE_XH_CALC(x2) - sprite_xh;
 
-    sprite_xorball(page, sprite2, col_delta, row_delta, sprite_xl);
+    sprite_xor(page, sprite2, col_delta, row_delta, sprite_xl);
     sprite_buffer_to_hgr(sprite_xh, y1);
 }
 
