@@ -33,7 +33,18 @@ GREY = (128, 128, 128)
 
 HCOLOR = [BLACK, PURPLE, GREEN, GREEN, PURPLE, BLUE, ORANGE, ORANGE, BLUE, WHITE]
 
-sprite =[ [0] * 8 for _ in range(8)]
+sprite = [[1] * 8 for _ in range(8)]
+line_colors = [0] * 8
+line_colors[0] = 1
+
+sprite[0][0] = 0
+sprite[1][0] = 0
+sprite[6][0] = 0
+sprite[7][0] = 0
+sprite[0][7] = 0
+sprite[1][7] = 0
+sprite[6][7] = 0
+sprite[7][7] = 0
 
 cursor_x = 10
 cursor_y = 10
@@ -89,6 +100,9 @@ while running:
             if event.key == pygame.K_F1:
                 keycode = pygame.K_F1
 
+            if event.key >= pygame.K_1 and event.key <= pygame.K_8:
+                line_colors[event.key - pygame.K_1] ^= 1
+
             if event.key == pygame.K_UP:
                 keycode = pygame.K_UP
 
@@ -130,13 +144,22 @@ while running:
         cursor_y = 10
 
     for y in range(8):
+        if line_colors[y] == 1:
+            pixel_4x(8, 10 + y, WHITE)
+
         for x in range(8):
             if sprite[x][y] == 1:
                 pixel_4x(10 + x, 10 + y, WHITE)
+                pixel(180 + x, 60 + y, WHITE)
+
+    line_4x(7, 9, 7, 17, GREY)
+    line_4x(8, 9, 8, 17, GREY)
 
     for i in range(9):
         line_4x(9, 9 + i, 17, 9 + i, GREY)
         line_4x(9 + i, 9, 9 + i, 17, GREY)
+
+        line_4x(7, 9 + i, 8, 9 + i, GREY)
 
     cursor_4x(cursor_x - 1, cursor_y - 1, WHITE)
 
