@@ -38,12 +38,12 @@ line_colors = [0] * 8
 sprite_data = [[0] * 16 for _ in range(8)]
 
 sprite[0][0] = 0
-sprite[1][0] = 0
-sprite[6][0] = 0
-sprite[7][0] = 0
+sprite[0][1] = 0
+sprite[0][6] = 0
 sprite[0][7] = 0
-sprite[1][7] = 0
-sprite[6][7] = 0
+sprite[7][0] = 0
+sprite[7][1] = 0
+sprite[7][6] = 0
 sprite[7][7] = 0
 
 cursor_x = 10
@@ -98,9 +98,9 @@ while running:
                 running = False
 
             if event.key == pygame.K_F1:
+                print("sprite data:")
                 for i in range(8):
                     print(", ".join("0x{:02X}".format(num) for num in sprite_data[i]) + ",")
-                #[hex(x) for x in sprite_data[0]])
 
             if event.key >= pygame.K_1 and event.key <= pygame.K_8:
                 line_colors[event.key - pygame.K_1] ^= 1
@@ -134,7 +134,7 @@ while running:
         cursor_y -= 1
 
     if keycode == pygame.K_SPACE:
-        sprite[cursor_x - 10][cursor_y - 10] ^= 1
+        sprite[cursor_y - 10][cursor_x - 10] ^= 1
 
     if cursor_x < 10:
         cursor_x = 17
@@ -150,7 +150,7 @@ while running:
             pixel_4x(8, 10 + y, WHITE)
 
         for x in range(8):
-            if sprite[x][y] == 1:
+            if sprite[y][x] == 1:
                 pixel_4x(10 + x, 10 + y, WHITE)
                 pixel(180 + x, 60 + y, WHITE)
 
@@ -164,6 +164,16 @@ while running:
         line_4x(7, 9 + i, 8, 9 + i, GREY)
 
     cursor_4x(cursor_x - 1, cursor_y - 1, WHITE)
+
+    for y in range(8):
+        for x in range(8):
+            # color bit first
+            sprite_data[x][y * 2] = line_colors[y] << 7
+            sprite_data[x][y * 2 + 1] = line_colors[y] << 7
+            # 8 pixel bits shift on each y increment
+
+
+
 
     # Translate array into bytes data
 
