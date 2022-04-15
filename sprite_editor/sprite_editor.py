@@ -35,7 +35,7 @@ HCOLOR = [BLACK, PURPLE, GREEN, GREEN, PURPLE, BLUE, ORANGE, ORANGE, BLUE, WHITE
 
 sprite = [[1] * 8 for _ in range(8)]
 line_colors = [0] * 8
-line_colors[0] = 1
+sprite_data = [[0] * 16 for _ in range(8)]
 
 sprite[0][0] = 0
 sprite[1][0] = 0
@@ -98,7 +98,9 @@ while running:
                 running = False
 
             if event.key == pygame.K_F1:
-                keycode = pygame.K_F1
+                for i in range(8):
+                    print(", ".join("0x{:02X}".format(num) for num in sprite_data[i]) + ",")
+                #[hex(x) for x in sprite_data[0]])
 
             if event.key >= pygame.K_1 and event.key <= pygame.K_8:
                 line_colors[event.key - pygame.K_1] ^= 1
@@ -162,6 +164,12 @@ while running:
         line_4x(7, 9 + i, 8, 9 + i, GREY)
 
     cursor_4x(cursor_x - 1, cursor_y - 1, WHITE)
+
+    # Translate array into bytes data
+
+
+
+
 
     pygame.display.flip()
 
