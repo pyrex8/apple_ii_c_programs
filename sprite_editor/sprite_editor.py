@@ -165,21 +165,28 @@ while running:
 
     cursor_4x(cursor_x - 1, cursor_y - 1, WHITE)
 
-    for y in range(8):
-        for x in range(8):
-            # color bit first
-            sprite_data[x][y * 2] = line_colors[y] << 7
-            sprite_data[x][y * 2 + 1] = line_colors[y] << 7
+    for col in range(8):
+        for row in range(8):
+            sprite_data[row][col * 2] = 0
+            sprite_data[row][col * 2 + 1] = 0
+
+    for col in range(8):
+        for row in range(7):
             # 8 pixel bits shift on each y increment
-
-
-
-
-    # Translate array into bytes data
-
-
-
-
+            for pix in range(7):
+                sprite_data[row][col * 2] |= sprite[col][pix] << pix
+            sprite_data[row][col * 2 + 1] |= sprite[col][pix]
+            # shift bits to the left if row > 0 fro previous row
+            if row > 0:
+                sprite_data[row][col * 2] = sprite_data[row - 1][col * 2] << 1
+                sprite_data[row][col * 2 + 1] = sprite_data[row - 1][col * 2 + 1] << 1
+                # move MSBit over to other byte
+                if sprite_data[row][col * 2] & 0x80:
+                    sprite_data[row][col * 2] &= 0x7F
+                    sprite_data[row][col * 2 + 1] |= 0x01
+            # color bit last
+            sprite_data[row][col * 2] |= line_colors[col] << 7
+            sprite_data[row][col * 2 + 1] |= line_colors[col] << 7
 
     pygame.display.flip()
 
