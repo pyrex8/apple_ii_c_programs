@@ -178,8 +178,8 @@ while running:
             sprite_data[row][col * 2 + 1] |= sprite[col][pix]
             # shift bits to the left if row > 0 fro previous row
             if row > 0:
-                sprite_data[row][col * 2] = sprite_data[row - 1][col * 2] << 1
-                sprite_data[row][col * 2 + 1] = sprite_data[row - 1][col * 2 + 1] << 1
+                sprite_data[row][col * 2] = (sprite_data[row - 1][col * 2] & 0x7F) << 1
+                sprite_data[row][col * 2 + 1] = (sprite_data[row - 1][col * 2 + 1] & 0x7F) << 1
                 # move MSBit over to other byte
                 if sprite_data[row][col * 2] & 0x80:
                     sprite_data[row][col * 2] &= 0x7F
