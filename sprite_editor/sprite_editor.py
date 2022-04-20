@@ -37,54 +37,6 @@ sprite = [[0] * 8 for _ in range(8)]
 line_colors = [0] * 8
 sprite_data = [[0] * 16 for _ in range(8)]
 
-sprite[0][3] = 1
-sprite[0][4] = 1
-sprite[1][3] = 1
-sprite[1][4] = 1
-
-sprite[2][3] = 1
-sprite[2][4] = 1
-sprite[3][3] = 1
-sprite[3][4] = 1
-
-sprite[4][3] = 1
-sprite[4][4] = 1
-sprite[5][3] = 1
-sprite[5][4] = 1
-
-sprite[6][3] = 1
-sprite[6][4] = 1
-
-sprite[2][2] = 1
-sprite[2][5] = 1
-
-sprite[3][2] = 1
-sprite[3][5] = 1
-
-sprite[4][2] = 1
-sprite[4][5] = 1
-
-sprite[5][2] = 1
-sprite[5][5] = 1
-
-sprite[6][2] = 1
-sprite[6][5] = 1
-
-sprite[7][2] = 1
-sprite[7][5] = 1
-
-sprite[4][1] = 1
-sprite[4][6] = 1
-
-sprite[5][1] = 1
-sprite[5][6] = 1
-
-sprite[6][1] = 1
-sprite[6][6] = 1
-
-sprite[7][1] = 1
-sprite[7][6] = 1
-
 cursor_x = 10
 cursor_y = 10
 
