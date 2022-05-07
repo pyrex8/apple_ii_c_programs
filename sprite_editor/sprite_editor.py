@@ -23,6 +23,10 @@ LINE_OFFSET = 4 * SCREEN_SCALE + 3
 PIXEL_GRID = 6
 PIXEL_SIZE = 4
 
+SPRITE_X = 8
+SPRITE_Y = 8
+
+
 BLACK = (0, 0, 0)
 GREEN = (66, 230, 6)
 PURPLE = (186, 23, 245)
@@ -36,6 +40,12 @@ HCOLOR = [BLACK, PURPLE, GREEN, GREEN, PURPLE, BLUE, ORANGE, ORANGE, BLUE, WHITE
 sprite = [[0] * 8 for _ in range(8)]
 line_colors = [0] * 8
 sprite_data = [[0] * 16 for _ in range(8)]
+sprite_color = [[0] * SPRITE_X for _ in range(SPRITE_Y)]
+
+sprite[0][0] = 1
+sprite[7][7] = 1
+sprite_color[0][0] = 1
+sprite_color[7][7] = 2
 
 cursor_x = 10
 cursor_y = 10
@@ -66,6 +76,43 @@ def line_4x(x1 , y1, x2, y2, color):
     lx2 = x2 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET
     ly2 = y2 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET
     pygame.draw.line(screen, color, (lx1, ly1), (lx2, ly2), SCREEN_SCALE)
+
+def sprite_color_draw(loc_x, loc_y):
+
+    pixel_present = 0
+    address_odd = (int(loc_x / 8) & 1) << 1
+    color_offset = 0
+    pixel_left = 0
+    pixel_right = 0
+
+    for y in range(SPRITE_Y):
+        color_offset = line_colors[y] << 2
+        pixel_left = 0
+        pixel_present = 0
+        pixel_right = sprite[y][0]
+        for x in range(SPRITE_X):
+            pixel_left = pixel_present
+            pixel_present = pixel_right
+            if x < SPRITE_X - 1:
+                pixel_right = sprite[y][x + 1]
+            else:
+                pixel_right = 0
+
+            if pixel_present:
+                if pixel_left or pixel_right:
+                    sprite_color[y][x] = 9
+                else:
+                    sprite_color[y][x] = color_offset + address_odd + (x & 1) + 1
+            else:
+                sprite_color[y][x] = 0
+
+            pixel(x + loc_x, y + loc_y, HCOLOR[sprite_color[y][x]])
+
+
+print(sprite_color)
+print()
+print(sprite)
+
 
 pygame.init()
 pygame.display.set_caption('pyrex8')
@@ -179,6 +226,9 @@ while running:
             # color bit last
             sprite_data[row][col * 2] |= line_colors[col] << 7
             sprite_data[row][col * 2 + 1] |= line_colors[col] << 7
+
+    sprite_color_draw(160, 100)
+    sprite_color_draw(184, 100)
 
     pygame.display.flip()
 
