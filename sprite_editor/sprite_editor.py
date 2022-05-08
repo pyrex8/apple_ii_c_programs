@@ -104,14 +104,12 @@ def sprite_color_draw(loc_x, loc_y):
                 else:
                     sprite_color[y][x] = color_offset + address_odd + (x & 1) + 1
             else:
-                sprite_color[y][x] = 0
+                if pixel_left and pixel_right:
+                    sprite_color[y][x] = color_offset + address_odd - (x & 1) + 2
+                else:
+                    sprite_color[y][x] = 0
 
             pixel(x + loc_x, y + loc_y, HCOLOR[sprite_color[y][x]])
-
-
-print(sprite_color)
-print()
-print(sprite)
 
 
 pygame.init()
