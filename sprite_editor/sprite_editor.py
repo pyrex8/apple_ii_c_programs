@@ -26,6 +26,8 @@ PIXEL_SIZE = 4
 SPRITE_X = 8
 SPRITE_Y = 8
 
+CURSOR_OFFSET_X = 9
+CURSOR_OFFSET_Y = 9
 
 BLACK = (0, 0, 0)
 GREEN = (66, 230, 6)
@@ -37,9 +39,9 @@ GREY = (128, 128, 128)
 
 HCOLOR = [BLACK, PURPLE, GREEN, GREEN, PURPLE, BLUE, ORANGE, ORANGE, BLUE, WHITE]
 
-sprite = [[0] * 8 for _ in range(8)]
-line_colors = [0] * 8
-sprite_data = [[0] * 16 for _ in range(8)]
+sprite = [[0] * SPRITE_X for _ in range(SPRITE_Y)]
+line_colors = [0] * SPRITE_Y
+sprite_data = [[0] * 16 for _ in range(SPRITE_Y)]
 sprite_color = [[0] * SPRITE_X for _ in range(SPRITE_Y)]
 
 sprite[0][0] = 1
@@ -47,8 +49,17 @@ sprite[7][7] = 1
 sprite_color[0][0] = 1
 sprite_color[7][7] = 2
 
-cursor_x = 10
-cursor_y = 10
+cursor_x = 0
+cursor_y = 0
+
+def running_test(running, keycode):
+    running_rtn = running
+    if keycode == pygame.K_F10:
+        running_rtn = False
+    return running_rtn
+
+def screen_clear():
+    pygame.draw.rect(screen, BLACK, (0, 0, SCREEN_X_TOTAL, SCREEN_Y_TOTAL))
 
 def pixel(x , y, color):
     px = x * SCREEN_SCALE
@@ -76,6 +87,54 @@ def line_4x(x1 , y1, x2, y2, color):
     lx2 = x2 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET
     ly2 = y2 * SCREEN_SCALE * PIXEL_GRID + LINE_OFFSET
     pygame.draw.line(screen, color, (lx1, ly1), (lx2, ly2), SCREEN_SCALE)
+
+def update_cursor(cursor_x, cursor_y, keycode):
+
+    if keycode == pygame.K_RIGHT:
+        cursor_x += 1
+    if keycode == pygame.K_LEFT:
+        cursor_x -= 1
+    if keycode == pygame.K_DOWN:
+        cursor_y += 1
+    if keycode == pygame.K_UP:
+        cursor_y -= 1
+
+    if cursor_x < 0:
+        cursor_x = SPRITE_X - 1
+    if cursor_x > SPRITE_X - 1:
+        cursor_x = 0
+    if cursor_y < 0:
+        cursor_y = SPRITE_Y - 1
+    if cursor_y > SPRITE_Y - 1:
+        cursor_y = 0
+
+    return cursor_x, cursor_y
+
+def pixel_update(pixel, keycode):
+    pixel_rtn = pixel
+    if keycode == pygame.K_SPACE:
+        pixel_rtn ^= 1
+    return pixel_rtn
+
+def cursor_grid_draw(line_colors, sprite):
+
+    for y in range(8):
+        if line_colors[y] == 1:
+            pixel_4x(8, 10 + y, WHITE)
+
+        for x in range(8):
+            if sprite[y][x] == 1:
+                pixel_4x(10 + x, 10 + y, WHITE)
+                pixel(180 + x, 60 + y, WHITE)
+
+    line_4x(7, 9, 7, 17, GREY)
+    line_4x(8, 9, 8, 17, GREY)
+
+    for i in range(9):
+        line_4x(9, 9 + i, 17, 9 + i, GREY)
+        line_4x(9 + i, 9, 9 + i, 17, GREY)
+
+        line_4x(7, 9 + i, 8, 9 + i, GREY)
 
 def sprite_color_draw(loc_x, loc_y):
 
@@ -111,6 +170,12 @@ def sprite_color_draw(loc_x, loc_y):
 
             pixel(x + loc_x, y + loc_y, HCOLOR[sprite_color[y][x]])
 
+def sprite_data_print(sprite_data):
+    if keycode == pygame.K_F1:
+        print("sprite data:")
+        for i in range(8):
+            print(", ".join("0x{:02X}".format(num) for num in sprite_data[i]) + ",")
+
 
 pygame.init()
 pygame.display.set_caption('pyrex8')
@@ -130,16 +195,14 @@ while running:
             running = False
 
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_F12:
-                running = False
+            if event.key == pygame.K_F10:
+                keycode = pygame.K_F10
 
             if event.key == pygame.K_F1:
-                print("sprite data:")
-                for i in range(8):
-                    print(", ".join("0x{:02X}".format(num) for num in sprite_data[i]) + ",")
+                keycode = pygame.K_F1
 
-            if event.key >= pygame.K_1 and event.key <= pygame.K_8:
-                line_colors[event.key - pygame.K_1] ^= 1
+            if event.key == pygame.K_1:
+                line_colors[cursor_y] ^= 1
 
             if event.key == pygame.K_UP:
                 keycode = pygame.K_UP
@@ -156,50 +219,15 @@ while running:
             if event.key == pygame.K_SPACE:
                 keycode = pygame.K_SPACE
 
-    pygame.draw.rect(screen, BLACK, (0, 0, SCREEN_X_TOTAL, SCREEN_Y_TOTAL))
 
-    # HCOLOR
-    # BLACK, PURPLE, GREEN, GREEN, PURPLE, BLUE, ORANGE, ORANGE, BLUE, WHITE
-    if keycode == pygame.K_RIGHT:
-        cursor_x += 1
-    if keycode == pygame.K_LEFT:
-        cursor_x -= 1
-    if keycode == pygame.K_DOWN:
-        cursor_y += 1
-    if keycode == pygame.K_UP:
-        cursor_y -= 1
+    running  = running_test(running, keycode)
+    screen_clear()
+    cursor_x, cursor_y = update_cursor(cursor_x, cursor_y, keycode)
+    sprite[cursor_y][cursor_x] = pixel_update(sprite[cursor_y][cursor_x], keycode)
+    cursor_grid_draw(line_colors, sprite)
+    cursor_4x(cursor_x + CURSOR_OFFSET_X, cursor_y + CURSOR_OFFSET_Y, WHITE)
 
-    if keycode == pygame.K_SPACE:
-        sprite[cursor_y - 10][cursor_x - 10] ^= 1
-
-    if cursor_x < 10:
-        cursor_x = 17
-    if cursor_x > 17:
-        cursor_x = 10
-    if cursor_y < 10:
-        cursor_y = 17
-    if cursor_y > 17:
-        cursor_y = 10
-
-    for y in range(8):
-        if line_colors[y] == 1:
-            pixel_4x(8, 10 + y, WHITE)
-
-        for x in range(8):
-            if sprite[y][x] == 1:
-                pixel_4x(10 + x, 10 + y, WHITE)
-                pixel(180 + x, 60 + y, WHITE)
-
-    line_4x(7, 9, 7, 17, GREY)
-    line_4x(8, 9, 8, 17, GREY)
-
-    for i in range(9):
-        line_4x(9, 9 + i, 17, 9 + i, GREY)
-        line_4x(9 + i, 9, 9 + i, 17, GREY)
-
-        line_4x(7, 9 + i, 8, 9 + i, GREY)
-
-    cursor_4x(cursor_x - 1, cursor_y - 1, WHITE)
+    sprite_data_print(sprite_data)
 
     for col in range(8):
         for row in range(8):
