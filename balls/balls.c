@@ -186,6 +186,8 @@ static uint8_t sprite_y2;
 static uint8_t sprite_xl;
 static uint8_t sprite_xh;
 
+static uint8_t sprite_no_jump;
+
 static uint8_t sprite_buffer[SPRITE_BUFFER_SIZE];
 
 static void pointers_init(void)
@@ -400,7 +402,6 @@ static void sprite_buffer_to_hgr(uint8_t column, uint8_t row)
     // test for new row
     __asm__ ("lda %b", SBUFR_INDEX);
     __asm__ ("and #%b", 3);
-//    __asm__ ("cmp #%b", 3);
     __asm__ ("beq newrow");
 
     __asm__ ("lda %b", SBUFR_INDEX);
@@ -459,6 +460,18 @@ void delay(void)
     for (i = 0; i < 200; i++)
     {
     }
+    for (i = 0; i < 200; i++)
+    {
+    }
+    for (i = 0; i < 200; i++)
+    {
+    }
+    for (i = 0; i < 200; i++)
+    {
+    }
+    for (i = 0; i < 200; i++)
+    {
+    }
 }
 
 void main(void)
@@ -467,6 +480,7 @@ void main(void)
     hclear();
     hbox();
 
+    sprite_no_jump = 1;
     sprite_x1 = 140;
     sprite_y1 = 100;
     sprite_x2 = sprite_x1;
@@ -475,23 +489,39 @@ void main(void)
 
     while(1)
     {
-        sprite_x2++;
-        sprite_y2++;
+        sprite_x2 += 2;
+        sprite_y2 += 1;
         if (sprite_y2 > 180)
         {
             sprite_update(0, 128, sprite_x1, sprite_y1, 0, sprite_x2, sprite_y2);
             sprite_y2 = 10;
+            sprite_x1 = sprite_x2;
+            sprite_y1 = sprite_y2;
             sprite_update(0, 0, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
+            sprite_no_jump = 0;
         }
-        else
+
+        if (sprite_x2 > 240)
+        {
+            sprite_update(0, 128, sprite_x1, sprite_y1, 0, sprite_x2, sprite_y2);
+            sprite_x2 = 10;
+            sprite_x1 = sprite_x2;
+            sprite_y1 = sprite_y2;
+            sprite_update(0, 0, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
+            sprite_no_jump = 0;
+        }
+
+        if (sprite_no_jump)
         {
             TEST_PIN_TOGGLE; // adds 2.5us
             sprite_update(0, 128, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
             TEST_PIN_TOGGLE; // adds 2.5us
-        }
 
-        sprite_x1 = sprite_x2;
-        sprite_y1 = sprite_y2;
+            sprite_x1 = sprite_x2;
+            sprite_y1 = sprite_y2;
+        }
+        sprite_no_jump = 1;
+
 
         delay();
 
