@@ -2,6 +2,7 @@
 // Note all timing is based on the slower emulated apple IIe that is taking
 // approx 1.5us per cycle.
 
+#include <string.h>
 #include <stdio.h>
 #include <stdint.h>
 #include "../test_pin/test_pin.h"
@@ -16,8 +17,8 @@
 #define WHITE               0x7F           // White hires byte
 #define BLACK               0x00
 #define SPRITE_BUFFER_SIZE  45
-#define HGR1SCRN_PAGE       0x20
-#define HGRSCRN_LENGTH      0x20        // number of pages
+#define HGR1SCRN            0x2000
+#define HGR_SCRN_LEN        0x2000
 
 #define TXTCLR              0xC050         // graphics mode
 #define HIRES               0xC057         // hires mode
@@ -198,28 +199,6 @@ static void pointers_init(void)
     LKHIH_P = (uint8_t)(((uint16_t)lkhi) >> 8);
     SBUFRL_P = (uint8_t)sprite_buffer;
     SBUFRH_P = (uint8_t)(((uint16_t)sprite_buffer)>> 8);
-}
-
-static void pageset(uint8_t page, uint8_t value, uint8_t length)
-{
-    // this method takes 114ms
-    DATA1_P = value;
-    DATA2_P = length;
-    ADDR1L_P = 0x00;
-    ADDR1H_P = page;
-
-    // init registers with memory
-    __asm__ ("lda %b", DATA1);    // value to fill page(s) with
-    __asm__ ("ldx %b", DATA2);    // number of pages
-    __asm__ ("ldy %b", ADDR1L); // address two bytes
-
-    // nested loops
-    __asm__ ("hclr1: sta (%b),y", ADDR1L);
-    __asm__ ("iny");
-    __asm__ ("bne hclr1");
-    __asm__ ("inc %b", ADDR1H);
-    __asm__ ("dex");
-    __asm__ ("bne hclr1");
 }
 
 static void hline(uint8_t line, uint8_t pixels)
@@ -432,7 +411,8 @@ void sprite_update(uint8_t page, uint8_t sprite1, uint8_t x1, uint8_t y1, uint8_
 
 static void hclear(void)
 {
-    pageset(HGR1SCRN_PAGE, BLACK, HGRSCRN_LENGTH);
+    // 77.9ms
+    memset((uint8_t*)HGR1SCRN, 0, HGR_SCRN_LEN); // clear page 1
     STROBE(HIRES);
     STROBE(TXTCLR);
 }
@@ -513,9 +493,7 @@ void main(void)
 
         if (sprite_no_jump)
         {
-            TEST_PIN_TOGGLE; // adds 2.5us
             sprite_update(0, 128, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
-            TEST_PIN_TOGGLE; // adds 2.5us
 
             sprite_x1 = sprite_x2;
             sprite_y1 = sprite_y2;
@@ -525,5 +503,7 @@ void main(void)
 
         delay();
 
+        TEST_PIN_TOGGLE; // adds 2.5us
+        TEST_PIN_TOGGLE; // adds 2.5us
     }
 }
