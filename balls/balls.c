@@ -23,6 +23,17 @@
 #define TXTCLR              0xC050         // graphics mode
 #define HIRES               0xC057         // hires mode
 
+//0X20, 0X24, 0X28, 0X2C, 0X30,
+#define SHIP_Y0_L           0x50
+#define SHIP_Y0_H           0x20
+#define SHIP_Y1_L           (SHIP_Y0_L)
+#define SHIP_Y1_H           0X24
+#define SHIP_Y2_L           (SHIP_Y0_L)
+#define SHIP_Y2_H           0X24
+#define SHIP_Y3_L           (SHIP_Y0_L)
+#define SHIP_Y3_H           0X2C
+#define SHIP_Y4_L           (SHIP_Y0_L)
+#define SHIP_Y4_H           0X30
 
 // Addresses
 enum Zero_page
@@ -79,7 +90,14 @@ enum Zero_page
 #define SPRITEL_P            *((uint8_t*)SPRITEL)
 #define SPRITEH_P            *((uint8_t*)SPRITEH)
 
-static const uint8_t lklo[ROWS] =
+#define x_set(x) __asm__ ("ldx %b", (x));
+
+// lklo 0X00, 0X80, 0X28, 0XA8, 0X50, 0XD0 (6)
+// lkhi 0X20 to 0X3F 0x1F = 31 (32)
+
+
+
+static const uint8_t lklo[256] =
 {
     0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80,
     0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80, 0X80,
@@ -93,9 +111,14 @@ static const uint8_t lklo[ROWS] =
     0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0,
     0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0,
     0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0X50, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0, 0XD0,
+
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
 };
 
-static const uint8_t lkhi[ROWS] =
+static const uint8_t lkhi[256] =
 {
     0X20, 0X24, 0X28, 0X2C, 0X30, 0X34, 0X38, 0X3C, 0X20, 0X24, 0X28, 0X2C, 0X30, 0X34, 0X38, 0X3C,
     0X21, 0X25, 0X29, 0X2D, 0X31, 0X35, 0X39, 0X3D, 0X21, 0X25, 0X29, 0X2D, 0X31, 0X35, 0X39, 0X3D,
@@ -109,6 +132,11 @@ static const uint8_t lkhi[ROWS] =
     0X21, 0X25, 0X29, 0X2D, 0X31, 0X35, 0X39, 0X3D, 0X21, 0X25, 0X29, 0X2D, 0X31, 0X35, 0X39, 0X3D,
     0X22, 0X26, 0X2A, 0X2E, 0X32, 0X36, 0X3A, 0X3E, 0X22, 0X26, 0X2A, 0X2E, 0X32, 0X36, 0X3A, 0X3E,
     0X23, 0X27, 0X2B, 0X2F, 0X33, 0X37, 0X3B, 0X3F, 0X23, 0X27, 0X2B, 0X2F, 0X33, 0X37, 0X3B, 0X3F,
+
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
 };
 
 // divide-by 7 table
@@ -182,31 +210,41 @@ static const uint8_t sprites[] =
 #define LUT(x) (uint8_t*)(0x2000|x)
 
 // starting address of each scanline
-static uint8_t* const vidmem[ROWS] = {
-  LUT(0x0000), LUT(0x0400), LUT(0x0800), LUT(0x0c00), LUT(0x1000), LUT(0x1400), LUT(0x1800), LUT(0x1c00),
-  LUT(0x0080), LUT(0x0480), LUT(0x0880), LUT(0x0c80), LUT(0x1080), LUT(0x1480), LUT(0x1880), LUT(0x1c80),
-  LUT(0x0100), LUT(0x0500), LUT(0x0900), LUT(0x0d00), LUT(0x1100), LUT(0x1500), LUT(0x1900), LUT(0x1d00),
-  LUT(0x0180), LUT(0x0580), LUT(0x0980), LUT(0x0d80), LUT(0x1180), LUT(0x1580), LUT(0x1980), LUT(0x1d80),
-  LUT(0x0200), LUT(0x0600), LUT(0x0a00), LUT(0x0e00), LUT(0x1200), LUT(0x1600), LUT(0x1a00), LUT(0x1e00),
-  LUT(0x0280), LUT(0x0680), LUT(0x0a80), LUT(0x0e80), LUT(0x1280), LUT(0x1680), LUT(0x1a80), LUT(0x1e80),
-  LUT(0x0300), LUT(0x0700), LUT(0x0b00), LUT(0x0f00), LUT(0x1300), LUT(0x1700), LUT(0x1b00), LUT(0x1f00),
-  LUT(0x0380), LUT(0x0780), LUT(0x0b80), LUT(0x0f80), LUT(0x1380), LUT(0x1780), LUT(0x1b80), LUT(0x1f80),
-  LUT(0x0028), LUT(0x0428), LUT(0x0828), LUT(0x0c28), LUT(0x1028), LUT(0x1428), LUT(0x1828), LUT(0x1c28),
-  LUT(0x00a8), LUT(0x04a8), LUT(0x08a8), LUT(0x0ca8), LUT(0x10a8), LUT(0x14a8), LUT(0x18a8), LUT(0x1ca8),
-  LUT(0x0128), LUT(0x0528), LUT(0x0928), LUT(0x0d28), LUT(0x1128), LUT(0x1528), LUT(0x1928), LUT(0x1d28),
-  LUT(0x01a8), LUT(0x05a8), LUT(0x09a8), LUT(0x0da8), LUT(0x11a8), LUT(0x15a8), LUT(0x19a8), LUT(0x1da8),
-  LUT(0x0228), LUT(0x0628), LUT(0x0a28), LUT(0x0e28), LUT(0x1228), LUT(0x1628), LUT(0x1a28), LUT(0x1e28),
-  LUT(0x02a8), LUT(0x06a8), LUT(0x0aa8), LUT(0x0ea8), LUT(0x12a8), LUT(0x16a8), LUT(0x1aa8), LUT(0x1ea8),
-  LUT(0x0328), LUT(0x0728), LUT(0x0b28), LUT(0x0f28), LUT(0x1328), LUT(0x1728), LUT(0x1b28), LUT(0x1f28),
-  LUT(0x03a8), LUT(0x07a8), LUT(0x0ba8), LUT(0x0fa8), LUT(0x13a8), LUT(0x17a8), LUT(0x1ba8), LUT(0x1fa8),
-  LUT(0x0050), LUT(0x0450), LUT(0x0850), LUT(0x0c50), LUT(0x1050), LUT(0x1450), LUT(0x1850), LUT(0x1c50),
-  LUT(0x00d0), LUT(0x04d0), LUT(0x08d0), LUT(0x0cd0), LUT(0x10d0), LUT(0x14d0), LUT(0x18d0), LUT(0x1cd0),
-  LUT(0x0150), LUT(0x0550), LUT(0x0950), LUT(0x0d50), LUT(0x1150), LUT(0x1550), LUT(0x1950), LUT(0x1d50),
-  LUT(0x01d0), LUT(0x05d0), LUT(0x09d0), LUT(0x0dd0), LUT(0x11d0), LUT(0x15d0), LUT(0x19d0), LUT(0x1dd0),
-  LUT(0x0250), LUT(0x0650), LUT(0x0a50), LUT(0x0e50), LUT(0x1250), LUT(0x1650), LUT(0x1a50), LUT(0x1e50),
-  LUT(0x02d0), LUT(0x06d0), LUT(0x0ad0), LUT(0x0ed0), LUT(0x12d0), LUT(0x16d0), LUT(0x1ad0), LUT(0x1ed0),
-  LUT(0x0350), LUT(0x0750), LUT(0x0b50), LUT(0x0f50), LUT(0x1350), LUT(0x1750), LUT(0x1b50), LUT(0x1f50),
-  LUT(0x03d0), LUT(0x07d0), LUT(0x0bd0), LUT(0x0fd0), LUT(0x13d0), LUT(0x17d0), LUT(0x1bd0), LUT(0x1fd0)
+static uint8_t* const vidmem[256] =
+{
+    LUT(0x0000), LUT(0x0400), LUT(0x0800), LUT(0x0c00), LUT(0x1000), LUT(0x1400), LUT(0x1800), LUT(0x1c00),
+    LUT(0x0080), LUT(0x0480), LUT(0x0880), LUT(0x0c80), LUT(0x1080), LUT(0x1480), LUT(0x1880), LUT(0x1c80),
+    LUT(0x0100), LUT(0x0500), LUT(0x0900), LUT(0x0d00), LUT(0x1100), LUT(0x1500), LUT(0x1900), LUT(0x1d00),
+    LUT(0x0180), LUT(0x0580), LUT(0x0980), LUT(0x0d80), LUT(0x1180), LUT(0x1580), LUT(0x1980), LUT(0x1d80),
+    LUT(0x0200), LUT(0x0600), LUT(0x0a00), LUT(0x0e00), LUT(0x1200), LUT(0x1600), LUT(0x1a00), LUT(0x1e00),
+    LUT(0x0280), LUT(0x0680), LUT(0x0a80), LUT(0x0e80), LUT(0x1280), LUT(0x1680), LUT(0x1a80), LUT(0x1e80),
+    LUT(0x0300), LUT(0x0700), LUT(0x0b00), LUT(0x0f00), LUT(0x1300), LUT(0x1700), LUT(0x1b00), LUT(0x1f00),
+    LUT(0x0380), LUT(0x0780), LUT(0x0b80), LUT(0x0f80), LUT(0x1380), LUT(0x1780), LUT(0x1b80), LUT(0x1f80),
+    LUT(0x0028), LUT(0x0428), LUT(0x0828), LUT(0x0c28), LUT(0x1028), LUT(0x1428), LUT(0x1828), LUT(0x1c28),
+    LUT(0x00a8), LUT(0x04a8), LUT(0x08a8), LUT(0x0ca8), LUT(0x10a8), LUT(0x14a8), LUT(0x18a8), LUT(0x1ca8),
+    LUT(0x0128), LUT(0x0528), LUT(0x0928), LUT(0x0d28), LUT(0x1128), LUT(0x1528), LUT(0x1928), LUT(0x1d28),
+    LUT(0x01a8), LUT(0x05a8), LUT(0x09a8), LUT(0x0da8), LUT(0x11a8), LUT(0x15a8), LUT(0x19a8), LUT(0x1da8),
+    LUT(0x0228), LUT(0x0628), LUT(0x0a28), LUT(0x0e28), LUT(0x1228), LUT(0x1628), LUT(0x1a28), LUT(0x1e28),
+    LUT(0x02a8), LUT(0x06a8), LUT(0x0aa8), LUT(0x0ea8), LUT(0x12a8), LUT(0x16a8), LUT(0x1aa8), LUT(0x1ea8),
+    LUT(0x0328), LUT(0x0728), LUT(0x0b28), LUT(0x0f28), LUT(0x1328), LUT(0x1728), LUT(0x1b28), LUT(0x1f28),
+    LUT(0x03a8), LUT(0x07a8), LUT(0x0ba8), LUT(0x0fa8), LUT(0x13a8), LUT(0x17a8), LUT(0x1ba8), LUT(0x1fa8),
+    LUT(0x0050), LUT(0x0450), LUT(0x0850), LUT(0x0c50), LUT(0x1050), LUT(0x1450), LUT(0x1850), LUT(0x1c50),
+    LUT(0x00d0), LUT(0x04d0), LUT(0x08d0), LUT(0x0cd0), LUT(0x10d0), LUT(0x14d0), LUT(0x18d0), LUT(0x1cd0),
+    LUT(0x0150), LUT(0x0550), LUT(0x0950), LUT(0x0d50), LUT(0x1150), LUT(0x1550), LUT(0x1950), LUT(0x1d50),
+    LUT(0x01d0), LUT(0x05d0), LUT(0x09d0), LUT(0x0dd0), LUT(0x11d0), LUT(0x15d0), LUT(0x19d0), LUT(0x1dd0),
+    LUT(0x0250), LUT(0x0650), LUT(0x0a50), LUT(0x0e50), LUT(0x1250), LUT(0x1650), LUT(0x1a50), LUT(0x1e50),
+    LUT(0x02d0), LUT(0x06d0), LUT(0x0ad0), LUT(0x0ed0), LUT(0x12d0), LUT(0x16d0), LUT(0x1ad0), LUT(0x1ed0),
+    LUT(0x0350), LUT(0x0750), LUT(0x0b50), LUT(0x0f50), LUT(0x1350), LUT(0x1750), LUT(0x1b50), LUT(0x1f50),
+    LUT(0x03d0), LUT(0x07d0), LUT(0x0bd0), LUT(0x0fd0), LUT(0x13d0), LUT(0x17d0), LUT(0x1bd0), LUT(0x1fd0),
+
+    LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000),
+    LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000),
+    LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000),
+    LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000),
+    LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000),
+    LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000),
+    LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000),
+    LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000), LUT(0x0000),
 };
 
 static uint8_t sprite_x1;
@@ -214,12 +252,23 @@ static uint8_t sprite_y1;
 static uint8_t sprite_x2;
 static uint8_t sprite_y2;
 
+static uint8_t sprite_x3;
+static uint8_t sprite_x4;
+
 static uint8_t sprite_xl;
 static uint8_t sprite_xh;
 
 static uint8_t sprite_no_jump;
 
 static uint8_t sprite_buffer[SPRITE_BUFFER_SIZE];
+
+union my_uint16_t
+{
+   uint16_t value;
+   uint8_t b[2];
+};
+
+union my_uint16_t x16;
 
 static void pointers_init(void)
 {
@@ -261,6 +310,98 @@ static void vline(uint8_t column, uint8_t pixels)
     __asm__ ("bne vl1");
 }
 
+static void player_1_on(uint8_t x, uint8_t y)
+{
+    // 1.9ms
+    x16.b[0] = lklo[y] + x;
+    x16.b[1] = lkhi[y];
+    POKE(x16.value, 0xFF);
+
+    y++;
+
+    x16.b[0] = lklo[y] + x;
+    x16.b[1] = lkhi[y];
+    POKE(x16.value, 0xFF);
+
+    y++;
+
+    x16.b[0] = lklo[y] + x;
+    x16.b[1] = lkhi[y];
+    POKE(x16.value, 0xFF);
+
+    y++;
+
+    x16.b[0] = lklo[y] + x;
+    x16.b[1] = lkhi[y];
+    POKE(x16.value, 0xFF);
+
+    y++;
+
+    x16.b[0] = lklo[y] + x;
+    x16.b[1] = lkhi[y];
+    POKE(x16.value, 0xFF);
+}
+
+
+static void player_1_off(uint8_t x, uint8_t y)
+{
+    // 1.9ms
+    x16.b[0] = lklo[y] + x;
+    x16.b[1] = lkhi[y];
+    POKE(x16.value, 0x00);
+
+    y++;
+
+    x16.b[0] = lklo[y] + x;
+    x16.b[1] = lkhi[y];
+    POKE(x16.value, 0x00);
+
+    y++;
+
+    x16.b[0] = lklo[y] + x;
+    x16.b[1] = lkhi[y];
+    POKE(x16.value, 0x00);
+
+    y++;
+
+    x16.b[0] = lklo[y] + x;
+    x16.b[1] = lkhi[y];
+    POKE(x16.value, 0x00);
+
+    y++;
+
+    x16.b[0] = lklo[y] + x;
+    x16.b[1] = lkhi[y];
+    POKE(x16.value, 0x00);
+}
+
+static void player_1_fixed(uint8_t x)
+{
+    // 0.712ms
+    x16.b[0] = SHIP_Y0_L + x;
+    x16.b[1] = SHIP_Y0_H;
+
+    POKE(x16.value, 0xFF);
+
+    x16.b[0] = SHIP_Y1_L + x;
+    x16.b[1] = SHIP_Y1_H;
+    POKE(x16.value, 0xFF);
+
+    x16.b[0] = SHIP_Y2_L + x;
+    x16.b[1] = SHIP_Y2_H;
+    POKE(x16.value, 0xFF);
+
+    x16.b[0] = SHIP_Y3_L + x;
+    x16.b[1] = SHIP_Y3_H;
+    POKE(x16.value, 0xFF);
+
+    x16.b[0] = SHIP_Y4_L + x;
+    x16.b[1] = SHIP_Y4_H;
+    POKE(x16.value, 0xFF);
+}
+
+
+
 static void sprite_hgr_to_buffer(uint8_t column, uint8_t row)
 {
     // 1580us
@@ -291,7 +432,7 @@ static void sprite_hgr_to_buffer(uint8_t column, uint8_t row)
     // store in sprite_buffer
     __asm__ ("ldy %b", SBUFR_INDEX);
     __asm__ ("sta (%b),y", SBUFR);
-    // decrement counters
+    // increment counters
     __asm__ ("inc %b", HGR_COL);
     __asm__ ("inc %b", SBUFR_INDEX);
 
@@ -484,6 +625,7 @@ void main(void)
     sprite_y1 = 100;
     sprite_x2 = sprite_x1;
     sprite_y2 = sprite_y1;
+
     sprite_update(0, 0, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
 
     while(1)
@@ -521,9 +663,17 @@ void main(void)
 
 
         delay();
+        sprite_x4 = sprite_x1>>3;
+        if (sprite_x4 != sprite_x3)
+        {
+            player_1_off(sprite_x3, 0x03); // 9.16ms
+            player_1_on(sprite_x4, 0x03); // 9.16ms
+        }
+        sprite_x3 = sprite_x4;
 
         TEST_PIN_TOGGLE; // adds 2.5us
-        hline(ROW_FIRST, WHITE); // 1.3ms
+        player_1_fixed(sprite_x3);
         TEST_PIN_TOGGLE; // adds 2.5us
+
     }
 }
