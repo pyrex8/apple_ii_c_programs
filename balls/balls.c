@@ -224,10 +224,23 @@ static void pointers_init(void)
 
 static void hline(uint8_t column, uint8_t row, uint8_t length, uint8_t pixels)
 {
-    // 1.1ms
-    x16.b[0] = lklo[row] + column;
-    x16.b[1] = lkhi[row];
-    memset((uint8_t*)x16.value, pixels, length);
+    // 1.7ms
+    DATA1_P = pixels;
+    DATA2_P = column;
+    DATA3_P = column + length;
+    ADDR1L_P = lklo[row];
+    ADDR1H_P = lkhi[row];
+
+    // init
+    __asm__ ("ldy %b", DATA3);
+
+    // loop
+    __asm__ ("hl1: dey");
+    __asm__ ("lda (%b),y", ADDR1L);
+    __asm__ ("eor %b", DATA1);
+    __asm__ ("sta (%b),y", ADDR1L);
+    __asm__ ("cpy %b", DATA2);
+    __asm__ ("bne hl1");
 }
 
 static void vline(uint8_t column, uint8_t row, uint8_t length, uint8_t pixels)
@@ -512,10 +525,10 @@ void main(void)
 
         delay();
 
-
-        hline(5, 5, 20, WHITE);
+        TEST_PIN_TOGGLE; // adds 2.5us
+        hline(5, 5, 40, WHITE);
         TEST_PIN_TOGGLE; // adds 2.5us
         vline(10, 0, 192, 0x03);
-        TEST_PIN_TOGGLE; // adds 2.5us
+
     }
 }
