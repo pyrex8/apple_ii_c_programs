@@ -230,16 +230,16 @@ static void hline(uint8_t column, uint8_t row, uint8_t length, uint8_t pixels)
     memset((uint8_t*)x16.value, pixels, length);
 }
 
-
-static void vline(uint8_t column, uint8_t pixels)
+static void vline(uint8_t column, uint8_t row, uint8_t length, uint8_t pixels)
 {
     // Assembly = 6700us, C = 9400us
     DATA1_P = pixels;
     DATA2_P = column;
-    DATA3_P = ROW_SECOND_LAST;
+    DATA3_P = row;
+    DATA4_P = row + length;
 
     // init
-    __asm__ ("ldx %b", DATA3);          // Start at second-to-last row
+    __asm__ ("ldx %b", DATA4);          // Start at second-to-last row
 
     // loop
     __asm__ ("vl1: txa");               // row to a
@@ -252,8 +252,10 @@ static void vline(uint8_t column, uint8_t pixels)
     __asm__ ("ldy %b", DATA2);          // column
     __asm__ ("sta (%b),y", ADDR1L);
     __asm__ ("dex");
+    __asm__ ("cpx %b", DATA3);
     __asm__ ("bne vl1");
 }
+
 
 static void sprite_hgr_to_buffer(uint8_t column, uint8_t row)
 {
@@ -434,8 +436,8 @@ static void hbox(void)
 {
     hline(COLUMN_FIRST, ROW_FIRST, COLUMNS, WHITE);
     hline(COLUMN_FIRST, ROW_LAST, COLUMNS, WHITE);
-    vline(COLUMN_FIRST, 0x03);
-    vline(COLUMN_LAST, 0x60);
+    vline(COLUMN_FIRST, 0, 190, 0x03);
+    vline(COLUMN_LAST, 0, 190, 0x60);
 }
 
 void delay(void)
@@ -509,8 +511,10 @@ void main(void)
 
         delay();
 
-        TEST_PIN_TOGGLE; // adds 2.5us
+
         hline(5, 5, 20, WHITE);
+        TEST_PIN_TOGGLE; // adds 2.5us
+        vline(10, 0, 190, 0x03);
         TEST_PIN_TOGGLE; // adds 2.5us
     }
 }
