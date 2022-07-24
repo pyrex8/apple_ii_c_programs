@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include "../test_pin/test_pin.h"
+#include "../lib/test_pin.h"
 
 #include <string.h>
 

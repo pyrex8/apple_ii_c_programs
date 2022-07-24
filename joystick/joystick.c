@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include "../test_pin/test_pin.h"
+#include "../lib/test_pin.h"
 
 #define JOYSTICK_BUTTON0_ADDR 0xC061
 #define JOYSTICK_BUTTON1_ADDR 0xC062

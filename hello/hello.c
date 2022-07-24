@@ -1,6 +1,6 @@
 
 #include <stdio.h>
-#include "../test_pin/test_pin.h"
+#include "../lib/test_pin.h"
 
 void main(void)
 {

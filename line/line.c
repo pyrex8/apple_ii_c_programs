@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
-#include "../test_pin/test_pin.h"
+#include "../lib/test_pin.h"
 
 #define ROWS                192	// number of scanlines
 #define ROW_FIRST           0

@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include "../test_pin/test_pin.h"
+#include "../lib/test_pin.h"
 
 #define SPEAKER_ADDR 0xC030
 #define SOUND_TOGGLE POKE(SPEAKER_ADDR, 0)
