@@ -1,7 +1,7 @@
-#ifndef __SPRITES_H__
-#define __SPRITES_H__
+#ifndef __MAIN_H__
+#define __MAIN_H__
 
-#define SPRITES \
+#define SPRITE_DATA \
 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, \
 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, \
 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, \
@@ -35,4 +35,4 @@
 0x80, 0x84, 0x80, 0x84, 0x00, 0x0A, 0x00, 0x0A, 0x00, 0x15, 0x00, 0x15, 0xC0, 0xAA, 0xC0, 0xAA, \
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 
-#endif /* __SPRITES_H__ */
+#endif /* __MAIN_H__ */

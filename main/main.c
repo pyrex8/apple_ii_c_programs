@@ -8,78 +8,27 @@
 #include "../lib/test_pin.h"
 #include "../lib/zero_page.h"
 #include "../lib/hires.h"
-#include "sprites.h"
+#include "../lib/sprites.h"
+#include "main.h"
 
-#define ROWS                192	// number of scanlines
-#define ROW_FIRST           0
-#define ROW_LAST            ROWS - 1
-#define ROW_SECOND_LAST     ROW_LAST - 1
-#define COLUMNS             40            // Number of columns/bytes per row
-#define COLUMN_FIRST        0
-#define COLUMN_LAST         COLUMNS - 1
-#define WHITE               0x7F           // White hires byte
-#define BLACK               0x00
-#define SPRITE_BUFFER_SIZE  45
-#define HGR1SCRN            0x2000
-#define HGR_SCRN_LEN        0x2000
-
-#define TXTCLR              0xC050         // graphics mode
-#define HIRES               0xC057         // hires mode
-
+static const uint8_t sprites[] = {SPRITE_DATA};
 static const uint8_t lklo[256] = {HIRES_MEMORY_LOW_BYTE};
 static const uint8_t lkhi[256] = {HIRES_MEMORY_HIGH_BYTE};
+const uint8_t div7[256] = {DIV7};
+const uint8_t mod7[256] = {MOD7};
 
-// divide-by 7 table
-const uint8_t DIV7[256] =
-{
-     0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4,
-     4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 9,
-     9, 9, 9, 9, 9, 9,10,10,10,10,10,10,10,11,11,11,11,11,11,11,12,12,12,12,12,12,12,13,13,13,13,13,
-    13,13,14,14,14,14,14,14,14,15,15,15,15,15,15,15,16,16,16,16,16,16,16,17,17,17,17,17,17,17,18,18,
-    18,18,18,18,18,19,19,19,19,19,19,19,20,20,20,20,20,20,20,21,21,21,21,21,21,21,22,22,22,22,22,22,
-    22,23,23,23,23,23,23,23,24,24,24,24,24,24,24,25,25,25,25,25,25,25,26,26,26,26,26,26,26,27,27,27,
-    27,27,27,27,28,28,28,28,28,28,28,29,29,29,29,29,29,29,30,30,30,30,30,30,30,31,31,31,31,31,31,31,
-    32,32,32,32,32,32,32,33,33,33,33,33,33,33,34,34,34,34,34,34,34,35,35,35,35,35,35,35,36,36,36,36,
-};
-
-// modulo-by-7 table
-const uint8_t MOD7[256] =
-{
-    0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3,
-    4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0,
-    1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4,
-    5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1,
-    2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5,
-    6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2,
-    3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6,
-    0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3,
-};
-
-#define SPRITE_XH_CALC(x) (DIV7[x])
-#define SPRITE_XL_CALC(x) (MOD7[x])
-
-static const uint8_t sprites[] = {SPRITES};
+#define SPRITE_XH_CALC(x) (div7[x])
+#define SPRITE_XL_CALC(x) (mod7[x])
 
 
 static uint8_t sprite_x1;
 static uint8_t sprite_y1;
 static uint8_t sprite_x2;
 static uint8_t sprite_y2;
-
 static uint8_t sprite_xl;
 static uint8_t sprite_xh;
-
 static uint8_t sprite_no_jump;
-
 static uint8_t sprite_buffer[SPRITE_BUFFER_SIZE];
-
-union my_uint16_t
-{
-   uint16_t value;
-   uint8_t b[2];
-};
-
-union my_uint16_t x16;
 
 
 static void pointers_init(void)
