@@ -257,14 +257,6 @@ void sprite_update(uint8_t page, uint8_t sprite1, uint8_t x1, uint8_t y1, uint8_
 }
 
 
-static void hclear(void)
-{
-    // 77.9ms
-    memset((uint8_t *)HGR1SCRN, 0, HGR_SCRN_LEN); // clear page 1
-    STROBE(HIRES);
-    STROBE(TXTCLR);
-}
-
 static void hbox(void)
 {
     hline(COLUMN_FIRST, ROW_FIRST, COLUMNS, WHITE);
@@ -305,7 +297,7 @@ void delay(void)
 void main(void)
 {
     pointers_init();
-    hclear();
+    hires_clr();
     hbox();
 
     sprite_no_jump = 1;
