@@ -18,6 +18,9 @@ enum Zero_page
     LKHIL,
     LHHIH,
 
+    STABLEL,
+    STABLEH,
+
     SBUFRL,
     SBUFRH,
 
@@ -47,6 +50,9 @@ enum Zero_page
 #define LKLOH_P             *((uint8_t*)LKLOH)
 #define LKHIL_P             *((uint8_t*)LKHIL)
 #define LKHIH_P             *((uint8_t*)LHHIH)
+
+#define STABLEL_P            *((uint8_t*)STABLEL)
+#define STABLEH_P            *((uint8_t*)STABLEH)
 
 #define SBUFRL_P            *((uint8_t*)SBUFRL)
 #define SBUFRH_P            *((uint8_t*)SBUFRH)

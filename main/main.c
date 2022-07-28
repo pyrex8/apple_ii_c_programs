@@ -37,57 +37,12 @@ static void pointers_init(void)
     LKLOH_P = (uint8_t)(((uint16_t)lklo)>> 8);
     LKHIL_P = (uint8_t)lkhi;
     LKHIH_P = (uint8_t)(((uint16_t)lkhi) >> 8);
+    STABLEL_P = (uint8_t)sprites;
+    STABLEH_P = (uint8_t)(((uint16_t)sprites)>> 8);
     SBUFRL_P = (uint8_t)sprite_buffer;
     SBUFRH_P = (uint8_t)(((uint16_t)sprite_buffer)>> 8);
 }
 
-static void hline(uint8_t column, uint8_t row, uint8_t length, uint8_t pixels)
-{
-    // 1.7ms
-    DATA1_P = pixels;
-    DATA2_P = column;
-    DATA3_P = column + length;
-    ADDR1L_P = lklo[row];
-    ADDR1H_P = lkhi[row];
-
-    // init
-    __asm__ ("ldy %b", DATA3);
-
-    // loop
-    __asm__ ("hl1: dey");
-    __asm__ ("lda (%b),y", ADDR1L);
-    __asm__ ("eor %b", DATA1);
-    __asm__ ("sta (%b),y", ADDR1L);
-    __asm__ ("cpy %b", DATA2);
-    __asm__ ("bne hl1");
-}
-
-static void vline(uint8_t column, uint8_t row, uint8_t length, uint8_t pixels)
-{
-    // 11.2ms
-    DATA1_P = pixels;
-    DATA2_P = column;
-    DATA3_P = row;
-    DATA4_P = row + length;
-
-    // init
-    __asm__ ("ldx %b", DATA4);          // Start at second-to-last row
-
-    // loop
-    __asm__ ("vl1: dex");
-    __asm__ ("txa");               // row to a
-    __asm__ ("tay");                    // row to y
-    __asm__ ("lda (%b),y", LKLO);       // Get the row address
-    __asm__ ("sta %b", ADDR1L);
-    __asm__ ("lda (%b),y", LKHI);
-    __asm__ ("sta %b", ADDR1H);
-    __asm__ ("ldy %b", DATA2);          // column
-    __asm__ ("lda (%b),y", ADDR1L);
-    __asm__ ("eor %b", DATA1);
-    __asm__ ("sta (%b),y", ADDR1L);
-    __asm__ ("cpx %b", DATA3);
-    __asm__ ("bne vl1");
-}
 
 
 static void sprite_hgr_to_buffer(uint8_t column, uint8_t row)
@@ -151,16 +106,13 @@ static void sprite_xor(uint8_t page, uint8_t sprite, uint8_t column, uint8_t row
     DATA4_P = sprite;
     DATA5_P = page;
 
-    SPRITEL_P = (uint8_t)sprites;
-    SPRITEH_P = (uint8_t)(((uint16_t)sprites)>> 8);
-
     // init
-    __asm__ ("lda %b", SPRITEL);
+    __asm__ ("lda %b", STABLEL);
     __asm__ ("clc");
     __asm__ ("adc %b", SPRITE_NUM);
     __asm__ ("sta %b", SPRITEL);
 
-    __asm__ ("lda %b", SPRITEH);
+    __asm__ ("lda %b", STABLEH);
     __asm__ ("adc %b", PAGE);
     __asm__ ("sta %b", SPRITEH);
 
@@ -259,10 +211,10 @@ void sprite_update(uint8_t page, uint8_t sprite1, uint8_t x1, uint8_t y1, uint8_
 
 static void hbox(void)
 {
-    hline(COLUMN_FIRST, ROW_FIRST, COLUMNS, WHITE);
-    hline(COLUMN_FIRST, ROW_LAST, COLUMNS, WHITE);
-    vline(COLUMN_FIRST, 0, 192, 0x03);
-    vline(COLUMN_LAST, 0, 192, 0x60);
+    hires_hline(COLUMN_FIRST, ROW_FIRST, COLUMNS, WHITE);
+    hires_hline(COLUMN_FIRST, ROW_LAST, COLUMNS, WHITE);
+    hires_vline(COLUMN_FIRST, 0, 192, 0x03);
+    hires_vline(COLUMN_LAST, 0, 192, 0x60);
 }
 
 void delay(void)
@@ -337,9 +289,9 @@ void main(void)
         delay();
 
         TEST_PIN_TOGGLE; // adds 2.5us
-        hline(5, 5, 40, WHITE);
+        hires_hline(5, 5, 40, WHITE);
         TEST_PIN_TOGGLE; // adds 2.5us
-        vline(10, 0, 192, 0x03);
+        hires_vline(10, 0, 192, 0x03);
 
     }
 }

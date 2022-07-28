@@ -77,4 +77,7 @@
 
 void hires_clr(void);
 
+void hires_hline(uint8_t column, uint8_t row, uint8_t length, uint8_t pixels);
+void hires_vline(uint8_t column, uint8_t row, uint8_t length, uint8_t pixels);
+
 #endif /* __HIRES_H__ */
