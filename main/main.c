@@ -10,6 +10,7 @@
 #include "../lib/hires.h"
 #include "../lib/sprites.h"
 #include "../lib/joystick.h"
+#include "../lib/sound.h"
 #include "main.h"
 
 static const uint8_t sprites[] = {SPRITE_DATA};
@@ -21,7 +22,7 @@ const uint8_t mod7[256] = {MOD7};
 #define SPRITE_XH_CALC(x) (div7[x])
 #define SPRITE_XL_CALC(x) (mod7[x])
 
-
+static uint8_t pulses;
 static uint8_t sprite_x1;
 static uint8_t sprite_y1;
 static uint8_t sprite_x2;
@@ -163,7 +164,16 @@ void main(void)
             sprite_x2 += 2;
         }
 
+        if (joystick_fire_get())
+        {
+            pulses = 5;
+        }
 
+        if (pulses > 0)
+        {
+            sound(pulses);
+            pulses--;
+        }
 
 
         delay();
