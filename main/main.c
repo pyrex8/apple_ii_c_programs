@@ -114,11 +114,13 @@ void main(void)
     sprite_update(0, 20, 150, 1, 20, 150);
     sprite_update(0, 40, 150, 2, 40, 150);
     sprite_update(0, 60, 150, 3, 60, 150);
-    sprite_update(0, 80, 150, 1, 80, 150);
-    sprite_update(0, 100, 150, 1, 100, 150);
-    sprite_update(0, 120, 150, 1, 120, 150);
-    sprite_update(0, 140, 150, 1, 140, 150);
-    // sprite_update(0, 160, 150, 1, 160, 150);
+    sprite_update(0, 80, 150, 4, 80, 150);
+    sprite_update(0, 100, 150, 5, 100, 150);
+    sprite_update(0, 120, 150, 6, 120, 150);
+    sprite_update(0, 140, 150, 7, 140, 150);
+    sprite_update(0, 160, 150, 8, 160, 150);
+    sprite_update(0, 180, 150, 9, 180, 150);
+    sprite_update(0, 200, 150, 10, 200, 150);
 
     while(1)
     {
