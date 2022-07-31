@@ -13,10 +13,15 @@
 0x15, 0X00, 0x2A, 0X00, 0x54, 0X00, 0x28, 0x01, 0x50, 0x02, 0x20, 0x05, 0x40, 0x0A, 0X00, 0X00, \
 
 static const uint8_t sprites[] = {SPRITE_DATA};
+static const uint8_t sprites_size[] = {6, 6};
+static const uint8_t sprites_offset[] = {5, 5};
+
 static uint8_t sprite_buffer[SPRITE_BUFFER_SIZE];
 
 void sprites_init(void)
 {
+    STABLEL_P = (uint8_t)sprites;
+    STABLEH_P = (uint8_t)(((uint16_t)sprites)>> 8);
     SBUFRL_P = (uint8_t)sprite_buffer;
     SBUFRH_P = (uint8_t)(((uint16_t)sprite_buffer)>> 8);
 }
@@ -75,16 +80,10 @@ void sprite_xor(uint8_t sprite, uint8_t column, uint8_t row, uint8_t shift)
     #define SPRITE_SHFT DATA3
     #define SPRITE_NUM DATA4
 
-    DATA1_P = 6;                        // 8 to 6
-    DATA2_P = (row << 2) + column + 5;
+    DATA1_P = sprites_size[sprite];
+    DATA2_P = (row << 2) + column + sprites_offset[sprite];
     DATA3_P = shift << 1;
-    DATA4_P = sprite;
-
-    // SPRITEL_P = (uint8_t)sprites;
-    // SPRITEH_P = (uint8_t)(((uint16_t)sprites)>> 8);
-
-    STABLEL_P = (uint8_t)sprites;
-    STABLEH_P = (uint8_t)(((uint16_t)sprites)>> 8);
+    DATA4_P = sprite << 4;
 
     // init
     __asm__ ("lda %b", STABLEL);
@@ -113,7 +112,7 @@ void sprite_xor(uint8_t sprite, uint8_t column, uint8_t row, uint8_t shift)
     __asm__ ("ldy %b", SBUFR_IND);
     __asm__ ("sta (%b),y", SBUFR);
 
-    __asm__ ("dec %b", SPRITE_SHFT); // inc to dec
+    __asm__ ("dec %b", SPRITE_SHFT);
 
     __asm__ ("inc %b", SBUFR_IND);
     __asm__ ("inc %b", SBUFR_IND);
