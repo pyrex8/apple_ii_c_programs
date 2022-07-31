@@ -12,7 +12,7 @@
 #include "../lib/joystick.h"
 #include "../lib/sound.h"
 
-static const uint8_t sprites[] = {SPRITE_DATA};
+
 static const uint8_t lklo[256] = {HIRES_MEMORY_LOW_BYTE};
 static const uint8_t lkhi[256] = {HIRES_MEMORY_HIGH_BYTE};
 const uint8_t div7[256] = {DIV7};
@@ -29,8 +29,6 @@ static uint8_t sprite_y2;
 static uint8_t sprite_xl;
 static uint8_t sprite_xh;
 static uint8_t sprite_no_jump;
-static uint8_t sprite_buffer[SPRITE_BUFFER_SIZE];
-
 
 static void pointers_init(void)
 {
@@ -38,10 +36,6 @@ static void pointers_init(void)
     LKLOH_P = (uint8_t)(((uint16_t)lklo)>> 8);
     LKHIL_P = (uint8_t)lkhi;
     LKHIH_P = (uint8_t)(((uint16_t)lkhi) >> 8);
-    STABLEL_P = (uint8_t)sprites;
-    STABLEH_P = (uint8_t)(((uint16_t)sprites)>> 8);
-    SBUFRL_P = (uint8_t)sprite_buffer;
-    SBUFRH_P = (uint8_t)(((uint16_t)sprite_buffer)>> 8);
 }
 
 void sprite_update(uint8_t sprite1, uint8_t x1, uint8_t y1, uint8_t sprite2, uint8_t x2, uint8_t y2)
@@ -104,6 +98,7 @@ void delay(void)
 void main(void)
 {
     pointers_init();
+    sprites_init();
     hires_clr();
     hbox();
 

@@ -8,6 +8,19 @@
 #include "hires.h"
 #include "sprites.h"
 
+#define SPRITE_DATA \
+0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, \
+0x15, 0X00, 0x2A, 0X00, 0x54, 0X00, 0x28, 0x01, 0x50, 0x02, 0x20, 0x05, 0x40, 0x0A, 0X00, 0X00, \
+
+static const uint8_t sprites[] = {SPRITE_DATA};
+static uint8_t sprite_buffer[SPRITE_BUFFER_SIZE];
+
+void sprites_init(void)
+{
+    SBUFRL_P = (uint8_t)sprite_buffer;
+    SBUFRH_P = (uint8_t)(((uint16_t)sprite_buffer)>> 8);
+}
+
 void sprite_hgr_to_buffer(uint8_t column, uint8_t row)
 {
     // 1580us
@@ -66,6 +79,12 @@ void sprite_xor(uint8_t sprite, uint8_t column, uint8_t row, uint8_t shift)
     DATA2_P = (row << 2) + column + 5;
     DATA3_P = shift << 1;
     DATA4_P = sprite;
+
+    // SPRITEL_P = (uint8_t)sprites;
+    // SPRITEH_P = (uint8_t)(((uint16_t)sprites)>> 8);
+
+    STABLEL_P = (uint8_t)sprites;
+    STABLEH_P = (uint8_t)(((uint16_t)sprites)>> 8);
 
     // init
     __asm__ ("lda %b", STABLEL);
