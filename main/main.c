@@ -21,6 +21,8 @@ const uint8_t mod7[256] = {MOD7};
 #define SPRITE_XH_CALC(x) (div7[x])
 #define SPRITE_XL_CALC(x) (mod7[x])
 
+#define SPRITE_PLAYER 4
+
 static uint8_t pulses;
 static uint8_t sprite_x1;
 static uint8_t sprite_y1;
@@ -107,10 +109,16 @@ void main(void)
     sprite_y1 = 100;
     sprite_x2 = sprite_x1;
     sprite_y2 = sprite_y1;
-    sprite_update(0, sprite_x1, sprite_y1, 1, sprite_x2, sprite_y2);
+    sprite_update(0, sprite_x1, sprite_y1, SPRITE_PLAYER, sprite_x2, sprite_y2);
 
-    sprite_update(0, 1, 150, 1, 255, 150);
-    sprite_update(0, 0, 150, 1, 0, 150);
+    sprite_update(0, 20, 150, 1, 20, 150);
+    sprite_update(0, 40, 150, 2, 40, 150);
+    sprite_update(0, 60, 150, 3, 60, 150);
+    sprite_update(0, 80, 150, 1, 80, 150);
+    sprite_update(0, 100, 150, 1, 100, 150);
+    sprite_update(0, 120, 150, 1, 120, 150);
+    sprite_update(0, 140, 150, 1, 140, 150);
+    // sprite_update(0, 160, 150, 1, 160, 150);
 
     while(1)
     {
@@ -118,17 +126,17 @@ void main(void)
 
         if (sprite_x2 > 240)
         {
-            sprite_update(1, sprite_x1, sprite_y1, 0, sprite_x2, sprite_y2);
+            sprite_update(SPRITE_PLAYER, sprite_x1, sprite_y1, 0, sprite_x2, sprite_y2);
             sprite_x2 = 10;
             sprite_x1 = sprite_x2;
             sprite_y1 = sprite_y2;
-            sprite_update(0, sprite_x1, sprite_y1, 1, sprite_x2, sprite_y2);
+            sprite_update(0, sprite_x1, sprite_y1, SPRITE_PLAYER, sprite_x2, sprite_y2);
             sprite_no_jump = 0;
         }
 
         if (sprite_no_jump)
         {
-            sprite_update(1, sprite_x1, sprite_y1, 1, sprite_x2, sprite_y2);
+            sprite_update(SPRITE_PLAYER, sprite_x1, sprite_y1, SPRITE_PLAYER, sprite_x2, sprite_y2);
 
             sprite_x1 = sprite_x2;
             sprite_y1 = sprite_y2;

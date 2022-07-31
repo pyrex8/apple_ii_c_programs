@@ -174,8 +174,9 @@ def sprite_data_print(sprite_data):
     if keycode == pygame.K_F1:
         print("sprite data:")
         for i in range(8):
-            print(", ".join("0x{:02X}".format(num) for num in sprite_data[i]) + ", \\")
-
+            print("0x{:02X}, ".format(sprite_data[i][0]), end='')
+            print("0x{:02X}, ".format(sprite_data[i][1]), end='')
+        print('\\')
 
 pygame.init()
 pygame.display.set_caption('pyrex8')

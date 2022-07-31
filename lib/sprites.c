@@ -10,13 +10,19 @@
 
 #define SPRITE_DATA \
 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, \
+0x01, 0x00, 0x02, 0x00, 0x04, 0x00, 0x08, 0x00, 0x10, 0x00, 0x20, 0x00, 0x40, 0x00, 0x00, 0x00, \
+0x02, 0x00, 0x04, 0x00, 0x08, 0x00, 0x10, 0x00, 0x20, 0x00, 0x40, 0x00, 0x00, 0x01, 0x00, 0x00, \
+0x03, 0x00, 0x06, 0x00, 0x0C, 0x00, 0x18, 0x00, 0x30, 0x00, 0x60, 0x00, 0x40, 0x01, 0x00, 0x00, \
+0x81, 0x80, 0x82, 0x80, 0x84, 0x80, 0x88, 0x80, 0x90, 0x80, 0xA0, 0x80, 0xC0, 0x80, 0x00, 0x00, \
+0x82, 0x80, 0x84, 0x80, 0x88, 0x80, 0x90, 0x80, 0xA0, 0x80, 0xC0, 0x80, 0x80, 0x81, 0x00, 0x00, \
 0x15, 0X00, 0x2A, 0X00, 0x54, 0X00, 0x28, 0x01, 0x50, 0x02, 0x20, 0x05, 0x40, 0x0A, 0X00, 0X00, \
 
 static const uint8_t sprites[] = {SPRITE_DATA};
-static const uint8_t sprites_size[] = {6, 6};
-static const uint8_t sprites_offset[] = {5, 5};
+static const uint8_t sprites_size[] = {6, 2, 2, 2, 2, 2, 6};
+static const uint8_t sprites_offset[] = {5, 5, 5, 5, 5, 5, 5};
 
 static uint8_t sprite_buffer[SPRITE_BUFFER_SIZE];
+static uint8_t sprite_index;
 
 void sprites_init(void)
 {
@@ -80,10 +86,18 @@ void sprite_xor(uint8_t sprite, uint8_t column, uint8_t row, uint8_t shift)
     #define SPRITE_SHFT DATA3
     #define SPRITE_NUM DATA4
 
+    #define SPRITE_LEFT DATA3
+    #define SPRITE_RIGHT DATA4
+
+    sprite_index = (sprite << 4) + (shift << 1);
+
     DATA1_P = sprites_size[sprite];
     DATA2_P = (row << 2) + column + sprites_offset[sprite];
     DATA3_P = shift << 1;
     DATA4_P = sprite << 4;
+
+    DATA3_P = sprites[sprite_index];
+    DATA4_P = sprites[sprite_index + 1];
 
     // init
     __asm__ ("lda %b", STABLEL);
@@ -94,29 +108,22 @@ void sprite_xor(uint8_t sprite, uint8_t column, uint8_t row, uint8_t shift)
     __asm__ ("lda %b", STABLEH);
     __asm__ ("sta %b", SPRITEH);
 
+    __asm__ ("ldy %b", SBUFR_IND);
+
     // loop
-    __asm__ ("sprite: ldy %b", SBUFR_IND);
-    __asm__ ("lda (%b),y", SBUFR);
-    __asm__ ("ldy %b", SPRITE_SHFT);
-    __asm__ ("eor (%b), y", SPRITE);
-    __asm__ ("ldy %b", SBUFR_IND);
+    __asm__ ("sprite: lda (%b),y", SBUFR);
+    __asm__ ("eor %b", SPRITE_LEFT);
     __asm__ ("sta (%b),y", SBUFR);
 
-    __asm__ ("inc %b", SPRITE_SHFT);
-    __asm__ ("inc %b", SBUFR_IND);
+    __asm__ ("iny");
 
-    __asm__ ("ldy %b", SBUFR_IND);
     __asm__ ("lda (%b),y", SBUFR);
-    __asm__ ("ldy %b", SPRITE_SHFT);
-    __asm__ ("eor (%b), y", SPRITE);
-    __asm__ ("ldy %b", SBUFR_IND);
+    __asm__ ("eor %b", SPRITE_RIGHT);
     __asm__ ("sta (%b),y", SBUFR);
 
-    __asm__ ("dec %b", SPRITE_SHFT);
-
-    __asm__ ("inc %b", SBUFR_IND);
-    __asm__ ("inc %b", SBUFR_IND);
-    __asm__ ("inc %b", SBUFR_IND);
+    __asm__ ("iny");
+    __asm__ ("iny");
+    __asm__ ("iny");
 
     __asm__ ("dec %b", SPRITE_CNTR);
     __asm__ ("bne sprite");
