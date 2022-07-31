@@ -53,7 +53,7 @@ void sprite_hgr_to_buffer(uint8_t column, uint8_t row)
     __asm__ ("bne newcol");
 }
 
-void sprite_xor(uint8_t page, uint8_t sprite, uint8_t column, uint8_t row, uint8_t shift)
+void sprite_xor(uint8_t sprite, uint8_t column, uint8_t row, uint8_t shift)
 {
 
     // 1150us
@@ -67,7 +67,6 @@ void sprite_xor(uint8_t page, uint8_t sprite, uint8_t column, uint8_t row, uint8
     DATA2_P = (row << 2) + column;
     DATA3_P = shift << 4;
     DATA4_P = sprite;
-    DATA5_P = page;
 
     // init
     __asm__ ("lda %b", STABLEL);
@@ -76,7 +75,6 @@ void sprite_xor(uint8_t page, uint8_t sprite, uint8_t column, uint8_t row, uint8
     __asm__ ("sta %b", SPRITEL);
 
     __asm__ ("lda %b", STABLEH);
-    __asm__ ("adc %b", PAGE);
     __asm__ ("sta %b", SPRITEH);
 
     // loop

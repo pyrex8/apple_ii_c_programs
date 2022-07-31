@@ -45,7 +45,7 @@ static void pointers_init(void)
     SBUFRH_P = (uint8_t)(((uint16_t)sprite_buffer)>> 8);
 }
 
-void sprite_update(uint8_t page, uint8_t sprite1, uint8_t x1, uint8_t y1, uint8_t sprite2, uint8_t x2, uint8_t y2)
+void sprite_update(uint8_t sprite1, uint8_t x1, uint8_t y1, uint8_t sprite2, uint8_t x2, uint8_t y2)
 {
     // 9200us
     uint8_t col_delta = 1;
@@ -55,12 +55,12 @@ void sprite_update(uint8_t page, uint8_t sprite1, uint8_t x1, uint8_t y1, uint8_
     sprite_xh = SPRITE_XH_CALC(x1);
 
     sprite_hgr_to_buffer(sprite_xh, y1);
-    sprite_xor(page, sprite1, 1, 1, sprite_xl);
+    sprite_xor(sprite1, 1, 1, sprite_xl);
 
     sprite_xl = SPRITE_XL_CALC(x2);
     col_delta += SPRITE_XH_CALC(x2) - sprite_xh;
 
-    sprite_xor(page, sprite2, col_delta, row_delta, sprite_xl);
+    sprite_xor(sprite2, col_delta, row_delta, sprite_xl);
     sprite_buffer_to_hgr(sprite_xh, y1);
 }
 
@@ -113,10 +113,10 @@ void main(void)
     sprite_y1 = 100;
     sprite_x2 = sprite_x1;
     sprite_y2 = sprite_y1;
-    sprite_update(0, 0, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
+    sprite_update(0, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
 
-    sprite_update(0, 0, 255, 150, 128, 255, 150);
-    sprite_update(0, 0, 0, 150, 128, 0, 150);
+    sprite_update(0, 255, 150, 128, 255, 150);
+    sprite_update(0, 0, 150, 128, 0, 150);
 
     while(1)
     {
@@ -124,17 +124,17 @@ void main(void)
 
         if (sprite_x2 > 240)
         {
-            sprite_update(0, 128, sprite_x1, sprite_y1, 0, sprite_x2, sprite_y2);
+            sprite_update(128, sprite_x1, sprite_y1, 0, sprite_x2, sprite_y2);
             sprite_x2 = 10;
             sprite_x1 = sprite_x2;
             sprite_y1 = sprite_y2;
-            sprite_update(0, 0, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
+            sprite_update(0, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
             sprite_no_jump = 0;
         }
 
         if (sprite_no_jump)
         {
-            sprite_update(0, 128, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
+            sprite_update(128, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
 
             sprite_x1 = sprite_x2;
             sprite_y1 = sprite_y2;
