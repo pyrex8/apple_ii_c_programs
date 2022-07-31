@@ -61,11 +61,10 @@ void sprite_xor(uint8_t sprite, uint8_t column, uint8_t row, uint8_t shift)
     #define SBUFR_IND DATA2
     #define SPRITE_SHFT DATA3
     #define SPRITE_NUM DATA4
-    #define PAGE DATA5
 
-    DATA1_P = 8;
-    DATA2_P = (row << 2) + column;
-    DATA3_P = shift << 4;
+    DATA1_P = 6;                        // 8 to 6
+    DATA2_P = (row << 2) + column + 5;
+    DATA3_P = shift << 1;
     DATA4_P = sprite;
 
     // init
@@ -95,7 +94,7 @@ void sprite_xor(uint8_t sprite, uint8_t column, uint8_t row, uint8_t shift)
     __asm__ ("ldy %b", SBUFR_IND);
     __asm__ ("sta (%b),y", SBUFR);
 
-    __asm__ ("inc %b", SPRITE_SHFT);
+    __asm__ ("dec %b", SPRITE_SHFT); // inc to dec
 
     __asm__ ("inc %b", SBUFR_IND);
     __asm__ ("inc %b", SBUFR_IND);

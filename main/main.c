@@ -11,7 +11,6 @@
 #include "../lib/sprites.h"
 #include "../lib/joystick.h"
 #include "../lib/sound.h"
-#include "main.h"
 
 static const uint8_t sprites[] = {SPRITE_DATA};
 static const uint8_t lklo[256] = {HIRES_MEMORY_LOW_BYTE};
@@ -113,10 +112,10 @@ void main(void)
     sprite_y1 = 100;
     sprite_x2 = sprite_x1;
     sprite_y2 = sprite_y1;
-    sprite_update(0, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
+    sprite_update(0, sprite_x1, sprite_y1, 16, sprite_x2, sprite_y2);
 
-    sprite_update(0, 255, 150, 128, 255, 150);
-    sprite_update(0, 0, 150, 128, 0, 150);
+    sprite_update(0, 16, 150, 16, 255, 150);
+    sprite_update(0, 0, 150, 16, 0, 150);
 
     while(1)
     {
@@ -124,17 +123,17 @@ void main(void)
 
         if (sprite_x2 > 240)
         {
-            sprite_update(128, sprite_x1, sprite_y1, 0, sprite_x2, sprite_y2);
+            sprite_update(16, sprite_x1, sprite_y1, 0, sprite_x2, sprite_y2);
             sprite_x2 = 10;
             sprite_x1 = sprite_x2;
             sprite_y1 = sprite_y2;
-            sprite_update(0, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
+            sprite_update(0, sprite_x1, sprite_y1, 16, sprite_x2, sprite_y2);
             sprite_no_jump = 0;
         }
 
         if (sprite_no_jump)
         {
-            sprite_update(128, sprite_x1, sprite_y1, 128, sprite_x2, sprite_y2);
+            sprite_update(16, sprite_x1, sprite_y1, 16, sprite_x2, sprite_y2);
 
             sprite_x1 = sprite_x2;
             sprite_y1 = sprite_y2;
