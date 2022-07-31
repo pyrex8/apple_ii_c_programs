@@ -146,12 +146,12 @@ void main(void)
 
         if (joystick_up_get())
         {
-            sprite_y2 -= 1;
+            sprite_y2 -= 2;
         }
 
         if (joystick_down_get())
         {
-            sprite_y2 += 1;
+            sprite_y2 += 2;
         }
 
         if (joystick_left_get())
@@ -178,10 +178,10 @@ void main(void)
 
         delay();
 
-        TEST_PIN_TOGGLE; // adds 2.5us
-        hires_hline(5, 5, 40, WHITE);
-        TEST_PIN_TOGGLE; // adds 2.5us
-        hires_vline(10, 0, 192, 0x03);
+        // TEST_PIN_TOGGLE; // adds 2.5us
+        // hires_hline(5, 5, 40, WHITE);
+        // TEST_PIN_TOGGLE; // adds 2.5us
+        // hires_vline(10, 0, 192, 0x03);
 
     }
 }

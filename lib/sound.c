@@ -17,5 +17,14 @@ void sound(uint8_t pulses)
         SOUND_TOGGLE;
         SOUND_TOGGLE;
         SOUND_TOGGLE;
+        SOUND_TOGGLE;
+        SOUND_TOGGLE;
+        SOUND_TOGGLE;
+        SOUND_TOGGLE;
+        SOUND_TOGGLE;
+        SOUND_TOGGLE;
+        SOUND_TOGGLE;
+        SOUND_TOGGLE;
+        SOUND_TOGGLE;
     }
 }

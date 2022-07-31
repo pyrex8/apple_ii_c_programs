@@ -174,7 +174,7 @@ def sprite_data_print(sprite_data):
     if keycode == pygame.K_F1:
         print("sprite data:")
         for i in range(8):
-            print(", ".join("0x{:02X}".format(num) for num in sprite_data[i]) + ",")
+            print(", ".join("0x{:02X}".format(num) for num in sprite_data[i]) + ", \\")
 
 
 pygame.init()
