@@ -21,7 +21,7 @@ const uint8_t mod7[256] = {MOD7};
 #define SPRITE_XH_CALC(x) (div7[x])
 #define SPRITE_XL_CALC(x) (mod7[x])
 
-#define SPRITE_PLAYER 4
+#define SPRITE_PLAYER 1
 
 static uint8_t pulses;
 static uint8_t sprite_x1;
@@ -64,8 +64,8 @@ static void hbox(void)
 {
     hires_hline(COLUMN_FIRST, ROW_FIRST, COLUMNS, WHITE);
     hires_hline(COLUMN_FIRST, ROW_LAST, COLUMNS, WHITE);
-    hires_vline(COLUMN_FIRST, 0, 192, 0x03);
-    hires_vline(COLUMN_LAST, 0, 192, 0x60);
+    hires_vline(COLUMN_FIRST, 1, 191, 0x03);
+    hires_vline(COLUMN_LAST, 1, 191, 0x60);
 }
 
 void delay(void)

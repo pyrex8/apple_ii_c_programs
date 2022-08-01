@@ -18,20 +18,13 @@ enum Zero_page
     LKHIL,
     LHHIH,
 
-    STABLEL,
-    STABLEH,
-
     SBUFRL,
     SBUFRH,
-
-    SPRITEL,
-    SPRITEH,
 };
 
 // low byte is used for some instructions, alias so that it maps to assembly version
 #define LKLO                LKLOL
 #define LKHI                LKHIL
-#define SPRITE              SPRITEL
 #define SBUFR               SBUFRL // sprint buffer location
 
 // pointers to zero page memory
@@ -51,11 +44,5 @@ enum Zero_page
 #define LKHIL_P             *((uint8_t*)LKHIL)
 #define LKHIH_P             *((uint8_t*)LHHIH)
 
-#define STABLEL_P            *((uint8_t*)STABLEL)
-#define STABLEH_P            *((uint8_t*)STABLEH)
-
 #define SBUFRL_P            *((uint8_t*)SBUFRL)
 #define SBUFRH_P            *((uint8_t*)SBUFRH)
-
-#define SPRITEL_P            *((uint8_t*)SPRITEL)
-#define SPRITEH_P            *((uint8_t*)SPRITEH)
