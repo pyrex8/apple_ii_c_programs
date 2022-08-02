@@ -21,7 +21,8 @@ const uint8_t mod7[256] = {MOD7};
 #define SPRITE_XH_CALC(x) (div7[x])
 #define SPRITE_XL_CALC(x) (mod7[x])
 
-#define SPRITE_PLAYER 1
+#define SPRITE_PLAYER 10
+#define SPRITE_STEP 2
 
 static uint8_t pulses;
 static uint8_t sprite_x1;
@@ -155,22 +156,22 @@ void main(void)
 
         if (joystick_up_get())
         {
-            sprite_y2 -= 2;
+            sprite_y2 -= SPRITE_STEP;
         }
 
         if (joystick_down_get())
         {
-            sprite_y2 += 2;
+            sprite_y2 += SPRITE_STEP;
         }
 
         if (joystick_left_get())
         {
-            sprite_x2 -= 2;
+            sprite_x2 -= SPRITE_STEP;
         }
 
         if (joystick_right_get())
         {
-            sprite_x2 += 2;
+            sprite_x2 += SPRITE_STEP;
         }
 
         if (joystick_fire_get())
@@ -194,3 +195,7 @@ void main(void)
 
     }
 }
+
+
+// 1.023 MHz / 30 Hz = 34100 cycles
+// 34100 / 255 = 133 cycles per count

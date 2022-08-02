@@ -8,6 +8,8 @@
 #include "hires.h"
 #include "sprites.h"
 
+#define SO 13 // 5 + 4 + 4
+
 static const uint8_t sprites[] =
 {
     0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00,
@@ -28,8 +30,8 @@ static const uint8_t sprites[] =
     0x3F, 0x00, 0x7E, 0x00, 0x7C, 0x01, 0x78, 0x03, 0x70, 0x07, 0x60, 0x0F, 0x40, 0x1F, 0x00, 0x00,
 };
 
-static const uint8_t sprites_size[] =   {6, 1, 1, 1, 1, 2, 3, 3, 3, 3, 4, 5, 5, 5, 5, 6};
-static const uint8_t sprites_offset[] = {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 ,5, 5, 5, 5};
+static const uint8_t sprites_size[] =   {6,  1,  1,  1,  1, 2, 3, 3, 3, 3, 4, 5, 5, 5, 5, 6};
+static const uint8_t sprites_offset[] = {SO, SO, SO, SO, SO, SO, SO, SO, SO, SO, SO, SO ,SO, SO, SO, SO};
 static const uint8_t sprites_color[] = {0x00, 0x00, 0x00, 0x80, 0x80, 0x00, 0x00, 0x00, 0x80, 0x80, 0x00, 0x00, 0x00, 0x80, 0x80, 0x00};
 
 static uint8_t sprite_buffer[SPRITE_BUFFER_SIZE];
