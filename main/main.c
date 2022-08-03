@@ -22,7 +22,7 @@ const uint8_t mod7[256] = {MOD7};
 #define SPRITE_XL_CALC(x) (mod7[x])
 
 #define SPRITE_PLAYER 10
-#define SPRITE_STEP 2
+#define SPRITE_STEP 4
 
 static uint8_t pulses;
 static uint8_t sprite_x1;
@@ -63,33 +63,30 @@ void sprite_update(uint8_t sprite1, uint8_t x1, uint8_t y1, uint8_t sprite2, uin
 
 static void hbox(void)
 {
-    hires_hline(COLUMN_FIRST, ROW_FIRST, COLUMNS, WHITE);
-    hires_hline(COLUMN_FIRST, ROW_LAST, COLUMNS, WHITE);
-    hires_vline(COLUMN_FIRST, 1, 191, 0x03);
-    hires_vline(COLUMN_LAST, 1, 191, 0x60);
+    hires_hline(8, ROW_FIRST, 24, WHITE);
+    hires_vline(8, 1, 191, 0x03);
+    hires_vline(31, 1, 191, 0x60);
+}
+
+void blocks(void)
+{
+    uint8_t i;
+    uint8_t j;
+    uint8_t k;
+    for (i = 0; i < 20; i++)
+    {
+        j = 8 * i + 48;
+        k = j - 2;
+        sprite_update(0, j, 20, 11, j, 20);
+        sprite_update(0, k, 28, 12, k, 28);
+        sprite_update(0, j, 36, 13, j, 36);
+        sprite_update(0, k, 44, 14, k, 44);
+    }
 }
 
 void delay(void)
 {
     uint8_t i = 0;
-    for (i = 0; i < 200; i++)
-    {
-    }
-    for (i = 0; i < 200; i++)
-    {
-    }
-    for (i = 0; i < 200; i++)
-    {
-    }
-    for (i = 0; i < 200; i++)
-    {
-    }
-    for (i = 0; i < 200; i++)
-    {
-    }
-    for (i = 0; i < 200; i++)
-    {
-    }
     for (i = 0; i < 200; i++)
     {
     }
@@ -107,10 +104,12 @@ void main(void)
 
     sprite_no_jump = 1;
     sprite_x1 = 140;
-    sprite_y1 = 100;
+    sprite_y1 = 180;
     sprite_x2 = sprite_x1;
     sprite_y2 = sprite_y1;
     sprite_update(0, sprite_x1, sprite_y1, SPRITE_PLAYER, sprite_x2, sprite_y2);
+    sprite_update(0, sprite_x1 - 4, sprite_y1, SPRITE_PLAYER, sprite_x2 - 4, sprite_y2);
+    sprite_update(0, sprite_x1 + 4, sprite_y1, SPRITE_PLAYER, sprite_x2 + 4, sprite_y2);
 
     sprite_update(0, 20, 150, 1, 20, 150);
     sprite_update(0, 30, 150, 2, 30, 150);
@@ -128,41 +127,22 @@ void main(void)
     sprite_update(0, 150, 150, 14, 150, 150);
     sprite_update(0, 160, 150, 15, 160, 150);
 
+    blocks();
+
     while(1)
     {
-
-
-        if (sprite_x2 > 240)
-        {
-            sprite_update(SPRITE_PLAYER, sprite_x1, sprite_y1, 0, sprite_x2, sprite_y2);
-            sprite_x2 = 10;
-            sprite_x1 = sprite_x2;
-            sprite_y1 = sprite_y2;
-            sprite_update(0, sprite_x1, sprite_y1, SPRITE_PLAYER, sprite_x2, sprite_y2);
-            sprite_no_jump = 0;
-        }
-
         if (sprite_no_jump)
         {
             sprite_update(SPRITE_PLAYER, sprite_x1, sprite_y1, SPRITE_PLAYER, sprite_x2, sprite_y2);
+            sprite_update(SPRITE_PLAYER, sprite_x1 - 4, sprite_y1, SPRITE_PLAYER, sprite_x2 - 4, sprite_y2);
+            sprite_update(SPRITE_PLAYER, sprite_x1 + 4, sprite_y1, SPRITE_PLAYER, sprite_x2 + 4, sprite_y2);
 
             sprite_x1 = sprite_x2;
-            sprite_y1 = sprite_y2;
+
         }
         sprite_no_jump = 1;
 
         joystick_run();
-
-
-        if (joystick_up_get())
-        {
-            sprite_y2 -= SPRITE_STEP;
-        }
-
-        if (joystick_down_get())
-        {
-            sprite_y2 += SPRITE_STEP;
-        }
 
         if (joystick_left_get())
         {
