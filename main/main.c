@@ -64,8 +64,9 @@ void sprite_update(uint8_t sprite1, uint8_t x1, uint8_t y1, uint8_t sprite2, uin
 static void hbox(void)
 {
     hires_hline(8, ROW_FIRST, 24, WHITE);
-    hires_vline(8, 1, 191, 0x03);
-    hires_vline(31, 1, 191, 0x60);
+    hires_hline(8, ROW_FIRST + 1, 24, WHITE);
+    hires_vline(8, 2, 191, 0x03);
+    hires_vline(31, 2, 191, 0x60);
 }
 
 void blocks(void)
