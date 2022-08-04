@@ -111,47 +111,43 @@ void main(void)
     sprite_update(0, sprite_x1 - 4, sprite_y1, SPRITE_PLAYER, sprite_x2 - 4, sprite_y2);
     sprite_update(0, sprite_x1 + 4, sprite_y1, SPRITE_PLAYER, sprite_x2 + 4, sprite_y2);
 
-    sprite_update(0, 20, 150, 1, 20, 150);
-    sprite_update(0, 30, 150, 2, 30, 150);
-    sprite_update(0, 40, 150, 3, 40, 150);
-    sprite_update(0, 50, 150, 4, 50, 150);
-    sprite_update(0, 60, 150, 5, 60, 150);
-    sprite_update(0, 70, 150, 6, 70, 150);
-    sprite_update(0, 80, 150, 7, 80, 150);
-    sprite_update(0, 90, 150, 8, 90, 150);
-    sprite_update(0, 100, 150, 9, 100, 150);
     sprite_update(0, 110, 150, 10, 110, 150);
-    sprite_update(0, 120, 150, 11, 120, 150);
-    sprite_update(0, 130, 150, 12, 130, 150);
-    sprite_update(0, 140, 150, 13, 140, 150);
-    sprite_update(0, 150, 150, 14, 150, 150);
-    sprite_update(0, 160, 150, 15, 160, 150);
 
     blocks();
 
     while(1)
     {
-        if (sprite_no_jump)
+
+        if (sprite_x2 > sprite_x1)
         {
-            sprite_update(SPRITE_PLAYER, sprite_x1, sprite_y1, SPRITE_PLAYER, sprite_x2, sprite_y2);
-            sprite_update(SPRITE_PLAYER, sprite_x1 - 4, sprite_y1, SPRITE_PLAYER, sprite_x2 - 4, sprite_y2);
-            sprite_update(SPRITE_PLAYER, sprite_x1 + 4, sprite_y1, SPRITE_PLAYER, sprite_x2 + 4, sprite_y2);
-
-            sprite_x1 = sprite_x2;
-
+            sprite_update(SPRITE_PLAYER, sprite_x1 - 4, sprite_y1, 0, sprite_x1 - 4, sprite_y2);
+            sprite_update(0, sprite_x2 + 4, sprite_y1, SPRITE_PLAYER, sprite_x2 + 4, sprite_y2);
         }
-        sprite_no_jump = 1;
+        if (sprite_x2 < sprite_x1)
+        {
+            sprite_update(SPRITE_PLAYER, sprite_x1 + 4, sprite_y1, 0, sprite_x1 + 4, sprite_y2);
+            sprite_update(0, sprite_x2 - 4, sprite_y1, SPRITE_PLAYER, sprite_x2 - 4, sprite_y2);
+        }
+
+        sprite_x1 = sprite_x2;
+
 
         joystick_run();
 
         if (joystick_left_get())
         {
-            sprite_x2 -= SPRITE_STEP;
+            if (sprite_x2 > 50)
+            {
+                sprite_x2 -= SPRITE_STEP;
+            }
         }
 
         if (joystick_right_get())
         {
-            sprite_x2 += SPRITE_STEP;
+            if (sprite_x2 < 200)
+            {
+                sprite_x2 += SPRITE_STEP;
+            }
         }
 
         if (joystick_fire_get())
@@ -165,14 +161,10 @@ void main(void)
             pulses--;
         }
 
-
         delay();
 
         // TEST_PIN_TOGGLE; // adds 2.5us
-        // hires_hline(5, 5, 40, WHITE);
         // TEST_PIN_TOGGLE; // adds 2.5us
-        // hires_vline(10, 0, 192, 0x03);
-
     }
 }
 
