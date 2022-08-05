@@ -78,10 +78,11 @@ void blocks(void)
     {
         j = 8 * i + 48;
         k = j - 2;
-        sprite_update(0, j, 20, 11, j, 20);
-        sprite_update(0, k, 28, 12, k, 28);
-        sprite_update(0, j, 36, 13, j, 36);
-        sprite_update(0, k, 44, 14, k, 44);
+        sprite_update(0, j, 20, 13, j, 20);
+        sprite_update(0, j, 28, 11, j, 28);
+
+        sprite_update(0, k, 60, 14, k, 60);
+        sprite_update(0, k, 68, 12, k, 68);
     }
 }
 
