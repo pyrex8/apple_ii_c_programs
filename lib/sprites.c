@@ -8,7 +8,8 @@
 #include "hires.h"
 #include "sprites.h"
 
-#define SO 13 // 5 + 4 + 4
+#define SPRITE_BUFFER_SIZE  53 // (4 * 13) + 1
+#define SO 17 // (4 * 4) + 1
 
 static const uint8_t sprites[] =
 {
@@ -84,7 +85,7 @@ void sprite_hgr_to_buffer(uint8_t column, uint8_t row)
     __asm__ ("beq newrow");
 
     __asm__ ("lda %b", SBUFR_INDEX);
-    __asm__ ("cmp #%b", 41);
+    __asm__ ("cmp #%b", SPRITE_BUFFER_SIZE);
     __asm__ ("bne newcol");
 }
 
@@ -170,7 +171,7 @@ void sprite_buffer_to_hgr(uint8_t column, uint8_t row)
     __asm__ ("beq newrow");
 
     __asm__ ("lda %b", SBUFR_INDEX);
-    __asm__ ("cmp #%b", 41);
+    __asm__ ("cmp #%b", SPRITE_BUFFER_SIZE);
     __asm__ ("bne newcol");
 
 }

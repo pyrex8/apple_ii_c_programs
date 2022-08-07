@@ -1,8 +1,6 @@
 #ifndef __SPRITES_H__
 #define __SPRITES_H__
 
-#define SPRITE_BUFFER_SIZE  45
-
 void sprites_init(void);
 
 void sprite_hgr_to_buffer(uint8_t column, uint8_t row);

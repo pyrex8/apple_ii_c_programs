@@ -39,6 +39,7 @@ static uint8_t ball_dx_n;
 static uint8_t ball_dy_p;
 static uint8_t ball_dy_n;
 static uint8_t ball_speed_x;
+static uint8_t ball_speed_y;
 static uint8_t start;
 
 static void pointers_init(void)
@@ -109,6 +110,7 @@ void main(void)
     ball_y1 = 110;
     ball_y2 = ball_y1;
     ball_speed_x = 4;
+    ball_speed_y = 0;
     ball_dx_p = ball_speed_x;
     ball_dx_n = 0;
     ball_dy_p = 0;
@@ -165,7 +167,22 @@ void main(void)
             pulses = 5;
         }
 
+        if (ball_y2 > 200)
+        {
+            ball_dy_p = 0;
+            ball_dy_n = ball_speed_y;
+            pulses = 5;
+        }
+
+        if (ball_y2 < 50)
+        {
+            ball_dy_p = ball_speed_y;
+            ball_dy_n = 0;
+            pulses = 5;
+        }
+
         ball_x2 += ball_dx_p - ball_dx_n;
+        ball_y2 += ball_dy_p - ball_dy_n;
 
         joystick_run();
 
@@ -190,6 +207,8 @@ void main(void)
             if (start == 0)
             {
                 start = 1;
+                ball_speed_y = 4;
+                ball_dy_p = ball_speed_y;
             }
         }
 
