@@ -72,10 +72,10 @@ void sprite_update(uint8_t sprite1, uint8_t x1, uint8_t y1, uint8_t sprite2, uin
 
 static void hbox(void)
 {
-    hires_hline(8, ROW_FIRST, 24, WHITE);
-    hires_hline(8, ROW_FIRST + 1, 24, WHITE);
-    hires_vline(8, 2, 191, 0x03);
-    hires_vline(31, 2, 191, 0x60);
+    hires_hline(8, 6, 24, WHITE);
+    hires_hline(8, 6 + 1, 24, WHITE);
+    hires_vline(8, 8, 191, 0x03);
+    hires_vline(31, 8, 191, 0x60);
 }
 
 void blocks(void)
@@ -105,9 +105,9 @@ void main(void)
     paddle_x1 = PADDLE_X_INIT;
     paddle_x2 = paddle_x1;
 
-    ball_x1 = 110;
+    ball_x1 = 112;
     ball_x2 = ball_x1;
-    ball_y1 = 110;
+    ball_y1 = 112;
     ball_y2 = ball_y1;
     ball_speed_x = 4;
     ball_speed_y = 0;
@@ -160,21 +160,21 @@ void main(void)
             pulses = 5;
         }
 
-        if (ball_x2 < 50)
+        if (ball_x2 < 48)
         {
             ball_dx_p = ball_speed_x;
             ball_dx_n = 0;
             pulses = 5;
         }
 
-        if (ball_y2 > 200)
+        if (ball_y2 > 180)
         {
             ball_dy_p = 0;
             ball_dy_n = ball_speed_y;
             pulses = 5;
         }
 
-        if (ball_y2 < 50)
+        if (ball_y2 < 5)
         {
             ball_dy_p = ball_speed_y;
             ball_dy_n = 0;
