@@ -21,17 +21,25 @@ const uint8_t mod7[256] = {MOD7};
 #define SPRITE_XH_CALC(x) (div7[x])
 #define SPRITE_XL_CALC(x) (mod7[x])
 
-#define SPRITE_PLAYER 10
+#define PADDLE_SPRITE 10
+#define BALL_SPRITE 10
 #define SPRITE_STEP 4
+#define PADDLE_Y 180
+#define PADDLE_X_INIT 140
 
 static uint8_t pulses;
-static uint8_t sprite_x1;
-static uint8_t sprite_y1;
-static uint8_t sprite_x2;
-static uint8_t sprite_y2;
-static uint8_t sprite_xl;
-static uint8_t sprite_xh;
-static uint8_t sprite_no_jump;
+static uint8_t paddle_x1;
+static uint8_t paddle_x2;
+static uint8_t ball_x1;
+static uint8_t ball_x2;
+static uint8_t ball_y1;
+static uint8_t ball_y2;
+static uint8_t ball_dx_p;
+static uint8_t ball_dx_n;
+static uint8_t ball_dy_p;
+static uint8_t ball_dy_n;
+static uint8_t ball_speed_x;
+static uint8_t start;
 
 static void pointers_init(void)
 {
@@ -47,8 +55,8 @@ void sprite_update(uint8_t sprite1, uint8_t x1, uint8_t y1, uint8_t sprite2, uin
     uint8_t col_delta = 1;
     uint8_t row_delta = 1 + y2 - y1;
 
-    sprite_xl = SPRITE_XL_CALC(x1);
-    sprite_xh = SPRITE_XH_CALC(x1);
+    uint8_t sprite_xl = SPRITE_XL_CALC(x1);
+    uint8_t sprite_xh = SPRITE_XH_CALC(x1);
 
     sprite_hgr_to_buffer(sprite_xh, y1);
     sprite_xor(sprite1, 1, 1, sprite_xl);
@@ -86,17 +94,6 @@ void blocks(void)
     }
 }
 
-void delay(void)
-{
-    uint8_t i = 0;
-    for (i = 0; i < 200; i++)
-    {
-    }
-    for (i = 0; i < 200; i++)
-    {
-    }
-}
-
 void main(void)
 {
     pointers_init();
@@ -104,57 +101,96 @@ void main(void)
     hires_clr();
     hbox();
 
-    sprite_no_jump = 1;
-    sprite_x1 = 140;
-    sprite_y1 = 180;
-    sprite_x2 = sprite_x1;
-    sprite_y2 = sprite_y1;
-    sprite_update(0, sprite_x1, sprite_y1, SPRITE_PLAYER, sprite_x2, sprite_y2);
-    sprite_update(0, sprite_x1 - 4, sprite_y1, SPRITE_PLAYER, sprite_x2 - 4, sprite_y2);
-    sprite_update(0, sprite_x1 + 4, sprite_y1, SPRITE_PLAYER, sprite_x2 + 4, sprite_y2);
+    paddle_x1 = PADDLE_X_INIT;
+    paddle_x2 = paddle_x1;
 
-    sprite_update(0, 110, 150, 10, 110, 150);
+    ball_x1 = 110;
+    ball_x2 = ball_x1;
+    ball_y1 = 110;
+    ball_y2 = ball_y1;
+    ball_speed_x = 4;
+    ball_dx_p = ball_speed_x;
+    ball_dx_n = 0;
+    ball_dy_p = 0;
+    ball_dy_n = 0;
+
+    start = 0;
+
+    sprite_update(0, paddle_x1, PADDLE_Y, PADDLE_SPRITE, paddle_x2, PADDLE_Y);
+    sprite_update(0, paddle_x1 - 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - 4, PADDLE_Y);
+    sprite_update(0, paddle_x1 + 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + 4, PADDLE_Y);
+
+    sprite_update(0, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
 
     blocks();
 
     while(1)
     {
 
-        if (sprite_x2 > sprite_x1)
+        if (paddle_x2 > paddle_x1)
         {
-            sprite_update(SPRITE_PLAYER, sprite_x1 - 4, sprite_y1, 0, sprite_x1 - 4, sprite_y2);
-            sprite_update(0, sprite_x2 + 4, sprite_y1, SPRITE_PLAYER, sprite_x2 + 4, sprite_y2);
+            sprite_update(PADDLE_SPRITE, paddle_x1 - 4, PADDLE_Y, 0, paddle_x1 - 4, PADDLE_Y);
+            sprite_update(0, paddle_x2 + 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + 4, PADDLE_Y);
         }
-        if (sprite_x2 < sprite_x1)
+        if (paddle_x2 < paddle_x1)
         {
-            sprite_update(SPRITE_PLAYER, sprite_x1 + 4, sprite_y1, 0, sprite_x1 + 4, sprite_y2);
-            sprite_update(0, sprite_x2 - 4, sprite_y1, SPRITE_PLAYER, sprite_x2 - 4, sprite_y2);
+            sprite_update(PADDLE_SPRITE, paddle_x1 + 4, PADDLE_Y, 0, paddle_x1 + 4, PADDLE_Y);
+            sprite_update(0, paddle_x2 - 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - 4, PADDLE_Y);
+        }
+        if (paddle_x2 == paddle_x1)
+        {
+            sprite_update(PADDLE_SPRITE, paddle_x1, PADDLE_Y, PADDLE_SPRITE, paddle_x1, PADDLE_Y);
+            sprite_update(PADDLE_SPRITE, paddle_x1, PADDLE_Y, PADDLE_SPRITE, paddle_x1, PADDLE_Y);
         }
 
-        sprite_x1 = sprite_x2;
 
+        paddle_x1 = paddle_x2;
+
+        sprite_update(BALL_SPRITE, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
+
+        ball_x1 = ball_x2;
+        ball_y1 = ball_y2;
+
+        if (ball_x2 > 200)
+        {
+            ball_dx_p = 0;
+            ball_dx_n = ball_speed_x;
+            pulses = 5;
+        }
+
+        if (ball_x2 < 50)
+        {
+            ball_dx_p = ball_speed_x;
+            ball_dx_n = 0;
+            pulses = 5;
+        }
+
+        ball_x2 += ball_dx_p - ball_dx_n;
 
         joystick_run();
 
         if (joystick_left_get())
         {
-            if (sprite_x2 > 50)
+            if (paddle_x2 > 50)
             {
-                sprite_x2 -= SPRITE_STEP;
+                paddle_x2 -= SPRITE_STEP;
             }
         }
 
         if (joystick_right_get())
         {
-            if (sprite_x2 < 200)
+            if (paddle_x2 < 200)
             {
-                sprite_x2 += SPRITE_STEP;
+                paddle_x2 += SPRITE_STEP;
             }
         }
 
         if (joystick_fire_get())
         {
-            pulses = 5;
+            if (start == 0)
+            {
+                start = 1;
+            }
         }
 
         if (pulses > 0)
@@ -162,8 +198,6 @@ void main(void)
             sound(pulses);
             pulses--;
         }
-
-        delay();
 
         // TEST_PIN_TOGGLE; // adds 2.5us
         // TEST_PIN_TOGGLE; // adds 2.5us
