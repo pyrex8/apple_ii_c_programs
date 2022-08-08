@@ -13,10 +13,10 @@
 #include "../lib/sound.h"
 
 
-static const uint8_t lklo[256] = {HIRES_MEMORY_LOW_BYTE};
-static const uint8_t lkhi[256] = {HIRES_MEMORY_HIGH_BYTE};
-const uint8_t div7[256] = {DIV7};
-const uint8_t mod7[256] = {MOD7};
+static const uint8_t lklo[] = {HIRES_MEMORY_LOW_BYTE};
+static const uint8_t lkhi[] = {HIRES_MEMORY_HIGH_BYTE};
+const uint8_t div7[] = {DIV7};
+const uint8_t mod7[] = {MOD7};
 
 #define SPRITE_XH_CALC(x) (div7[x])
 #define SPRITE_XL_CALC(x) (mod7[x])
@@ -24,7 +24,6 @@ const uint8_t mod7[256] = {MOD7};
 #define BYTE_HIGH_BITS 8
 #define SOUND_PULESES 5
 #define COLOR_OFFSET_ORANGE_GREEN 2
-
 
 #define BALL_SPRITE 10
 #define BALL_SPEED 4
@@ -121,11 +120,6 @@ void blocks(void)
 
 void main(void)
 {
-    pointers_init();
-    sprites_init();
-    hires_clr();
-    hbox();
-
     paddle_x1 = PADDLE_X_INIT;
     paddle_x2 = paddle_x1;
 
@@ -141,6 +135,12 @@ void main(void)
     ball_dy_n = 0;
 
     start = 0;
+
+    pointers_init();
+    sprites_init();
+    hires_clr();
+    hbox();
+
 
     sprite_update(0, paddle_x1, PADDLE_Y, PADDLE_SPRITE, paddle_x2, PADDLE_Y);
     sprite_update(0, paddle_x1 - PADDLE_SPRITE_SPACING, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - PADDLE_SPRITE_SPACING, PADDLE_Y);
