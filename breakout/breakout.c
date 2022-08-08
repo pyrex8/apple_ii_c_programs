@@ -21,11 +21,36 @@ const uint8_t mod7[256] = {MOD7};
 #define SPRITE_XH_CALC(x) (div7[x])
 #define SPRITE_XL_CALC(x) (mod7[x])
 
-#define PADDLE_SPRITE 10
+#define BYTE_HIGH_BITS 8
+#define SOUND_PULESES 5
+#define COLOR_OFFSET_ORANGE_GREEN 2
+
+
 #define BALL_SPRITE 10
-#define SPRITE_STEP 4
+#define BALL_SPEED 4
+#define BALL_X_INIT 112
+#define BALL_Y_INIT 112
+#define BALL_X_MIN 48
+#define BALL_X_MAX 200
+#define BALL_Y_MIN 5
+#define BALL_Y_MAX 180
+
+#define PADDLE_SPRITE 10
+#define PADDLE_SPRITE_SPACING 4
+#define PADDLE_STEP 4
 #define PADDLE_Y 180
 #define PADDLE_X_INIT 140
+
+#define BRICKS_NUMBER 20
+#define BRICKS_SPACING 8
+#define BRICKS_BLUE 13
+#define BRICKS_PURPLE 11
+#define BRICKS_ORANGE 14
+#define BRICKS_GREEN 12
+#define BRICKS_Y_BLUE 20
+#define BRICKS_Y_PURPLE 40
+#define BRICKS_Y_ORANGE 60
+#define BRICKS_Y_GREEN 80
 
 static uint8_t pulses;
 static uint8_t paddle_x1;
@@ -45,9 +70,9 @@ static uint8_t start;
 static void pointers_init(void)
 {
     LKLOL_P = (uint8_t)lklo;
-    LKLOH_P = (uint8_t)(((uint16_t)lklo)>> 8);
+    LKLOH_P = (uint8_t)(((uint16_t)lklo)>> BYTE_HIGH_BITS);
     LKHIL_P = (uint8_t)lkhi;
-    LKHIH_P = (uint8_t)(((uint16_t)lkhi) >> 8);
+    LKHIH_P = (uint8_t)(((uint16_t)lkhi) >> BYTE_HIGH_BITS);
 }
 
 void sprite_update(uint8_t sprite1, uint8_t x1, uint8_t y1, uint8_t sprite2, uint8_t x2, uint8_t y2)
@@ -83,15 +108,14 @@ void blocks(void)
     uint8_t i;
     uint8_t j;
     uint8_t k;
-    for (i = 0; i < 20; i++)
+    for (i = 0; i < BRICKS_NUMBER; i++)
     {
-        j = 8 * i + 48;
-        k = j - 2;
-        sprite_update(0, j, 20, 13, j, 20);
-        sprite_update(0, j, 28, 11, j, 28);
-
-        sprite_update(0, k, 60, 14, k, 60);
-        sprite_update(0, k, 68, 12, k, 68);
+        j = BRICKS_SPACING * i + BALL_X_MIN;
+        k = j - COLOR_OFFSET_ORANGE_GREEN;
+        sprite_update(0, j, BRICKS_Y_BLUE, BRICKS_BLUE, j, BRICKS_Y_BLUE);
+        sprite_update(0, j, BRICKS_Y_PURPLE, BRICKS_PURPLE, j, BRICKS_Y_PURPLE);
+        sprite_update(0, k, BRICKS_Y_ORANGE, BRICKS_ORANGE, k, BRICKS_Y_ORANGE);
+        sprite_update(0, k, BRICKS_Y_GREEN, BRICKS_GREEN, k, BRICKS_Y_GREEN);
     }
 }
 
@@ -105,11 +129,11 @@ void main(void)
     paddle_x1 = PADDLE_X_INIT;
     paddle_x2 = paddle_x1;
 
-    ball_x1 = 112;
+    ball_x1 = BALL_X_INIT;
     ball_x2 = ball_x1;
-    ball_y1 = 112;
+    ball_y1 = BALL_X_INIT;
     ball_y2 = ball_y1;
-    ball_speed_x = 4;
+    ball_speed_x = BALL_SPEED;
     ball_speed_y = 0;
     ball_dx_p = ball_speed_x;
     ball_dx_n = 0;
@@ -119,8 +143,8 @@ void main(void)
     start = 0;
 
     sprite_update(0, paddle_x1, PADDLE_Y, PADDLE_SPRITE, paddle_x2, PADDLE_Y);
-    sprite_update(0, paddle_x1 - 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - 4, PADDLE_Y);
-    sprite_update(0, paddle_x1 + 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + 4, PADDLE_Y);
+    sprite_update(0, paddle_x1 - PADDLE_SPRITE_SPACING, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - PADDLE_SPRITE_SPACING, PADDLE_Y);
+    sprite_update(0, paddle_x1 + PADDLE_SPRITE_SPACING, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + PADDLE_SPRITE_SPACING, PADDLE_Y);
 
     sprite_update(0, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
 
@@ -131,13 +155,13 @@ void main(void)
 
         if (paddle_x2 > paddle_x1)
         {
-            sprite_update(PADDLE_SPRITE, paddle_x1 - 4, PADDLE_Y, 0, paddle_x1 - 4, PADDLE_Y);
-            sprite_update(0, paddle_x2 + 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + 4, PADDLE_Y);
+            sprite_update(PADDLE_SPRITE, paddle_x1 - PADDLE_SPRITE_SPACING, PADDLE_Y, 0, paddle_x1 - PADDLE_SPRITE_SPACING, PADDLE_Y);
+            sprite_update(0, paddle_x2 + PADDLE_SPRITE_SPACING, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + PADDLE_SPRITE_SPACING, PADDLE_Y);
         }
         if (paddle_x2 < paddle_x1)
         {
-            sprite_update(PADDLE_SPRITE, paddle_x1 + 4, PADDLE_Y, 0, paddle_x1 + 4, PADDLE_Y);
-            sprite_update(0, paddle_x2 - 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - 4, PADDLE_Y);
+            sprite_update(PADDLE_SPRITE, paddle_x1 + PADDLE_SPRITE_SPACING, PADDLE_Y, 0, paddle_x1 + PADDLE_SPRITE_SPACING, PADDLE_Y);
+            sprite_update(0, paddle_x2 - PADDLE_SPRITE_SPACING, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - PADDLE_SPRITE_SPACING, PADDLE_Y);
         }
         if (paddle_x2 == paddle_x1)
         {
@@ -153,32 +177,32 @@ void main(void)
         ball_x1 = ball_x2;
         ball_y1 = ball_y2;
 
-        if (ball_x2 > 200)
+        if (ball_x2 > BALL_X_MAX)
         {
             ball_dx_p = 0;
             ball_dx_n = ball_speed_x;
-            pulses = 5;
+            pulses = SOUND_PULESES;
         }
 
-        if (ball_x2 < 48)
+        if (ball_x2 < BALL_X_MIN)
         {
             ball_dx_p = ball_speed_x;
             ball_dx_n = 0;
-            pulses = 5;
+            pulses = SOUND_PULESES;
         }
 
-        if (ball_y2 > 180)
+        if (ball_y2 > BALL_Y_MAX)
         {
             ball_dy_p = 0;
             ball_dy_n = ball_speed_y;
-            pulses = 5;
+            pulses = SOUND_PULESES;
         }
 
-        if (ball_y2 < 5)
+        if (ball_y2 < BALL_Y_MIN)
         {
             ball_dy_p = ball_speed_y;
             ball_dy_n = 0;
-            pulses = 5;
+            pulses = SOUND_PULESES;
         }
 
         ball_x2 += ball_dx_p - ball_dx_n;
@@ -190,7 +214,7 @@ void main(void)
         {
             if (paddle_x2 > 50)
             {
-                paddle_x2 -= SPRITE_STEP;
+                paddle_x2 -= PADDLE_STEP;
             }
         }
 
@@ -198,7 +222,7 @@ void main(void)
         {
             if (paddle_x2 < 200)
             {
-                paddle_x2 += SPRITE_STEP;
+                paddle_x2 += PADDLE_STEP;
             }
         }
 
