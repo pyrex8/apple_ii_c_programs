@@ -65,6 +65,10 @@ static uint8_t ball_dy_n;
 static uint8_t ball_speed_x;
 static uint8_t ball_speed_y;
 static uint8_t start;
+static uint8_t bricks_blue[BRICKS_NUMBER] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+static uint8_t bricks_purple[BRICKS_NUMBER] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+static uint8_t bricks_orange[BRICKS_NUMBER] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+static uint8_t bricks_green[BRICKS_NUMBER] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
 static void pointers_init(void)
 {
@@ -111,10 +115,25 @@ void blocks(void)
     {
         j = BRICKS_SPACING * i + BALL_X_MIN;
         k = j - COLOR_OFFSET_ORANGE_GREEN;
-        sprite_update(0, j, BRICKS_Y_BLUE, BRICKS_BLUE, j, BRICKS_Y_BLUE);
-        sprite_update(0, j, BRICKS_Y_PURPLE, BRICKS_PURPLE, j, BRICKS_Y_PURPLE);
-        sprite_update(0, k, BRICKS_Y_ORANGE, BRICKS_ORANGE, k, BRICKS_Y_ORANGE);
-        sprite_update(0, k, BRICKS_Y_GREEN, BRICKS_GREEN, k, BRICKS_Y_GREEN);
+        if (bricks_blue[i])
+        {
+            sprite_update(0, j, BRICKS_Y_BLUE, BRICKS_BLUE, j, BRICKS_Y_BLUE);
+        }
+
+        if (bricks_purple[i])
+        {
+            sprite_update(0, j, BRICKS_Y_PURPLE, BRICKS_PURPLE, j, BRICKS_Y_PURPLE);
+        }
+
+        if (bricks_orange[i])
+        {
+            sprite_update(0, k, BRICKS_Y_ORANGE, BRICKS_ORANGE, k, BRICKS_Y_ORANGE);
+        }
+
+        if (bricks_green[i])
+        {
+            sprite_update(0, k, BRICKS_Y_GREEN, BRICKS_GREEN, k, BRICKS_Y_GREEN);
+        }
     }
 }
 
