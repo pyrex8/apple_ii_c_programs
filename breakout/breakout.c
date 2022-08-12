@@ -137,16 +137,28 @@ void blocks(void)
     }
 }
 
-void ball_quant_on(uint8_t x)
+void ball_x_quant_on(uint8_t x)
 {
     uint8_t x1 = (((x - BALL_X_MIN) >> 3) << 3) + BALL_X_MIN;
     sprite_update(0, x1, 10, BALL_SPRITE, x1, 10);
 }
 
-void ball_quant_off(uint8_t x)
+void ball_x_quant_off(uint8_t x)
 {
     uint8_t x1 = (((x - BALL_X_MIN) >> 3) << 3) + BALL_X_MIN;
     sprite_update(BALL_SPRITE, x1, 10, 0, x1, 10);
+}
+
+void ball_y_quant_on(uint8_t y)
+{
+    uint8_t y1 = (((y - 5) >> 3) << 3) + 5;
+    sprite_update(0, 10, y1, BALL_SPRITE, 10, y1);
+}
+
+void ball_y_quant_off(uint8_t y)
+{
+    uint8_t y1 = (((y - 5) >> 3) << 3) + 5;
+    sprite_update(BALL_SPRITE, 10, y1, 0, 10, y1);
 }
 
 void main(void)
@@ -239,12 +251,14 @@ void main(void)
             pulses = SOUND_PULESES;
         }
 
-        ball_quant_off(ball_x2);
+        ball_x_quant_off(ball_x2);
+        ball_y_quant_off(ball_y2);
 
         ball_x2 += ball_dx_p - ball_dx_n;
         ball_y2 += ball_dy_p - ball_dy_n;
 
-        ball_quant_on(ball_x2);
+        ball_x_quant_on(ball_x2);
+        ball_y_quant_on(ball_y2);
 
         joystick_run();
 
