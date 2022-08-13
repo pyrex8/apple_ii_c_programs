@@ -281,6 +281,7 @@ void main(void)
                 bricks_blue[x_contract] = 0;
                 ball_dy_p = ball_speed_y - ball_dy_p;
                 ball_dy_n = ball_speed_y - ball_dy_n;
+                pulses = SOUND_PULESES;
                 brick_off(x_contract, y_contract, BRICKS_BLUE);
             }
         }
@@ -291,6 +292,7 @@ void main(void)
                 bricks_orange[x_contract] = 0;
                 ball_dy_p = ball_speed_y - ball_dy_p;
                 ball_dy_n = ball_speed_y - ball_dy_n;
+                pulses = SOUND_PULESES;
                 brick_off(x_contract, y_contract, BRICKS_ORANGE);
             }
         }
@@ -301,6 +303,7 @@ void main(void)
                 bricks_purple[x_contract] = 0;
                 ball_dy_p = ball_speed_y - ball_dy_p;
                 ball_dy_n = ball_speed_y - ball_dy_n;
+                pulses = SOUND_PULESES;
                 brick_off(x_contract, y_contract, BRICKS_PURPLE);
             }
         }
@@ -311,6 +314,7 @@ void main(void)
                 bricks_green[x_contract] = 0;
                 ball_dy_p = ball_speed_y - ball_dy_p;
                 ball_dy_n = ball_speed_y - ball_dy_n;
+                pulses = SOUND_PULESES;
                 brick_off(x_contract, y_contract, BRICKS_GREEN);
             }
         }
