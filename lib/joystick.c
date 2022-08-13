@@ -17,7 +17,6 @@
 #define JOYSTICK_UP (PEEK(JOYSTICK_PADDLE1_ADDR) > 127 ? 0 : 1)
 #define JOYSTICK_DOWN (PEEK(JOYSTICK_PADDLE1_ADDR) > 127 ? 1 : 0)
 
-uint8_t fire = 0;
 uint8_t left = 0;
 uint8_t right = 0;
 uint8_t up = 0;
@@ -33,7 +32,6 @@ static void delay(void)
 
 void joystick_run(void)
 {
-    fire = JOYSTICK_FIRE;
     JOYSTICK_START;
     left = JOYSTICK_LEFT;
     up = JOYSTICK_UP;
@@ -46,7 +44,7 @@ void joystick_run(void)
 
 uint8_t joystick_fire_get(void)
 {
-    return fire;
+    return JOYSTICK_FIRE;
 }
 
 uint8_t joystick_up_get(void)
