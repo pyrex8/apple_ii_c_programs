@@ -147,10 +147,6 @@ void brick_off(uint8_t x, uint8_t y, uint8_t sprite)
     sprite_update(sprite, x1, y1, 0, x1, y1);
 }
 
-
-
-
-
 void blocks(void)
 {
     uint8_t i;
@@ -188,8 +184,8 @@ void main(void)
     ball_x2 = ball_x1;
     ball_y1 = BALL_X_INIT;
     ball_y2 = ball_y1;
-    ball_speed_x = BALL_SPEED;
-    ball_speed_y = 0;
+    ball_speed_x = 2;
+    ball_speed_y = BALL_SPEED;
     ball_dx_p = ball_speed_x;
     ball_dx_n = 0;
     ball_dy_p = 0;
@@ -213,11 +209,6 @@ void main(void)
     sprite_update(0, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
 
     blocks();
-
-    x_contract = contract_x(ball_x2);
-    y_contract = contract_y(ball_y2);
-    brick_off(x_contract, 12, BALL_SPRITE);
-    brick_off(21, y_contract, BALL_SPRITE);
 
     while(1)
     {
@@ -277,24 +268,19 @@ void main(void)
             pulses = SOUND_PULESES;
         }
 
-        x_contract = contract_x(ball_x2);
-        y_contract = contract_y(ball_y2);
-        brick_off(x_contract, 12, BALL_SPRITE);
-        brick_off(21, y_contract, BALL_SPRITE);
-
         ball_x2 += ball_dx_p - ball_dx_n;
         ball_y2 += ball_dy_p - ball_dy_n;
 
         x_contract = contract_x(ball_x2);
         y_contract = contract_y(ball_y2);
-        brick_on(x_contract, 12, BALL_SPRITE);
-        brick_on(21, y_contract, BALL_SPRITE);
 
         if (y_contract == BRICKS_Y_BLUE)
         {
             if (bricks_blue[x_contract] == 1)
             {
                 bricks_blue[x_contract] = 0;
+                ball_dy_p = ball_speed_y - ball_dy_p;
+                ball_dy_n = ball_speed_y - ball_dy_n;
                 brick_off(x_contract, y_contract, BRICKS_BLUE);
             }
         }
@@ -303,6 +289,8 @@ void main(void)
             if (bricks_orange[x_contract] == 1)
             {
                 bricks_orange[x_contract] = 0;
+                ball_dy_p = ball_speed_y - ball_dy_p;
+                ball_dy_n = ball_speed_y - ball_dy_n;
                 brick_off(x_contract, y_contract, BRICKS_ORANGE);
             }
         }
@@ -311,6 +299,8 @@ void main(void)
             if (bricks_purple[x_contract] == 1)
             {
                 bricks_purple[x_contract] = 0;
+                ball_dy_p = ball_speed_y - ball_dy_p;
+                ball_dy_n = ball_speed_y - ball_dy_n;
                 brick_off(x_contract, y_contract, BRICKS_PURPLE);
             }
         }
@@ -319,6 +309,8 @@ void main(void)
             if (bricks_green[x_contract] == 1)
             {
                 bricks_green[x_contract] = 0;
+                ball_dy_p = ball_speed_y - ball_dy_p;
+                ball_dy_n = ball_speed_y - ball_dy_n;
                 brick_off(x_contract, y_contract, BRICKS_GREEN);
             }
         }
