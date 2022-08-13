@@ -42,10 +42,12 @@ const uint8_t mod7[] = {MOD7};
 
 #define BRICKS_NUMBER 20
 #define BRICKS_SPACING 8
-#define BRICKS_BLUE 13
-#define BRICKS_PURPLE 11
-#define BRICKS_ORANGE 14
-#define BRICKS_GREEN 12
+#define BRICKS_ORANGE 13
+#define BRICKS_GREEN 11
+#define BRICKS_BLUE 14
+#define BRICKS_PURPLE 12
+#define BRICK_X_OFFSET 47
+#define BRICK_Y_OFFSET 5
 #define BRICKS_Y_BLUE 20
 #define BRICKS_Y_PURPLE 40
 #define BRICKS_Y_ORANGE 60
@@ -64,6 +66,8 @@ static uint8_t ball_dy_p;
 static uint8_t ball_dy_n;
 static uint8_t ball_speed_x;
 static uint8_t ball_speed_y;
+static uint8_t x_contract;
+static uint8_t y_contract;
 static uint8_t start;
 static uint8_t bricks_blue[BRICKS_NUMBER] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 static uint8_t bricks_purple[BRICKS_NUMBER] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
@@ -106,60 +110,73 @@ static void hbox(void)
     hires_vline(31, 8, 191, 0x60);
 }
 
+
+
+uint8_t expand_x(uint8_t x)
+{
+    return (x << 3) + BRICK_X_OFFSET;
+}
+
+uint8_t expand_y(uint8_t y)
+{
+    return (y << 3) + BRICK_Y_OFFSET;
+}
+
+uint8_t contract_x(uint8_t x)
+{
+    return (x - BRICK_X_OFFSET) >> 3;
+}
+
+uint8_t contract_y(uint8_t y)
+{
+    return (y - BRICK_Y_OFFSET) >> 3;
+}
+
+void brick_on(uint8_t x, uint8_t y, uint8_t sprite)
+{
+    uint8_t x1 = expand_x(x);
+    uint8_t y1 = expand_y(y);
+    sprite_update(0, x1, y1, sprite, x1, y1);
+}
+
+void brick_off(uint8_t x, uint8_t y, uint8_t sprite)
+{
+    uint8_t x1 = expand_x(x);
+    uint8_t y1 = expand_y(y);
+    sprite_update(sprite, x1, y1, 0, x1, y1);
+}
+
+
+
+
+
 void blocks(void)
 {
     uint8_t i;
-    uint8_t j;
-    uint8_t k;
     for (i = 0; i < BRICKS_NUMBER; i++)
     {
-        j = BRICKS_SPACING * i + BALL_X_MIN;
-        k = j - COLOR_OFFSET_ORANGE_GREEN;
         if (bricks_blue[i])
         {
-            sprite_update(0, j, BRICKS_Y_BLUE, BRICKS_BLUE, j, BRICKS_Y_BLUE);
+            brick_on(i, 2, BRICKS_BLUE);
         }
 
         if (bricks_purple[i])
         {
-            sprite_update(0, j, BRICKS_Y_PURPLE, BRICKS_PURPLE, j, BRICKS_Y_PURPLE);
+            brick_on(i, 5, BRICKS_ORANGE);
         }
 
         if (bricks_orange[i])
         {
-            sprite_update(0, k, BRICKS_Y_ORANGE, BRICKS_ORANGE, k, BRICKS_Y_ORANGE);
+            brick_on(i, 8, BRICKS_PURPLE);
         }
 
         if (bricks_green[i])
         {
-            sprite_update(0, k, BRICKS_Y_GREEN, BRICKS_GREEN, k, BRICKS_Y_GREEN);
+            brick_on(i, 11, BRICKS_GREEN);
         }
     }
 }
 
-void ball_x_quant_on(uint8_t x)
-{
-    uint8_t x1 = (((x - BALL_X_MIN) >> 3) << 3) + BALL_X_MIN;
-    sprite_update(0, x1, 10, BALL_SPRITE, x1, 10);
-}
-
-void ball_x_quant_off(uint8_t x)
-{
-    uint8_t x1 = (((x - BALL_X_MIN) >> 3) << 3) + BALL_X_MIN;
-    sprite_update(BALL_SPRITE, x1, 10, 0, x1, 10);
-}
-
-void ball_y_quant_on(uint8_t y)
-{
-    uint8_t y1 = (((y - 5) >> 3) << 3) + 5;
-    sprite_update(0, 10, y1, BALL_SPRITE, 10, y1);
-}
-
-void ball_y_quant_off(uint8_t y)
-{
-    uint8_t y1 = (((y - 5) >> 3) << 3) + 5;
-    sprite_update(BALL_SPRITE, 10, y1, 0, 10, y1);
-}
 
 void main(void)
 {
@@ -177,6 +194,9 @@ void main(void)
     ball_dy_p = 0;
     ball_dy_n = 0;
 
+    x_contract = 0;
+    y_contract = 0;
+
     start = 0;
 
     pointers_init();
@@ -192,6 +212,11 @@ void main(void)
     sprite_update(0, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
 
     blocks();
+
+    x_contract = contract_x(ball_x2);
+    y_contract = contract_y(ball_y2);
+    brick_off(x_contract, 12, BALL_SPRITE);
+    brick_off(21, y_contract, BALL_SPRITE);
 
     while(1)
     {
@@ -251,14 +276,18 @@ void main(void)
             pulses = SOUND_PULESES;
         }
 
-        ball_x_quant_off(ball_x2);
-        ball_y_quant_off(ball_y2);
+        x_contract = contract_x(ball_x2);
+        y_contract = contract_y(ball_y2);
+        brick_off(x_contract, 12, BALL_SPRITE);
+        brick_off(21, y_contract, BALL_SPRITE);
 
         ball_x2 += ball_dx_p - ball_dx_n;
         ball_y2 += ball_dy_p - ball_dy_n;
 
-        ball_x_quant_on(ball_x2);
-        ball_y_quant_on(ball_y2);
+        x_contract = contract_x(ball_x2);
+        y_contract = contract_y(ball_y2);
+        brick_on(x_contract, 12, BALL_SPRITE);
+        brick_on(21, y_contract, BALL_SPRITE);
 
         joystick_run();
 
