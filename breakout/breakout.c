@@ -42,16 +42,16 @@ const uint8_t mod7[] = {MOD7};
 
 #define BRICKS_NUMBER 20
 #define BRICKS_SPACING 8
-#define BRICKS_ORANGE 13
-#define BRICKS_GREEN 11
 #define BRICKS_BLUE 14
+#define BRICKS_ORANGE 13
 #define BRICKS_PURPLE 12
+#define BRICKS_GREEN 11
 #define BRICK_X_OFFSET 47
 #define BRICK_Y_OFFSET 5
-#define BRICKS_Y_BLUE 20
-#define BRICKS_Y_PURPLE 40
-#define BRICKS_Y_ORANGE 60
-#define BRICKS_Y_GREEN 80
+#define BRICKS_Y_BLUE 2
+#define BRICKS_Y_ORANGE 5
+#define BRICKS_Y_PURPLE 8
+#define BRICKS_Y_GREEN 11
 
 static uint8_t pulses;
 static uint8_t paddle_x1;
@@ -69,10 +69,11 @@ static uint8_t ball_speed_y;
 static uint8_t x_contract;
 static uint8_t y_contract;
 static uint8_t start;
-static uint8_t bricks_blue[BRICKS_NUMBER] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-static uint8_t bricks_purple[BRICKS_NUMBER] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-static uint8_t bricks_orange[BRICKS_NUMBER] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-static uint8_t bricks_green[BRICKS_NUMBER] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+// pad the end with one zero
+static uint8_t bricks_blue[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
+static uint8_t bricks_purple[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
+static uint8_t bricks_orange[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
+static uint8_t bricks_green[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 
 static void pointers_init(void)
 {
@@ -124,12 +125,12 @@ uint8_t expand_y(uint8_t y)
 
 uint8_t contract_x(uint8_t x)
 {
-    return (x - BRICK_X_OFFSET) >> 3;
+    return (x - BRICK_X_OFFSET + 4) >> 3;
 }
 
 uint8_t contract_y(uint8_t y)
 {
-    return (y - BRICK_Y_OFFSET) >> 3;
+    return (y - BRICK_Y_OFFSET + 4) >> 3;
 }
 
 void brick_on(uint8_t x, uint8_t y, uint8_t sprite)
@@ -157,22 +158,22 @@ void blocks(void)
     {
         if (bricks_blue[i])
         {
-            brick_on(i, 2, BRICKS_BLUE);
-        }
-
-        if (bricks_purple[i])
-        {
-            brick_on(i, 5, BRICKS_ORANGE);
+            brick_on(i, BRICKS_Y_BLUE, BRICKS_BLUE);
         }
 
         if (bricks_orange[i])
         {
-            brick_on(i, 8, BRICKS_PURPLE);
+            brick_on(i, BRICKS_Y_ORANGE, BRICKS_ORANGE);
+        }
+
+        if (bricks_purple[i])
+        {
+            brick_on(i, BRICKS_Y_PURPLE, BRICKS_PURPLE);
         }
 
         if (bricks_green[i])
         {
-            brick_on(i, 11, BRICKS_GREEN);
+            brick_on(i, BRICKS_Y_GREEN, BRICKS_GREEN);
         }
     }
 }
@@ -288,6 +289,40 @@ void main(void)
         y_contract = contract_y(ball_y2);
         brick_on(x_contract, 12, BALL_SPRITE);
         brick_on(21, y_contract, BALL_SPRITE);
+
+        if (y_contract == BRICKS_Y_BLUE)
+        {
+            if (bricks_blue[x_contract] == 1)
+            {
+                bricks_blue[x_contract] = 0;
+                brick_off(x_contract, y_contract, BRICKS_BLUE);
+            }
+        }
+        if (y_contract == BRICKS_Y_ORANGE)
+        {
+            if (bricks_orange[x_contract] == 1)
+            {
+                bricks_orange[x_contract] = 0;
+                brick_off(x_contract, y_contract, BRICKS_ORANGE);
+            }
+        }
+        if (y_contract == BRICKS_Y_PURPLE)
+        {
+            if (bricks_purple[x_contract] == 1)
+            {
+                bricks_purple[x_contract] = 0;
+                brick_off(x_contract, y_contract, BRICKS_PURPLE);
+            }
+        }
+        if (y_contract == BRICKS_Y_GREEN)
+        {
+            if (bricks_green[x_contract] == 1)
+            {
+                bricks_green[x_contract] = 0;
+                brick_off(x_contract, y_contract, BRICKS_GREEN);
+            }
+        }
+
 
         joystick_run();
 
