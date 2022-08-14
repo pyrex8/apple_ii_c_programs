@@ -67,12 +67,12 @@ static uint8_t start;
 static uint8_t end;
 static uint8_t score;
 static uint8_t high_score;
-// static uint8_t score_ones;
-// static uint8_t score_tens;
-// static uint8_t score_hundreds;
-// static uint8_t high_ones;
-// static uint8_t high_tens;
-// static uint8_t high_hundreds;
+static uint8_t score_ones;
+static uint8_t score_tens;
+static uint8_t score_hundreds;
+static uint8_t high_ones;
+static uint8_t high_tens;
+static uint8_t high_hundreds;
 
 // pad the end with one zero
 static uint8_t bricks_blue[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
@@ -191,51 +191,66 @@ void game_init(void)
     start = 0;
     end = 0;
 
-    // if (score > high_score)
-    // {
-    //     high_ones = score_ones;
-    //     high_tens = score_tens;
-    //     high_hundreds = score_hundreds;
-    // }
+    if (score > high_score)
+    {
+        high_ones = score_ones;
+        high_tens = score_tens;
+        high_hundreds = score_hundreds;
+    }
 
-    // digit_set(110, 185, score_hundreds);
-    // digit_set(117, 185, score_tens);
-    // digit_set(124, 185, score_ones);
+
 
     score = 0;
+    score_ones = 0;
+    score_tens = 0;
+    score_hundreds = 0;
+}
+
+void score_draw(void)
+{
+    digit_set(10, 185, score_hundreds);
+    digit_set(11, 185, score_tens);
+    digit_set(12, 185, score_ones);
+
+    digit_set(27, 185, high_hundreds);
+    digit_set(28, 185, high_tens);
+    digit_set(29, 185, high_ones);
 }
 
 void score_increase(void)
 {
     score++;
-    // if (score_ones > 8)
-    // {
-    //     score_ones = 0;
-    //     if (score_tens > 8)
-    //     {
-    //         score_tens = 0;
-    //         score_hundreds++;
-    //
-    //     }
-    //     else
-    //     {
-    //         score_tens++;
-    //     }
-    // }
-    // else
-    // {
-    //     score_ones++;
-    // }
-    // digit_set(10, 185, score_hundreds);
-    // digit_set(17, 185, score_tens);
-    // digit_set(24, 185, score_ones);
+    if (score_ones > 8)
+    {
+        score_ones = 0;
+        if (score_tens > 8)
+        {
+            score_tens = 0;
+            score_hundreds++;
+
+        }
+        else
+        {
+            score_tens++;
+        }
+    }
+    else
+    {
+        score_ones++;
+    }
+    score_draw();
 }
-
-
 
 void main(void)
 {
     high_score = 0;
+
+    score_ones = 0;
+    score_tens = 0;
+    score_hundreds = 0;
+    high_ones = 0;
+    high_tens = 0;
+    high_hundreds = 0;
 
     pointers_init();
     sprite_init();
@@ -248,6 +263,7 @@ void main(void)
     sprite_update(0, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
 
     blocks();
+    score_draw();
 
     while(1)
     {
@@ -372,6 +388,7 @@ void main(void)
                 hbox();
                 sprite_update(0, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
                 blocks();
+                score_draw();
             }
         }
 
