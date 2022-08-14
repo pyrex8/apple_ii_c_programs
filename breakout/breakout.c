@@ -22,8 +22,8 @@ const uint8_t mod7[] = {MOD7};
 #define SPRITE_XL_CALC(x) (mod7[x])
 
 #define BYTE_HIGH_BITS 8
-#define SOUND_PULESES 5
-#define COLOR_OFFSET_ORANGE_GREEN 2
+#define SOUND_BOUNCE 5
+#define SOUND_END 30
 
 #define BALL_SPRITE 10
 #define BALL_SPEED 4
@@ -33,12 +33,6 @@ const uint8_t mod7[] = {MOD7};
 #define BALL_X_MAX 200
 #define BALL_Y_MIN 5
 #define BALL_Y_MAX 180
-
-#define PADDLE_SPRITE 10
-#define PADDLE_SPRITE_SPACING 4
-#define PADDLE_STEP 4
-#define PADDLE_Y 180
-#define PADDLE_X_INIT 140
 
 #define BRICKS_NUMBER 20
 #define BRICKS_SPACING 8
@@ -54,8 +48,6 @@ const uint8_t mod7[] = {MOD7};
 #define BRICKS_Y_GREEN 11
 
 static uint8_t pulses;
-static uint8_t paddle_x1;
-static uint8_t paddle_x2;
 static uint8_t ball_x1;
 static uint8_t ball_x2;
 static uint8_t ball_y1;
@@ -177,8 +169,6 @@ void blocks(void)
 
 void main(void)
 {
-    paddle_x1 = PADDLE_X_INIT;
-    paddle_x2 = paddle_x1;
 
     ball_x1 = BALL_X_INIT;
     ball_x2 = ball_x1;
@@ -201,11 +191,6 @@ void main(void)
     hires_clr();
     hbox();
 
-
-    // sprite_update(0, paddle_x1, PADDLE_Y, PADDLE_SPRITE, paddle_x2, PADDLE_Y);
-    // sprite_update(0, paddle_x1 - PADDLE_SPRITE_SPACING, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - PADDLE_SPRITE_SPACING, PADDLE_Y);
-    // sprite_update(0, paddle_x1 + PADDLE_SPRITE_SPACING, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + PADDLE_SPRITE_SPACING, PADDLE_Y);
-
     sprite_update(0, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
 
     blocks();
@@ -213,29 +198,7 @@ void main(void)
     while(1)
     {
 
-        // if (paddle_x2 > paddle_x1)
-        // {
-        //     sprite_update(PADDLE_SPRITE, paddle_x1 - PADDLE_SPRITE_SPACING, PADDLE_Y, 0, paddle_x1 - PADDLE_SPRITE_SPACING, PADDLE_Y);
-        //     sprite_update(0, paddle_x2 + PADDLE_SPRITE_SPACING, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + PADDLE_SPRITE_SPACING, PADDLE_Y);
-        // }
-        // if (paddle_x2 < paddle_x1)
-        // {
-        //     sprite_update(PADDLE_SPRITE, paddle_x1 + PADDLE_SPRITE_SPACING, PADDLE_Y, 0, paddle_x1 + PADDLE_SPRITE_SPACING, PADDLE_Y);
-        //     sprite_update(0, paddle_x2 - PADDLE_SPRITE_SPACING, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - PADDLE_SPRITE_SPACING, PADDLE_Y);
-        // }
-        // if (paddle_x2 == paddle_x1)
-        // {
-        //     sprite_update(PADDLE_SPRITE, paddle_x1, PADDLE_Y, PADDLE_SPRITE, paddle_x1, PADDLE_Y);
-        //     sprite_update(PADDLE_SPRITE, paddle_x1, PADDLE_Y, PADDLE_SPRITE, paddle_x1, PADDLE_Y);
-        // }
-        //
-
-        // paddle_x1 = paddle_x2;
-
         sprite_update(BALL_SPRITE, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
-
-
-
 
         ball_x1 = ball_x2;
         ball_y1 = ball_y2;
@@ -244,28 +207,32 @@ void main(void)
         {
             ball_dx_p = 0;
             ball_dx_n = ball_speed_x;
-            pulses = SOUND_PULESES;
+            pulses = SOUND_BOUNCE;
         }
 
         if (ball_x2 < BALL_X_MIN)
         {
             ball_dx_p = ball_speed_x;
             ball_dx_n = 0;
-            pulses = SOUND_PULESES;
+            pulses = SOUND_BOUNCE;
         }
 
         if (ball_y2 > BALL_Y_MAX)
         {
+            ball_dx_p = 0;
+            ball_dx_n = 0;
             ball_dy_p = 0;
-            ball_dy_n = ball_speed_y;
-            pulses = SOUND_PULESES;
+            ball_dy_n = 0;
+            pulses = SOUND_END;
+            start = 0;
+            ball_y2 = BALL_Y_MAX;
         }
 
         if (ball_y2 < BALL_Y_MIN)
         {
             ball_dy_p = ball_speed_y;
             ball_dy_n = 0;
-            pulses = SOUND_PULESES;
+            pulses = SOUND_BOUNCE;
         }
 
         ball_x2 += ball_dx_p - ball_dx_n;
@@ -281,7 +248,7 @@ void main(void)
                 bricks_blue[x_contract] = 0;
                 ball_dy_p = ball_speed_y - ball_dy_p;
                 ball_dy_n = ball_speed_y - ball_dy_n;
-                pulses = SOUND_PULESES;
+                pulses = SOUND_BOUNCE;
                 brick_off(x_contract, y_contract, BRICKS_BLUE);
             }
         }
@@ -292,7 +259,7 @@ void main(void)
                 bricks_orange[x_contract] = 0;
                 ball_dy_p = ball_speed_y - ball_dy_p;
                 ball_dy_n = ball_speed_y - ball_dy_n;
-                pulses = SOUND_PULESES;
+                pulses = SOUND_BOUNCE;
                 brick_off(x_contract, y_contract, BRICKS_ORANGE);
             }
         }
@@ -303,7 +270,7 @@ void main(void)
                 bricks_purple[x_contract] = 0;
                 ball_dy_p = ball_speed_y - ball_dy_p;
                 ball_dy_n = ball_speed_y - ball_dy_n;
-                pulses = SOUND_PULESES;
+                pulses = SOUND_BOUNCE;
                 brick_off(x_contract, y_contract, BRICKS_PURPLE);
             }
         }
@@ -314,29 +281,10 @@ void main(void)
                 bricks_green[x_contract] = 0;
                 ball_dy_p = ball_speed_y - ball_dy_p;
                 ball_dy_n = ball_speed_y - ball_dy_n;
-                pulses = SOUND_PULESES;
+                pulses = SOUND_BOUNCE;
                 brick_off(x_contract, y_contract, BRICKS_GREEN);
             }
         }
-
-
-        joystick_run();
-
-        // if (joystick_left_get())
-        // {
-        //     if (paddle_x2 > 50)
-        //     {
-        //         paddle_x2 -= PADDLE_STEP;
-        //     }
-        // }
-        //
-        // if (joystick_right_get())
-        // {
-        //     if (paddle_x2 < 200)
-        //     {
-        //         paddle_x2 += PADDLE_STEP;
-        //     }
-        // }
 
         if (joystick_fire_get())
         {
