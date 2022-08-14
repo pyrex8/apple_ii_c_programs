@@ -65,6 +65,8 @@ static uint8_t x_contract;
 static uint8_t y_contract;
 static uint8_t start;
 static uint8_t end;
+static uint8_t score;
+static uint8_t high_score;
 // pad the end with one zero
 static uint8_t bricks_blue[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 static uint8_t bricks_purple[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
@@ -98,7 +100,6 @@ void sprite_update(uint8_t sprite1, uint8_t x1, uint8_t y1, uint8_t sprite2, uin
     sprite_xor(sprite2, col_delta, row_delta, sprite_xl);
     sprite_buffer_to_hgr(sprite_xh, y1);
 }
-
 
 static void hbox(void)
 {
@@ -182,11 +183,14 @@ void game_init(void)
 
     start = 0;
     end = 0;
+
+    high_score = score;
+    score = 0;
 }
 
 void main(void)
 {
-    uint8_t i = 0;
+    high_score = 0;
 
     pointers_init();
     sprite_init();
@@ -199,11 +203,6 @@ void main(void)
     sprite_update(0, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
 
     blocks();
-
-    for (i = 0; i < 10; i++)
-    {
-        digit_set(10 + i, 170, i);
-    }
 
     while(1)
     {
@@ -260,6 +259,7 @@ void main(void)
                 ball_dy_n = ball_speed_y - ball_dy_n;
                 pulses = SOUND_BOUNCE;
                 brick_off(x_contract, y_contract, BRICKS_BLUE);
+                score++;
             }
         }
         if (y_contract == BRICKS_Y_ORANGE)
@@ -271,6 +271,8 @@ void main(void)
                 ball_dy_n = ball_speed_y - ball_dy_n;
                 pulses = SOUND_BOUNCE;
                 brick_off(x_contract, y_contract, BRICKS_ORANGE);
+                score++;
+                digit_set(10, 185, score & 7);
             }
         }
         if (y_contract == BRICKS_Y_PURPLE)
@@ -282,6 +284,8 @@ void main(void)
                 ball_dy_n = ball_speed_y - ball_dy_n;
                 pulses = SOUND_BOUNCE;
                 brick_off(x_contract, y_contract, BRICKS_PURPLE);
+                score++;
+                digit_set(10, 185, score & 7);
             }
         }
         if (y_contract == BRICKS_Y_GREEN)
@@ -293,6 +297,8 @@ void main(void)
                 ball_dy_n = ball_speed_y - ball_dy_n;
                 pulses = SOUND_BOUNCE;
                 brick_off(x_contract, y_contract, BRICKS_GREEN);
+                score++;
+                digit_set(10, 185, score & 7);
             }
         }
 
@@ -305,6 +311,8 @@ void main(void)
                 ball_dy_n = ball_speed_y - ball_dy_n;
                 pulses = SOUND_BOUNCE;
                 brick_off(x_contract, y_contract, BRICKS_WHITE);
+                score++;
+                digit_set(10, 185, score & 7);
             }
         }
 
