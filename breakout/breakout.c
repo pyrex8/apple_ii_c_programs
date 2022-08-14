@@ -36,7 +36,7 @@ const uint8_t mod7[] = {MOD7};
 #define BALL_Y_MAX 180
 
 #define BRICKS_NUMBER 20
-#define BRICKS_SPACING 4
+#define BRICKS_SPACING 3
 #define BRICKS_BLUE 14
 #define BRICKS_ORANGE 13
 #define BRICKS_PURPLE 12
@@ -44,11 +44,13 @@ const uint8_t mod7[] = {MOD7};
 #define BRICKS_WHITE 10
 #define BRICK_X_OFFSET 47
 #define BRICK_Y_OFFSET 5
-#define BRICKS_Y_BLUE 3
+#define BRICKS_Y_BLUE BRICKS_SPACING - 1
 #define BRICKS_Y_ORANGE (BRICKS_Y_BLUE + BRICKS_SPACING)
 #define BRICKS_Y_PURPLE (BRICKS_Y_ORANGE + BRICKS_SPACING)
 #define BRICKS_Y_GREEN (BRICKS_Y_PURPLE + BRICKS_SPACING)
 #define BRICKS_Y_WHITE (BRICKS_Y_GREEN + BRICKS_SPACING)
+
+#define SCORE_Y 146
 
 static uint8_t pulses;
 static uint8_t ball_x1;
@@ -112,8 +114,8 @@ static void hbox(void)
 {
     hires_hline(8, 6, 24, WHITE);
     hires_hline(8, 6 + 1, 24, WHITE);
-    hires_vline(8, 8, 191, 0x03);
-    hires_vline(31, 8, 191, 0x60);
+    hires_vline(8, 8, 164, 0x03);
+    hires_vline(31, 8, 164, 0x60);
 }
 
 uint8_t expand_x(uint8_t x)
@@ -193,12 +195,11 @@ void game_init(void)
 
     if (score > high_score)
     {
+        high_score = score;
         high_ones = score_ones;
         high_tens = score_tens;
         high_hundreds = score_hundreds;
     }
-
-
 
     score = 0;
     score_ones = 0;
@@ -208,13 +209,16 @@ void game_init(void)
 
 void score_draw(void)
 {
-    digit_set(10, 185, score_hundreds);
-    digit_set(11, 185, score_tens);
-    digit_set(12, 185, score_ones);
+    digit_set(10, SCORE_Y, score_hundreds);
+    digit_set(11, SCORE_Y, score_tens);
+    digit_set(12, SCORE_Y, score_ones);
+}
 
-    digit_set(27, 185, high_hundreds);
-    digit_set(28, 185, high_tens);
-    digit_set(29, 185, high_ones);
+void high_score_draw(void)
+{
+    digit_set(27, SCORE_Y, high_hundreds);
+    digit_set(28, SCORE_Y, high_tens);
+    digit_set(29, SCORE_Y, high_ones);
 }
 
 void score_increase(void)
@@ -264,6 +268,7 @@ void main(void)
 
     blocks();
     score_draw();
+    high_score_draw();
 
     while(1)
     {
@@ -389,6 +394,7 @@ void main(void)
                 sprite_update(0, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
                 blocks();
                 score_draw();
+                high_score_draw();
             }
         }
 
