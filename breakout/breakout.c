@@ -61,6 +61,7 @@ static uint8_t ball_speed_y;
 static uint8_t x_contract;
 static uint8_t y_contract;
 static uint8_t start;
+static uint8_t end;
 // pad the end with one zero
 static uint8_t bricks_blue[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 static uint8_t bricks_purple[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
@@ -103,8 +104,6 @@ static void hbox(void)
     hires_vline(31, 8, 191, 0x60);
 }
 
-
-
 uint8_t expand_x(uint8_t x)
 {
     return (x << 3) + BRICK_X_OFFSET;
@@ -144,32 +143,22 @@ void blocks(void)
     uint8_t i;
     for (i = 0; i < BRICKS_NUMBER; i++)
     {
-        if (bricks_blue[i])
-        {
-            brick_on(i, BRICKS_Y_BLUE, BRICKS_BLUE);
-        }
+        bricks_blue[i] = 1;
+        brick_on(i, BRICKS_Y_BLUE, BRICKS_BLUE);
 
-        if (bricks_orange[i])
-        {
-            brick_on(i, BRICKS_Y_ORANGE, BRICKS_ORANGE);
-        }
+        bricks_orange[i] = 1;
+        brick_on(i, BRICKS_Y_ORANGE, BRICKS_ORANGE);
 
-        if (bricks_purple[i])
-        {
-            brick_on(i, BRICKS_Y_PURPLE, BRICKS_PURPLE);
-        }
+        bricks_purple[i] = 1;
+        brick_on(i, BRICKS_Y_PURPLE, BRICKS_PURPLE);
 
-        if (bricks_green[i])
-        {
-            brick_on(i, BRICKS_Y_GREEN, BRICKS_GREEN);
-        }
+        bricks_green[i] = 1;
+        brick_on(i, BRICKS_Y_GREEN, BRICKS_GREEN);
     }
 }
 
-
-void main(void)
+void game_init(void)
 {
-
     ball_x1 = BALL_X_INIT;
     ball_x2 = ball_x1;
     ball_y1 = 10;
@@ -185,9 +174,15 @@ void main(void)
     y_contract = 0;
 
     start = 0;
+    end = 0;
+}
 
+void main(void)
+{
     pointers_init();
     sprites_init();
+
+    game_init();
     hires_clr();
     hbox();
 
@@ -224,7 +219,7 @@ void main(void)
             ball_dy_p = 0;
             ball_dy_n = 0;
             pulses = SOUND_END;
-            start = 0;
+            end = 1;
             ball_y2 = BALL_Y_MAX;
         }
 
@@ -293,6 +288,14 @@ void main(void)
                 start = 1;
                 ball_speed_y = 4;
                 ball_dy_p = ball_speed_y;
+            }
+            if (end == 1)
+            {
+                game_init();
+                hires_clr();
+                hbox();
+                sprite_update(0, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
+                blocks();
             }
         }
 
