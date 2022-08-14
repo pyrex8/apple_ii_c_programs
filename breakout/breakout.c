@@ -67,6 +67,13 @@ static uint8_t start;
 static uint8_t end;
 static uint8_t score;
 static uint8_t high_score;
+// static uint8_t score_ones;
+// static uint8_t score_tens;
+// static uint8_t score_hundreds;
+// static uint8_t high_ones;
+// static uint8_t high_tens;
+// static uint8_t high_hundreds;
+
 // pad the end with one zero
 static uint8_t bricks_blue[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 static uint8_t bricks_purple[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
@@ -184,9 +191,47 @@ void game_init(void)
     start = 0;
     end = 0;
 
-    high_score = score;
+    // if (score > high_score)
+    // {
+    //     high_ones = score_ones;
+    //     high_tens = score_tens;
+    //     high_hundreds = score_hundreds;
+    // }
+
+    // digit_set(110, 185, score_hundreds);
+    // digit_set(117, 185, score_tens);
+    // digit_set(124, 185, score_ones);
+
     score = 0;
 }
+
+void score_increase(void)
+{
+    score++;
+    // if (score_ones > 8)
+    // {
+    //     score_ones = 0;
+    //     if (score_tens > 8)
+    //     {
+    //         score_tens = 0;
+    //         score_hundreds++;
+    //
+    //     }
+    //     else
+    //     {
+    //         score_tens++;
+    //     }
+    // }
+    // else
+    // {
+    //     score_ones++;
+    // }
+    // digit_set(10, 185, score_hundreds);
+    // digit_set(17, 185, score_tens);
+    // digit_set(24, 185, score_ones);
+}
+
+
 
 void main(void)
 {
@@ -259,7 +304,7 @@ void main(void)
                 ball_dy_n = ball_speed_y - ball_dy_n;
                 pulses = SOUND_BOUNCE;
                 brick_off(x_contract, y_contract, BRICKS_BLUE);
-                score++;
+                score_increase();
             }
         }
         if (y_contract == BRICKS_Y_ORANGE)
@@ -271,8 +316,7 @@ void main(void)
                 ball_dy_n = ball_speed_y - ball_dy_n;
                 pulses = SOUND_BOUNCE;
                 brick_off(x_contract, y_contract, BRICKS_ORANGE);
-                score++;
-                digit_set(10, 185, score & 7);
+                score_increase();
             }
         }
         if (y_contract == BRICKS_Y_PURPLE)
@@ -284,8 +328,7 @@ void main(void)
                 ball_dy_n = ball_speed_y - ball_dy_n;
                 pulses = SOUND_BOUNCE;
                 brick_off(x_contract, y_contract, BRICKS_PURPLE);
-                score++;
-                digit_set(10, 185, score & 7);
+                score_increase();
             }
         }
         if (y_contract == BRICKS_Y_GREEN)
@@ -297,8 +340,7 @@ void main(void)
                 ball_dy_n = ball_speed_y - ball_dy_n;
                 pulses = SOUND_BOUNCE;
                 brick_off(x_contract, y_contract, BRICKS_GREEN);
-                score++;
-                digit_set(10, 185, score & 7);
+                score_increase();
             }
         }
 
@@ -311,8 +353,7 @@ void main(void)
                 ball_dy_n = ball_speed_y - ball_dy_n;
                 pulses = SOUND_BOUNCE;
                 brick_off(x_contract, y_contract, BRICKS_WHITE);
-                score++;
-                digit_set(10, 185, score & 7);
+                score_increase();
             }
         }
 
