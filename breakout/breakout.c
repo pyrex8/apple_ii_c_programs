@@ -36,17 +36,19 @@ const uint8_t mod7[] = {MOD7};
 #define BALL_Y_MAX 180
 
 #define BRICKS_NUMBER 20
-#define BRICKS_SPACING 8
+#define BRICKS_SPACING 4
 #define BRICKS_BLUE 14
 #define BRICKS_ORANGE 13
 #define BRICKS_PURPLE 12
 #define BRICKS_GREEN 11
+#define BRICKS_WHITE 10
 #define BRICK_X_OFFSET 47
 #define BRICK_Y_OFFSET 5
-#define BRICKS_Y_BLUE 2
-#define BRICKS_Y_ORANGE 5
-#define BRICKS_Y_PURPLE 8
-#define BRICKS_Y_GREEN 11
+#define BRICKS_Y_BLUE 3
+#define BRICKS_Y_ORANGE (BRICKS_Y_BLUE + BRICKS_SPACING)
+#define BRICKS_Y_PURPLE (BRICKS_Y_ORANGE + BRICKS_SPACING)
+#define BRICKS_Y_GREEN (BRICKS_Y_PURPLE + BRICKS_SPACING)
+#define BRICKS_Y_WHITE (BRICKS_Y_GREEN + BRICKS_SPACING)
 
 static uint8_t pulses;
 static uint8_t ball_x1;
@@ -68,6 +70,7 @@ static uint8_t bricks_blue[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 static uint8_t bricks_purple[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 static uint8_t bricks_orange[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 static uint8_t bricks_green[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
+static uint8_t bricks_white[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 
 static void pointers_init(void)
 {
@@ -155,6 +158,9 @@ void blocks(void)
 
         bricks_green[i] = 1;
         brick_on(i, BRICKS_Y_GREEN, BRICKS_GREEN);
+
+        bricks_white[i] = 1;
+        brick_on(i, BRICKS_Y_WHITE, BRICKS_WHITE);
     }
 }
 
@@ -287,6 +293,18 @@ void main(void)
                 ball_dy_n = ball_speed_y - ball_dy_n;
                 pulses = SOUND_BOUNCE;
                 brick_off(x_contract, y_contract, BRICKS_GREEN);
+            }
+        }
+
+        if (y_contract == BRICKS_Y_WHITE)
+        {
+            if (bricks_white[x_contract] == 1)
+            {
+                bricks_white[x_contract] = 0;
+                ball_dy_p = ball_speed_y - ball_dy_p;
+                ball_dy_n = ball_speed_y - ball_dy_n;
+                pulses = SOUND_BOUNCE;
+                brick_off(x_contract, y_contract, BRICKS_WHITE);
             }
         }
 
