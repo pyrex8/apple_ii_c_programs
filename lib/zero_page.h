@@ -20,12 +20,16 @@ enum Zero_page
 
     SBUFRL,
     SBUFRH,
+
+    DIGITL,
+    DIGITH,
 };
 
 // low byte is used for some instructions, alias so that it maps to assembly version
 #define LKLO                LKLOL
 #define LKHI                LKHIL
 #define SBUFR               SBUFRL // sprint buffer location
+#define DIGIT               DIGITL
 
 // pointers to zero page memory
 #define DATA1_P             *((uint8_t*)DATA1)
@@ -46,3 +50,6 @@ enum Zero_page
 
 #define SBUFRL_P            *((uint8_t*)SBUFRL)
 #define SBUFRH_P            *((uint8_t*)SBUFRH)
+
+#define DIGITL_P            *((uint8_t*)DIGITL)
+#define DIGITH_P            *((uint8_t*)DIGITH)

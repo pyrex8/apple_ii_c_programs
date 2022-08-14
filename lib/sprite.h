@@ -1,7 +1,7 @@
-#ifndef __SPRITES_H__
-#define __SPRITES_H__
+#ifndef __SPRITE_H__
+#define __SPRITE_H__
 
-void sprites_init(void);
+void sprite_init(void);
 
 void sprite_hgr_to_buffer(uint8_t column, uint8_t row);
 

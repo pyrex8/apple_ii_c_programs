@@ -6,7 +6,7 @@
 #include "test_pin.h"
 #include "zero_page.h"
 #include "hires.h"
-#include "sprites.h"
+#include "sprite.h"
 
 #define SPRITE_BUFFER_SIZE  53 // (4 * 13) + 1
 #define SO 17 // (4 * 4) + 1
@@ -38,7 +38,7 @@ static const uint8_t sprites_color[] = {0x00, 0x00, 0x00, 0x80, 0x80, 0x00, 0x00
 static uint8_t sprite_buffer[SPRITE_BUFFER_SIZE];
 static uint8_t sprite_index;
 
-void sprites_init(void)
+void sprite_init(void)
 {
     SBUFRL_P = (uint8_t)sprite_buffer;
     SBUFRH_P = (uint8_t)(((uint16_t)sprite_buffer)>> 8);

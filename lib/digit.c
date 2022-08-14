@@ -1,0 +1,64 @@
+
+
+#include <string.h>
+#include <stdio.h>
+#include <stdint.h>
+#include "test_pin.h"
+#include "zero_page.h"
+#include "hires.h"
+#include "digit.h"
+
+
+static const uint8_t digits[] =
+{
+0x3F, 0x33, 0x33, 0x33, 0x33, 0x33, 0x3F, 0x00, // 0
+0x0C, 0x0F, 0x0C, 0x0C, 0x0C, 0x0C, 0x3F, 0x00, // 1
+0x3F, 0x30, 0x30, 0x3F, 0x03, 0x03, 0x3F, 0x00, // 2
+0x3F, 0x30, 0x30, 0x3C, 0x30, 0x30, 0x3F, 0x00, // 3
+0x33, 0x33, 0x33, 0x3F, 0x30, 0x30, 0x30, 0x00, // 4
+0x3F, 0x03, 0x03, 0x3F, 0x30, 0x30, 0x3F, 0x00, // 5
+0x03, 0x03, 0x03, 0x3F, 0x33, 0x33, 0x3F, 0x00, // 6
+0x3F, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x00, // 7
+0x3F, 0x33, 0x33, 0x3F, 0x33, 0x33, 0x3F, 0x00, // 8
+0x3F, 0x33, 0x33, 0x3F, 0x30, 0x30, 0x30, 0x00, // 9
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // blank
+};
+
+void digit_init(void)
+{
+    DIGITL_P = (uint8_t)digits;
+    DIGITH_P = (uint8_t)(((uint16_t)digits)>> 8);
+}
+
+void digit_set(uint8_t column, uint8_t row, uint8_t digit)
+{
+    DATA1_P = ((digit + 1) << 3) - 1;
+    DATA2_P = column;
+    DATA3_P = row;
+    DATA4_P = row + 8;
+
+    // init
+    __asm__ ("ldx %b", DATA4);          // Start at second-to-last row
+
+    // loop
+    __asm__ ("vl1: dex");
+
+    __asm__ ("ldy %b", DATA1);
+    __asm__ ("lda (%b),y", DIGIT);
+    __asm__ ("sta %b", DATA5);
+    __asm__ ("dec %b", DATA1);
+
+    __asm__ ("txa");                    // row to a
+    __asm__ ("tay");                    // row to y
+    __asm__ ("lda (%b),y", LKLO);       // Get the row address
+    __asm__ ("sta %b", ADDR1L);
+    __asm__ ("lda (%b),y", LKHI);
+    __asm__ ("sta %b", ADDR1H);
+    __asm__ ("ldy %b", DATA2);          // column
+
+
+    __asm__ ("lda %b", DATA5);
+    __asm__ ("sta (%b),y", ADDR1L);
+    __asm__ ("cpx %b", DATA3);
+    __asm__ ("bne vl1");
+}

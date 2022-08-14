@@ -8,9 +8,10 @@
 #include "../lib/test_pin.h"
 #include "../lib/zero_page.h"
 #include "../lib/hires.h"
-#include "../lib/sprites.h"
+#include "../lib/sprite.h"
 #include "../lib/joystick.h"
 #include "../lib/sound.h"
+#include "../lib/digit.h"
 
 
 static const uint8_t lklo[] = {HIRES_MEMORY_LOW_BYTE};
@@ -179,8 +180,11 @@ void game_init(void)
 
 void main(void)
 {
+    uint8_t i = 0;
+
     pointers_init();
-    sprites_init();
+    sprite_init();
+    digit_init();
 
     game_init();
     hires_clr();
@@ -189,6 +193,11 @@ void main(void)
     sprite_update(0, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
 
     blocks();
+
+    for (i = 0; i < 10; i++)
+    {
+        digit_set(10 + i, 170, i);
+    }
 
     while(1)
     {
