@@ -12,7 +12,7 @@
 #include "../lib/joystick.h"
 #include "../lib/sound.h"
 #include "../lib/digit.h"
-
+#include "../lib/keyboard.h"
 
 static const uint8_t lklo[] = {HIRES_MEMORY_LOW_BYTE};
 static const uint8_t lkhi[] = {HIRES_MEMORY_HIGH_BYTE};
@@ -386,7 +386,7 @@ void main(void)
             }
         }
 
-        if (joystick_fire_get())
+        if (joystick_fire_get() || (keyboard_get() > 127))
         {
             if (start == 0)
             {
