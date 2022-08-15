@@ -301,6 +301,14 @@ void main(void)
             pulses = SOUND_END;
             end = 1;
             ball_y2 = BALL_Y_MAX;
+            if (ball_x2 > BALL_X_MAX)
+            {
+                ball_x2 = BALL_X_MAX;
+            }
+            if (ball_x2 < BALL_X_MIN)
+            {
+                ball_x2 = BALL_X_MIN;
+            }
         }
 
         if (ball_y2 < BALL_Y_MIN)
