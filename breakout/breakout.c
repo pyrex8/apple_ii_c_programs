@@ -366,11 +366,20 @@ void main(void)
                     ball_dx_boost_p = 0;
                     ball_dx_boost_n = 1;
                 }
-                if (ball_x2 > paddle_x2 + 8)
+                else
                 {
-                    ball_dx_boost_p = 1;
-                    ball_dx_boost_n = 0;
+                    if (ball_x2 > paddle_x2 + 8)
+                    {
+                        ball_dx_boost_p = 1;
+                        ball_dx_boost_n = 0;
+                    }
+                    else
+                    {
+                        ball_dx_boost_p = 0;
+                        ball_dx_boost_n = 0;
+                    }
                 }
+
             }
         }
 
