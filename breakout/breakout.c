@@ -66,6 +66,8 @@ static uint8_t ball_y1;
 static uint8_t ball_y2;
 static uint8_t ball_dx_p;
 static uint8_t ball_dx_n;
+static uint8_t ball_dx_boost_p;
+static uint8_t ball_dx_boost_n;
 static uint8_t ball_dy_p;
 static uint8_t ball_dy_n;
 static uint8_t ball_speed_x;
@@ -190,6 +192,8 @@ void game_init(void)
     ball_speed_y = BALL_SPEED;
     ball_dx_p = ball_speed_x;
     ball_dx_n = 0;
+    ball_dx_boost_p = 0;
+    ball_dx_boost_n = 0;
     ball_dy_p = 0;
     ball_dy_n = 0;
 
@@ -198,6 +202,7 @@ void game_init(void)
 
     start = 0;
     end = 0;
+    pulses = 0;
 
     if (score > high_score)
     {
@@ -314,6 +319,8 @@ void main(void)
         {
             ball_dx_p = 0;
             ball_dx_n = ball_speed_x;
+            ball_dx_boost_p = 0;
+            ball_dx_boost_n = 0;
             pulses = SOUND_BOUNCE;
         }
 
@@ -321,6 +328,8 @@ void main(void)
         {
             ball_dx_p = ball_speed_x;
             ball_dx_n = 0;
+            ball_dx_boost_p = 0;
+            ball_dx_boost_n = 0;
             pulses = SOUND_BOUNCE;
         }
 
@@ -330,6 +339,8 @@ void main(void)
             ball_dx_n = 0;
             ball_dy_p = 0;
             ball_dy_n = 0;
+            ball_dx_boost_p = 0;
+            ball_dx_boost_n = 0;
             pulses = SOUND_END;
             end = 1;
             ball_y2 = BALL_Y_MAX;
@@ -350,6 +361,16 @@ void main(void)
                 ball_dy_p = 0;
                 ball_dy_n = ball_speed_y;
                 pulses = SOUND_BOUNCE;
+                if (ball_x2 < paddle_x2 - 4)
+                {
+                    ball_dx_boost_p = 0;
+                    ball_dx_boost_n = 1;
+                }
+                if (ball_x2 > paddle_x2 + 8)
+                {
+                    ball_dx_boost_p = 1;
+                    ball_dx_boost_n = 0;
+                }
             }
         }
 
@@ -360,7 +381,7 @@ void main(void)
             pulses = SOUND_BOUNCE;
         }
 
-        ball_x2 += ball_dx_p - ball_dx_n;
+        ball_x2 += ball_dx_p - ball_dx_n + ball_dx_boost_p - ball_dx_boost_n;
         ball_y2 += ball_dy_p - ball_dy_n;
 
         x_contract = contract_x(ball_x2);
