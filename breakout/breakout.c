@@ -26,6 +26,11 @@ const uint8_t mod7[] = {MOD7};
 #define SOUND_BOUNCE 5
 #define SOUND_END 30
 
+#define PADDLE_SPRITE 10
+#define SPRITE_STEP 4
+#define PADDLE_Y 180
+#define PADDLE_X_INIT 140
+
 #define BALL_SPRITE 10
 #define BALL_SPEED 4
 #define BALL_X_INIT 112
@@ -33,7 +38,7 @@ const uint8_t mod7[] = {MOD7};
 #define BALL_X_MIN 48
 #define BALL_X_MAX 200
 #define BALL_Y_MIN 5
-#define BALL_Y_MAX 180
+#define BALL_Y_MAX 182
 
 #define BRICKS_NUMBER 20
 #define BRICKS_SPACING 3
@@ -50,9 +55,11 @@ const uint8_t mod7[] = {MOD7};
 #define BRICKS_Y_GREEN (BRICKS_Y_PURPLE + BRICKS_SPACING)
 #define BRICKS_Y_WHITE (BRICKS_Y_GREEN + BRICKS_SPACING)
 
-#define SCORE_Y 146
+#define SCORE_Y 10
 
 static uint8_t pulses;
+static uint8_t paddle_x1;
+static uint8_t paddle_x2;
 static uint8_t ball_x1;
 static uint8_t ball_x2;
 static uint8_t ball_y1;
@@ -81,7 +88,6 @@ static uint8_t bricks_blue[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 static uint8_t bricks_purple[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 static uint8_t bricks_orange[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 static uint8_t bricks_green[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
-static uint8_t bricks_white[BRICKS_NUMBER + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 
 static void pointers_init(void)
 {
@@ -114,8 +120,8 @@ static void hbox(void)
 {
     hires_hline(8, 6, 24, WHITE);
     hires_hline(8, 6 + 1, 24, WHITE);
-    hires_vline(8, 8, 164, 0x03);
-    hires_vline(31, 8, 164, 0x60);
+    hires_vline(8, 8, 191, 0x03);
+    hires_vline(31, 8, 191, 0x60);
 }
 
 uint8_t expand_x(uint8_t x)
@@ -168,17 +174,17 @@ void blocks(void)
 
         bricks_green[i] = 1;
         brick_on(i, BRICKS_Y_GREEN, BRICKS_GREEN);
-
-        bricks_white[i] = 1;
-        brick_on(i, BRICKS_Y_WHITE, BRICKS_WHITE);
     }
 }
 
 void game_init(void)
 {
+    paddle_x1 = PADDLE_X_INIT;
+    paddle_x2 = paddle_x1;
+
     ball_x1 = BALL_X_INIT;
     ball_x2 = ball_x1;
-    ball_y1 = 10;
+    ball_y1 = BALL_Y_INIT;
     ball_y2 = ball_y1;
     ball_speed_x = 2;
     ball_speed_y = BALL_SPEED;
@@ -219,6 +225,13 @@ void high_score_draw(void)
     digit_set(27, SCORE_Y, high_hundreds);
     digit_set(28, SCORE_Y, high_tens);
     digit_set(29, SCORE_Y, high_ones);
+}
+
+void paddle_draw(void)
+{
+    sprite_update(0, paddle_x1, PADDLE_Y, PADDLE_SPRITE, paddle_x2, PADDLE_Y);
+    sprite_update(0, paddle_x1 - 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - 4, PADDLE_Y);
+    sprite_update(0, paddle_x1 + 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + 4, PADDLE_Y);
 }
 
 void score_increase(void)
@@ -267,11 +280,30 @@ void main(void)
     sprite_update(0, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
 
     blocks();
+    paddle_draw();
     score_draw();
     high_score_draw();
 
     while(1)
     {
+        if (paddle_x2 > paddle_x1)
+         {
+             sprite_update(PADDLE_SPRITE, paddle_x1 - 4, PADDLE_Y, 0, paddle_x1 - 4, PADDLE_Y);
+             sprite_update(0, paddle_x2 + 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + 4, PADDLE_Y);
+         }
+         if (paddle_x2 < paddle_x1)
+         {
+             sprite_update(PADDLE_SPRITE, paddle_x1 + 4, PADDLE_Y, 0, paddle_x1 + 4, PADDLE_Y);
+             sprite_update(0, paddle_x2 - 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - 4, PADDLE_Y);
+         }
+         if (paddle_x2 == paddle_x1)
+         {
+             sprite_update(PADDLE_SPRITE, paddle_x1, PADDLE_Y, PADDLE_SPRITE, paddle_x1, PADDLE_Y);
+             sprite_update(PADDLE_SPRITE, paddle_x1, PADDLE_Y, PADDLE_SPRITE, paddle_x1, PADDLE_Y);
+         }
+
+
+         paddle_x1 = paddle_x2;
 
         sprite_update(BALL_SPRITE, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
 
@@ -309,6 +341,17 @@ void main(void)
             {
                 ball_x2 = BALL_X_MIN;
             }
+        }
+
+        if ((ball_y2 > 175) && (ball_y2 < 180))
+        {
+            if ((ball_x2 > paddle_x2 - 10) && (ball_x2 < paddle_x2 + 10))
+            {
+                ball_dy_p = 0;
+                ball_dy_n = ball_speed_y;
+                pulses = SOUND_BOUNCE;
+            }
+
         }
 
         if (ball_y2 < BALL_Y_MIN)
@@ -373,20 +416,25 @@ void main(void)
             }
         }
 
-        if (y_contract == BRICKS_Y_WHITE)
+        joystick_run();
+
+        if (joystick_left_get())
         {
-            if (bricks_white[x_contract] == 1)
+            if (paddle_x2 > 50)
             {
-                bricks_white[x_contract] = 0;
-                ball_dy_p = ball_speed_y - ball_dy_p;
-                ball_dy_n = ball_speed_y - ball_dy_n;
-                pulses = SOUND_BOUNCE;
-                brick_off(x_contract, y_contract, BRICKS_WHITE);
-                score_increase();
+                paddle_x2 -= SPRITE_STEP;
             }
         }
 
-        if (joystick_fire_get() || (keyboard_get() > 127))
+        if (joystick_right_get())
+        {
+            if (paddle_x2 < 200)
+            {
+                paddle_x2 += SPRITE_STEP;
+            }
+        }
+
+        if (joystick_fire_get())
         {
             if (start == 0)
             {
@@ -401,6 +449,7 @@ void main(void)
                 hbox();
                 sprite_update(0, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
                 blocks();
+                paddle_draw();
                 score_draw();
                 high_score_draw();
             }

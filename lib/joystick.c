@@ -35,9 +35,7 @@ void joystick_run(void)
     JOYSTICK_START;
     left = JOYSTICK_LEFT;
     up = JOYSTICK_UP;
-    TEST_PIN_TOGGLE;
     delay();
-    TEST_PIN_TOGGLE;
     right = JOYSTICK_RIGHT;
     down = JOYSTICK_DOWN;
 }
