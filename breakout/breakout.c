@@ -27,12 +27,12 @@ const uint8_t mod7[] = {MOD7};
 #define SOUND_END 30
 
 #define PADDLE_SPRITE 10
-#define SPRITE_STEP 4
+#define SPRITE_STEP 6
 #define PADDLE_Y 180
 #define PADDLE_X_INIT 140
 
 #define BALL_SPRITE 10
-#define BALL_SPEED 4
+#define BALL_SPEED 8
 #define BALL_X_INIT 112
 #define BALL_Y_INIT 112
 #define BALL_X_MIN 48
@@ -230,8 +230,8 @@ void high_score_draw(void)
 void paddle_draw(void)
 {
     sprite_update(0, paddle_x1, PADDLE_Y, PADDLE_SPRITE, paddle_x2, PADDLE_Y);
-    sprite_update(0, paddle_x1 - 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - 4, PADDLE_Y);
-    sprite_update(0, paddle_x1 + 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + 4, PADDLE_Y);
+    sprite_update(0, paddle_x1 - SPRITE_STEP, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - SPRITE_STEP, PADDLE_Y);
+    sprite_update(0, paddle_x1 + SPRITE_STEP, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + SPRITE_STEP, PADDLE_Y);
 }
 
 void score_increase(void)
@@ -288,13 +288,13 @@ void main(void)
     {
         if (paddle_x2 > paddle_x1)
          {
-             sprite_update(PADDLE_SPRITE, paddle_x1 - 4, PADDLE_Y, 0, paddle_x1 - 4, PADDLE_Y);
-             sprite_update(0, paddle_x2 + 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + 4, PADDLE_Y);
+             sprite_update(PADDLE_SPRITE, paddle_x1 - SPRITE_STEP, PADDLE_Y, 0, paddle_x1 - SPRITE_STEP, PADDLE_Y);
+             sprite_update(0, paddle_x2 + SPRITE_STEP, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + SPRITE_STEP, PADDLE_Y);
          }
          if (paddle_x2 < paddle_x1)
          {
-             sprite_update(PADDLE_SPRITE, paddle_x1 + 4, PADDLE_Y, 0, paddle_x1 + 4, PADDLE_Y);
-             sprite_update(0, paddle_x2 - 4, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - 4, PADDLE_Y);
+             sprite_update(PADDLE_SPRITE, paddle_x1 + SPRITE_STEP, PADDLE_Y, 0, paddle_x1 + SPRITE_STEP, PADDLE_Y);
+             sprite_update(0, paddle_x2 - SPRITE_STEP, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - SPRITE_STEP, PADDLE_Y);
          }
          if (paddle_x2 == paddle_x1)
          {
@@ -345,13 +345,12 @@ void main(void)
 
         if ((ball_y2 > 175) && (ball_y2 < 180))
         {
-            if ((ball_x2 > paddle_x2 - 10) && (ball_x2 < paddle_x2 + 10))
+            if ((ball_x2 > paddle_x2 - 12) && (ball_x2 < paddle_x2 + 16))
             {
                 ball_dy_p = 0;
                 ball_dy_n = ball_speed_y;
                 pulses = SOUND_BOUNCE;
             }
-
         }
 
         if (ball_y2 < BALL_Y_MIN)
