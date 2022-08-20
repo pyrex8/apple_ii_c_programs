@@ -315,7 +315,10 @@ void main(void)
 
          paddle_x1 = paddle_x2;
 
-        sprite_update(BALL_SPRITE, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
+        if (end == 0)
+        {
+            sprite_update(BALL_SPRITE, ball_x1, ball_y1, BALL_SPRITE, ball_x2, ball_y2);
+        }
 
         ball_x1 = ball_x2;
         ball_y1 = ball_y2;
@@ -348,6 +351,7 @@ void main(void)
             ball_dx_boost_n = 0;
             pulses = SOUND_END;
             end = 1;
+            sprite_update(BALL_SPRITE, ball_x1, ball_y1, 0, ball_x2, ball_y2);
             ball_y2 = BALL_Y_MAX;
             if (ball_x2 > BALL_X_MAX)
             {
