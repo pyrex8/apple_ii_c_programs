@@ -30,9 +30,14 @@ const uint8_t mod7[] = {MOD7};
 #define SPRITE_STEP 6
 #define PADDLE_Y 180
 #define PADDLE_X_INIT 140
+#define PADDLE_WIDTH 10
+#define PADDLE_CENTER 4
+#define PADDLE_COLLISION_MIN (PADDLE_Y - PADDLE_CENTER)
+#define PADDLE_COLLISION_MAX PADDLE_Y
 
 #define BALL_SPRITE 10
-#define BALL_SPEED 8
+#define BALL_SPEED_X 2
+#define BALL_SPEED_Y 8
 #define BALL_X_INIT 112
 #define BALL_Y_INIT 112
 #define BALL_X_MIN 48
@@ -188,8 +193,8 @@ void game_init(void)
     ball_x2 = ball_x1;
     ball_y1 = BALL_Y_INIT;
     ball_y2 = ball_y1;
-    ball_speed_x = 2;
-    ball_speed_y = BALL_SPEED;
+    ball_speed_x = BALL_SPEED_X;
+    ball_speed_y = BALL_SPEED_Y;
     ball_dx_p = ball_speed_x;
     ball_dx_n = 0;
     ball_dx_boost_p = 0;
@@ -354,21 +359,21 @@ void main(void)
             }
         }
 
-        if ((ball_y2 > 175) && (ball_y2 < 180))
+        if ((ball_y2 >= PADDLE_COLLISION_MIN) && (ball_y2 < PADDLE_COLLISION_MAX))
         {
-            if ((ball_x2 > paddle_x2 - 12) && (ball_x2 < paddle_x2 + 16))
+            if ((ball_x2 > paddle_x2 - PADDLE_WIDTH) && (ball_x2 < paddle_x2 + PADDLE_WIDTH))
             {
                 ball_dy_p = 0;
                 ball_dy_n = ball_speed_y;
                 pulses = SOUND_BOUNCE;
-                if (ball_x2 < paddle_x2 - 4)
+                if (ball_x2 < paddle_x2 - PADDLE_CENTER)
                 {
                     ball_dx_boost_p = 0;
                     ball_dx_boost_n = 1;
                 }
                 else
                 {
-                    if (ball_x2 > paddle_x2 + 8)
+                    if (ball_x2 > paddle_x2 + PADDLE_CENTER)
                     {
                         ball_dx_boost_p = 1;
                         ball_dx_boost_n = 0;
