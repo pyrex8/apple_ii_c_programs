@@ -25,17 +25,21 @@ uint8_t down = 0;
 static void delay(void)
 {
     uint8_t i = 0;
-    for (i = 0; i < 28; i++)
+    for (i = 0; i < 50; i++)
     {
     }
 }
 
 void joystick_run(void)
 {
+
     JOYSTICK_START;
+    delay();
     left = JOYSTICK_LEFT;
     up = JOYSTICK_UP;
+    TEST_PIN_TOGGLE;
     delay();
+    TEST_PIN_TOGGLE;
     right = JOYSTICK_RIGHT;
     down = JOYSTICK_DOWN;
 }
