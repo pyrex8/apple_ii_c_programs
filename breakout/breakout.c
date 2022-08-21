@@ -28,12 +28,16 @@ const uint8_t mod7[] = {MOD7};
 
 #define PADDLE_SPRITE 10
 #define SPRITE_STEP 6
+#define SPRITE_STEP2 (2 * SPRITE_STEP)
+#define PADDLE_X_MIN 58
+#define PADDLE_X_MAX 188
 #define PADDLE_Y 180
-#define PADDLE_X_INIT 140
-#define PADDLE_WIDTH 10
+#define PADDLE_X_INIT PADDLE_X_MIN + (SPRITE_STEP * 10)
+#define PADDLE_WIDTH 18
 #define PADDLE_CENTER 4
 #define PADDLE_COLLISION_MIN (PADDLE_Y - PADDLE_CENTER)
 #define PADDLE_COLLISION_MAX PADDLE_Y
+
 
 #define BALL_SPRITE 10
 #define BALL_SPEED_X 2
@@ -242,6 +246,8 @@ void paddle_draw(void)
     sprite_update(0, paddle_x1, PADDLE_Y, PADDLE_SPRITE, paddle_x2, PADDLE_Y);
     sprite_update(0, paddle_x1 - SPRITE_STEP, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - SPRITE_STEP, PADDLE_Y);
     sprite_update(0, paddle_x1 + SPRITE_STEP, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + SPRITE_STEP, PADDLE_Y);
+    sprite_update(0, paddle_x1 - SPRITE_STEP2, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - SPRITE_STEP2, PADDLE_Y);
+    sprite_update(0, paddle_x1 + SPRITE_STEP2, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + SPRITE_STEP2, PADDLE_Y);
 }
 
 void score_increase(void)
@@ -298,13 +304,13 @@ void main(void)
     {
         if (paddle_x2 > paddle_x1)
          {
-             sprite_update(PADDLE_SPRITE, paddle_x1 - SPRITE_STEP, PADDLE_Y, 0, paddle_x1 - SPRITE_STEP, PADDLE_Y);
-             sprite_update(0, paddle_x2 + SPRITE_STEP, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + SPRITE_STEP, PADDLE_Y);
+             sprite_update(PADDLE_SPRITE, paddle_x1 - SPRITE_STEP2, PADDLE_Y, 0, paddle_x1 - SPRITE_STEP2, PADDLE_Y);
+             sprite_update(0, paddle_x2 + SPRITE_STEP2, PADDLE_Y, PADDLE_SPRITE, paddle_x2 + SPRITE_STEP2, PADDLE_Y);
          }
          if (paddle_x2 < paddle_x1)
          {
-             sprite_update(PADDLE_SPRITE, paddle_x1 + SPRITE_STEP, PADDLE_Y, 0, paddle_x1 + SPRITE_STEP, PADDLE_Y);
-             sprite_update(0, paddle_x2 - SPRITE_STEP, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - SPRITE_STEP, PADDLE_Y);
+             sprite_update(PADDLE_SPRITE, paddle_x1 + SPRITE_STEP2, PADDLE_Y, 0, paddle_x1 + SPRITE_STEP2, PADDLE_Y);
+             sprite_update(0, paddle_x2 - SPRITE_STEP2, PADDLE_Y, PADDLE_SPRITE, paddle_x2 - SPRITE_STEP2, PADDLE_Y);
          }
          if (paddle_x2 == paddle_x1)
          {
@@ -458,7 +464,7 @@ void main(void)
 
         if (joystick_left_get())
         {
-            if (paddle_x2 > 50)
+            if (paddle_x2 > PADDLE_X_MIN)
             {
                 paddle_x2 -= SPRITE_STEP;
             }
@@ -466,7 +472,7 @@ void main(void)
 
         if (joystick_right_get())
         {
-            if (paddle_x2 < 200)
+            if (paddle_x2 < PADDLE_X_MAX)
             {
                 paddle_x2 += SPRITE_STEP;
             }
