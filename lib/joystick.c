@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include "delay.h"
 #include "test_pin.h"
 
 #define JOYSTICK_BUTTON0_ADDR 0xC061
@@ -22,22 +23,30 @@ uint8_t right = 0;
 uint8_t up = 0;
 uint8_t down = 0;
 
-static void delay(void)
-{
-    uint8_t i = 0;
-    for (i = 0; i < 50; i++)
-    {
-    }
-}
-
 void joystick_run(void)
 {
 
     JOYSTICK_START;
-    delay();
+    delay_100us();
+    delay_100us();
+    delay_100us();
+    delay_100us();
+    delay_100us();
+    delay_100us();
+    delay_100us();
+    delay_100us();
+    delay_100us();
     left = JOYSTICK_LEFT;
     up = JOYSTICK_UP;
-    delay();
+    delay_100us();
+    delay_100us();
+    delay_100us();
+    delay_100us();
+    delay_100us();
+    delay_100us();
+    delay_100us();
+    delay_100us();
+    delay_100us();
     right = JOYSTICK_RIGHT;
     down = JOYSTICK_DOWN;
 }
