@@ -504,12 +504,5 @@ void main(void)
             sound(pulses);
             pulses--;
         }
-
-        // TEST_PIN_TOGGLE; // adds 2.5us
-        // TEST_PIN_TOGGLE; // adds 2.5us
     }
 }
-
-
-// 1.023 MHz / 30 Hz = 34100 cycles
-// 34100 / 255 = 133 cycles per count
