@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "../lib/test_pin.h"
+#include "../lib/delay.h"
 #include "../lib/zero_page.h"
 #include "../lib/hires.h"
 #include "../lib/sprite.h"
@@ -39,6 +40,16 @@ const uint8_t mod7[] = {MOD7};
 
 #define SCORE_Y 0
 
+enum direction
+{
+    DIRECTION_NONE = 0,
+    DIRECTION_UP,
+    DIRECTION_DOWN,
+    DIRECTION_LEFT,
+    DIRECTION_RIGHT,
+};
+
+
 static uint8_t pulses;
 static uint8_t paddle_x1;
 static uint8_t paddle_x2;
@@ -52,6 +63,8 @@ static uint8_t score_hundreds;
 static uint8_t high_ones;
 static uint8_t high_tens;
 static uint8_t high_hundreds;
+static uint8_t ship_direction;
+static uint8_t ship_direction_new;
 
 static void pointers_init(void)
 {
@@ -99,6 +112,9 @@ void game_init(void)
     end = 0;
     pulses = 0;
 
+    ship_direction = DIRECTION_NONE;
+    ship_direction_new = DIRECTION_UP;
+
     if (score > high_score)
     {
         high_score = score;
@@ -127,13 +143,83 @@ void high_score_draw(void)
     digit_set(37, SCORE_Y, high_ones);
 }
 
-void paddle_draw(void)
+void ship_draw(void)
 {
     sprite_update(0, paddle_x1, PADDLE_Y, 15, paddle_x2, PADDLE_Y);
+}
+
+void ship_up_draw(void)
+{
     sprite_update(0, paddle_x1 + 2, PADDLE_Y - 2, 5, paddle_x2 + 2, PADDLE_Y - 2);
     sprite_update(0, paddle_x1 + 2, PADDLE_Y - 4, 5, paddle_x2 + 2, PADDLE_Y - 4);
     sprite_update(0, paddle_x1 + SPRITE_STEP, PADDLE_Y + 4, 5, paddle_x2 + SPRITE_STEP, PADDLE_Y + 4);
     sprite_update(0, paddle_x1 - 2, PADDLE_Y + 4, 5, paddle_x2 - 2, PADDLE_Y + 4);
+}
+
+void ship_up_erase(void)
+{
+    sprite_update(5, paddle_x1 + 2, PADDLE_Y - 2, 0, paddle_x2 + 2, PADDLE_Y - 2);
+    sprite_update(5, paddle_x1 + 2, PADDLE_Y - 4, 0, paddle_x2 + 2, PADDLE_Y - 4);
+    sprite_update(5, paddle_x1 + SPRITE_STEP, PADDLE_Y + 4, 0, paddle_x2 + SPRITE_STEP, PADDLE_Y + 4);
+    sprite_update(5, paddle_x1 - 2, PADDLE_Y + 4, 0, paddle_x2 - 2, PADDLE_Y + 4);
+}
+
+void ship_down_draw(void)
+{
+    sprite_update(0, paddle_x1 + 2, PADDLE_Y + 6, 5, paddle_x2 + 2, PADDLE_Y + 6);
+    sprite_update(0, paddle_x1 + 2, PADDLE_Y + 8, 5, paddle_x2 + 2, PADDLE_Y + 8);
+    sprite_update(0, paddle_x1 + SPRITE_STEP, PADDLE_Y, 5, paddle_x2 + SPRITE_STEP, PADDLE_Y);
+    sprite_update(0, paddle_x1 - 2, PADDLE_Y, 5, paddle_x2 - 2, PADDLE_Y);
+}
+
+void ship_down_erase(void)
+{
+    sprite_update(5, paddle_x1 + 2, PADDLE_Y + 6, 0, paddle_x2 + 2, PADDLE_Y + 6);
+    sprite_update(5, paddle_x1 + 2, PADDLE_Y + 8, 0, paddle_x2 + 2, PADDLE_Y + 8);
+    sprite_update(5, paddle_x1 + SPRITE_STEP, PADDLE_Y, 0, paddle_x2 + SPRITE_STEP, PADDLE_Y);
+    sprite_update(5, paddle_x1 - 2, PADDLE_Y, 0, paddle_x2 - 2, PADDLE_Y);
+}
+
+void ship_update(void)
+{
+    if (ship_direction_new == ship_direction)
+    {
+        return;
+    }
+
+    switch (ship_direction)
+    {
+        case DIRECTION_UP:
+            ship_up_erase();
+            break;
+        case DIRECTION_DOWN:
+            ship_down_erase();
+            break;
+        case DIRECTION_LEFT:
+            ship_up_erase();
+            break;
+        case DIRECTION_RIGHT:
+            ship_up_erase();
+            break;
+    }
+
+    switch (ship_direction_new)
+    {
+        case DIRECTION_UP:
+            ship_up_draw();
+            break;
+        case DIRECTION_DOWN:
+            ship_down_draw();
+            break;
+        case DIRECTION_LEFT:
+            ship_up_draw();
+            break;
+        case DIRECTION_RIGHT:
+            ship_up_draw();
+            break;
+    }
+
+    ship_direction = ship_direction_new;
 }
 
 void score_increase(void)
@@ -160,6 +246,15 @@ void score_increase(void)
     score_draw();
 }
 
+void delay(void)
+{
+    int i;
+    for (i = 0; i < 100; i++)
+    {
+        delay_100us();
+    }
+}
+
 void main(void)
 {
     high_score = 0;
@@ -179,7 +274,8 @@ void main(void)
     hires_clr();
     hbox();
 
-    paddle_draw();
+    ship_draw();
+    ship_update();
     score_draw();
     high_score_draw();
 
@@ -189,24 +285,31 @@ void main(void)
 
         joystick_run();
 
+        if (joystick_up_get())
+        {
+            ship_direction_new = DIRECTION_UP;
+        }
+
+        if (joystick_down_get())
+        {
+            ship_direction_new = DIRECTION_DOWN;
+        }
+
         if (joystick_left_get())
         {
-            if (paddle_x2 > PADDLE_X_MIN)
-            {
-                paddle_x2 -= SPRITE_STEP;
-            }
+            ship_direction_new = DIRECTION_LEFT;
         }
 
         if (joystick_right_get())
         {
-            if (paddle_x2 < PADDLE_X_MAX)
-            {
-                paddle_x2 += SPRITE_STEP;
-            }
+            ship_direction_new = DIRECTION_RIGHT;
         }
+
+        ship_update();
 
         if (joystick_fire_get())
         {
+            pulses = SOUND_BOUNCE;
             if (start == 0)
             {
                 start = 1;
@@ -216,7 +319,8 @@ void main(void)
                 game_init();
                 hires_clr();
                 hbox();
-                paddle_draw();
+                ship_draw();
+                ship_up_draw();
                 score_draw();
                 high_score_draw();
             }
@@ -227,5 +331,7 @@ void main(void)
             sound(pulses);
             pulses--;
         }
+
+        delay();
     }
 }
