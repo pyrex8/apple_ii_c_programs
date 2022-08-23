@@ -180,6 +180,38 @@ void ship_down_erase(void)
     sprite_update(5, paddle_x1 - 2, PADDLE_Y, 0, paddle_x2 - 2, PADDLE_Y);
 }
 
+void ship_left_draw(void)
+{
+    sprite_update(0, paddle_x1 + 4, PADDLE_Y - 2, 5, paddle_x2 + 4, PADDLE_Y - 2);
+    sprite_update(0, paddle_x1 + 4, PADDLE_Y + 6, 5, paddle_x2 + 4, PADDLE_Y + 6);
+    sprite_update(0, paddle_x1 - 2, PADDLE_Y + 2, 5, paddle_x2 - 2, PADDLE_Y + 2);
+    sprite_update(0, paddle_x1 - 4, PADDLE_Y + 2, 5, paddle_x2 - 4, PADDLE_Y + 2);
+}
+
+void ship_left_erase(void)
+{
+    sprite_update(5, paddle_x1 + 4, PADDLE_Y - 2, 0, paddle_x2 + 4, PADDLE_Y - 2);
+    sprite_update(5, paddle_x1 + 4, PADDLE_Y + 6, 0, paddle_x2 + 4, PADDLE_Y + 6);
+    sprite_update(5, paddle_x1 - 2, PADDLE_Y + 2, 0, paddle_x2 - 2, PADDLE_Y + 2);
+    sprite_update(5, paddle_x1 - 4, PADDLE_Y + 2, 0, paddle_x2 - 4, PADDLE_Y + 2);
+}
+
+void ship_right_draw(void)
+{
+    sprite_update(0, paddle_x1, PADDLE_Y - 2, 5, paddle_x2, PADDLE_Y - 2);
+    sprite_update(0, paddle_x1, PADDLE_Y + 6, 5, paddle_x2, PADDLE_Y + 6);
+    sprite_update(0, paddle_x1 + 6, PADDLE_Y + 2, 5, paddle_x2 + 6, PADDLE_Y + 2);
+    sprite_update(0, paddle_x1 + 8, PADDLE_Y + 2, 5, paddle_x2 + 8, PADDLE_Y + 2);
+}
+
+void ship_right_erase(void)
+{
+    sprite_update(5, paddle_x1, PADDLE_Y - 2, 0, paddle_x2, PADDLE_Y - 2);
+    sprite_update(5, paddle_x1, PADDLE_Y + 6, 0, paddle_x2, PADDLE_Y + 6);
+    sprite_update(5, paddle_x1 + 6, PADDLE_Y + 2, 0, paddle_x2 + 6, PADDLE_Y + 2);
+    sprite_update(5, paddle_x1 + 8, PADDLE_Y + 2, 0, paddle_x2 + 8, PADDLE_Y + 2);
+}
+
 void ship_update(void)
 {
     if (ship_direction_new == ship_direction)
@@ -196,10 +228,10 @@ void ship_update(void)
             ship_down_erase();
             break;
         case DIRECTION_LEFT:
-            ship_up_erase();
+            ship_left_erase();
             break;
         case DIRECTION_RIGHT:
-            ship_up_erase();
+            ship_right_erase();
             break;
     }
 
@@ -212,10 +244,10 @@ void ship_update(void)
             ship_down_draw();
             break;
         case DIRECTION_LEFT:
-            ship_up_draw();
+            ship_left_draw();
             break;
         case DIRECTION_RIGHT:
-            ship_up_draw();
+            ship_right_draw();
             break;
     }
 
