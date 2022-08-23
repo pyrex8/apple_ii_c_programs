@@ -143,7 +143,7 @@ void high_score_draw(void)
     digit_set(37, SCORE_Y, high_ones);
 }
 
-void ship_draw(void)
+void ship_init(void)
 {
     sprite_update(0, paddle_x1, PADDLE_Y, 15, paddle_x2, PADDLE_Y);
 }
@@ -274,7 +274,7 @@ void main(void)
     hires_clr();
     hbox();
 
-    ship_draw();
+    ship_init();
     ship_update();
     score_draw();
     high_score_draw();
@@ -319,7 +319,7 @@ void main(void)
                 game_init();
                 hires_clr();
                 hbox();
-                ship_draw();
+                ship_init();
                 ship_up_draw();
                 score_draw();
                 high_score_draw();
