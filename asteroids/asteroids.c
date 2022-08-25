@@ -26,13 +26,19 @@ const uint8_t mod7[] = {MOD7};
 #define SOUND_BOUNCE 5
 #define SOUND_END 30
 
-#define SHIP_Y 90
 #define SHIP_X 120
+#define SHIP_Y 90
 #define SPRITE_ON 5
 #define SPRITE_OFF 0
 
-#define ASTEROID_X_MIN 58
-#define ASTEROID_X_MAX 188
+#define FIRE_SPRITE 5
+#define FIRE_X_INIT 122
+#define FIRE_Y_INIT 92
+
+#define X_MIN 58
+#define X_MAX 188
+#define Y_MIN 58
+#define Y_MAX 188
 
 #define SCORE_Y 0
 
@@ -59,6 +65,15 @@ static uint8_t high_tens;
 static uint8_t high_hundreds;
 static uint8_t ship_direction;
 static uint8_t ship_direction_new;
+
+static uint8_t fire_x1;
+static uint8_t fire_y1;
+static uint8_t fire_x2;
+static uint8_t fire_y2;
+static uint8_t fire_dx_p;
+static uint8_t fire_dx_n;
+static uint8_t fire_dy_p;
+static uint8_t fire_dy_n;
 
 static void pointers_init(void)
 {
@@ -105,6 +120,15 @@ void game_init(void)
 
     ship_direction = DIRECTION_NONE;
     ship_direction_new = DIRECTION_UP;
+
+    fire_x1 = FIRE_X_INIT;
+    fire_x2 = fire_x1;
+    fire_y1 = FIRE_Y_INIT;
+    fire_y2 = fire_y1;
+    fire_dx_p = 4;
+    fire_dx_n = 0;
+    fire_dy_p = 0;
+    fire_dy_n = 0;
 
     if (score > high_score)
     {
@@ -271,9 +295,36 @@ void main(void)
     high_score_draw();
 
     sprite_update(0, 100, 100, 15, 100, 100);
+    sprite_update(0, fire_x1, fire_y1, FIRE_SPRITE, fire_x2, fire_y2);
+
 
     while(1)
     {
+
+        sprite_update(FIRE_SPRITE, fire_x1, fire_y1, FIRE_SPRITE, fire_x2, fire_y2);
+
+        fire_x1 = fire_x2;
+        fire_y1 = fire_y2;
+
+        if ((fire_x2 < X_MIN) || (fire_x2 > X_MAX) || (fire_y2 < Y_MIN) || (fire_y2 > Y_MAX))
+        {
+            fire_dx_p = 0;
+            fire_dx_n = 0;
+            fire_dy_p = 0;
+            fire_dy_n = 0;
+            sprite_update(FIRE_SPRITE, fire_x1, fire_y1, 0, fire_x2, fire_y2);
+
+            fire_x1 = FIRE_X_INIT;
+            fire_y1 = FIRE_Y_INIT;
+            fire_x2 = fire_x1;
+            fire_y2 = fire_y1;
+
+            sprite_update(0, fire_x1, fire_y1, FIRE_SPRITE, fire_x2, fire_y2);
+        }
+
+        fire_x2 += fire_dx_p - fire_dx_n;
+        fire_y2 += fire_dy_p - fire_dy_n;
+
         joystick_run();
 
         if (joystick_up_get())
@@ -300,6 +351,7 @@ void main(void)
 
         if (joystick_fire_get())
         {
+            fire_dx_p = 4;
             pulses = SOUND_BOUNCE;
             if (start == 0)
             {
