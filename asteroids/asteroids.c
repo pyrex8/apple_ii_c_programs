@@ -26,17 +26,13 @@ const uint8_t mod7[] = {MOD7};
 #define SOUND_BOUNCE 5
 #define SOUND_END 30
 
-#define PADDLE_SPRITE 10
-#define SPRITE_STEP 6
-#define SPRITE_STEP2 (2 * SPRITE_STEP)
-#define PADDLE_X_MIN 58
-#define PADDLE_X_MAX 188
-#define PADDLE_Y 90
-#define PADDLE_X_INIT PADDLE_X_MIN + (SPRITE_STEP * 10)
-#define PADDLE_WIDTH 18
-#define PADDLE_CENTER 4
-#define PADDLE_COLLISION_MIN (PADDLE_Y - PADDLE_CENTER)
-#define PADDLE_COLLISION_MAX PADDLE_Y
+#define SHIP_Y 90
+#define SHIP_X 120
+#define SPRITE_ON 5
+#define SPRITE_OFF 0
+
+#define ASTEROID_X_MIN 58
+#define ASTEROID_X_MAX 188
 
 #define SCORE_Y 0
 
@@ -51,8 +47,6 @@ enum direction
 
 
 static uint8_t pulses;
-static uint8_t paddle_x1;
-static uint8_t paddle_x2;
 static uint8_t start;
 static uint8_t end;
 static uint8_t score;
@@ -105,9 +99,6 @@ static void hbox(void)
 
 void game_init(void)
 {
-    paddle_x1 = PADDLE_X_INIT;
-    paddle_x2 = paddle_x1;
-
     start = 0;
     end = 0;
     pulses = 0;
@@ -145,71 +136,39 @@ void high_score_draw(void)
 
 void ship_init(void)
 {
-    sprite_update(0, paddle_x1, PADDLE_Y, 15, paddle_x2, PADDLE_Y);
+    sprite_update(0, SHIP_X, SHIP_Y, 15, SHIP_X, SHIP_Y);
 }
 
-void ship_up_draw(void)
+void ship_up_draw(uint8_t a, int8_t b)
 {
-    sprite_update(0, paddle_x1 + 2, PADDLE_Y - 2, 5, paddle_x2 + 2, PADDLE_Y - 2);
-    sprite_update(0, paddle_x1 + 2, PADDLE_Y - 4, 5, paddle_x2 + 2, PADDLE_Y - 4);
-    sprite_update(0, paddle_x1 + SPRITE_STEP, PADDLE_Y + 4, 5, paddle_x2 + SPRITE_STEP, PADDLE_Y + 4);
-    sprite_update(0, paddle_x1 - 2, PADDLE_Y + 4, 5, paddle_x2 - 2, PADDLE_Y + 4);
+    sprite_update(a, SHIP_X + 2, SHIP_Y - 2, b, SHIP_X + 2, SHIP_Y - 2);
+    sprite_update(a, SHIP_X + 2, SHIP_Y - 4, b, SHIP_X + 2, SHIP_Y - 4);
+    sprite_update(a, SHIP_X + 6, SHIP_Y + 4, b, SHIP_X + 6, SHIP_Y + 4);
+    sprite_update(a, SHIP_X - 2, SHIP_Y + 4, b, SHIP_X - 2, SHIP_Y + 4);
 }
 
-void ship_up_erase(void)
+void ship_down_draw(uint8_t a, int8_t b)
 {
-    sprite_update(5, paddle_x1 + 2, PADDLE_Y - 2, 0, paddle_x2 + 2, PADDLE_Y - 2);
-    sprite_update(5, paddle_x1 + 2, PADDLE_Y - 4, 0, paddle_x2 + 2, PADDLE_Y - 4);
-    sprite_update(5, paddle_x1 + SPRITE_STEP, PADDLE_Y + 4, 0, paddle_x2 + SPRITE_STEP, PADDLE_Y + 4);
-    sprite_update(5, paddle_x1 - 2, PADDLE_Y + 4, 0, paddle_x2 - 2, PADDLE_Y + 4);
+    sprite_update(a, SHIP_X + 2, SHIP_Y + 6, b, SHIP_X + 2, SHIP_Y + 6);
+    sprite_update(a, SHIP_X + 2, SHIP_Y + 8, b, SHIP_X + 2, SHIP_Y + 8);
+    sprite_update(a, SHIP_X + 6, SHIP_Y, b, SHIP_X + 6, SHIP_Y);
+    sprite_update(a, SHIP_X - 2, SHIP_Y, b, SHIP_X - 2, SHIP_Y);
 }
 
-void ship_down_draw(void)
+void ship_left_draw(uint8_t a, int8_t b)
 {
-    sprite_update(0, paddle_x1 + 2, PADDLE_Y + 6, 5, paddle_x2 + 2, PADDLE_Y + 6);
-    sprite_update(0, paddle_x1 + 2, PADDLE_Y + 8, 5, paddle_x2 + 2, PADDLE_Y + 8);
-    sprite_update(0, paddle_x1 + SPRITE_STEP, PADDLE_Y, 5, paddle_x2 + SPRITE_STEP, PADDLE_Y);
-    sprite_update(0, paddle_x1 - 2, PADDLE_Y, 5, paddle_x2 - 2, PADDLE_Y);
+    sprite_update(a, SHIP_X + 4, SHIP_Y - 2, b, SHIP_X + 4, SHIP_Y - 2);
+    sprite_update(a, SHIP_X + 4, SHIP_Y + 6, b, SHIP_X + 4, SHIP_Y + 6);
+    sprite_update(a, SHIP_X - 2, SHIP_Y + 2, b, SHIP_X - 2, SHIP_Y + 2);
+    sprite_update(a, SHIP_X - 4, SHIP_Y + 2, b, SHIP_X - 4, SHIP_Y + 2);
 }
 
-void ship_down_erase(void)
+void ship_right_draw(uint8_t a, int8_t b)
 {
-    sprite_update(5, paddle_x1 + 2, PADDLE_Y + 6, 0, paddle_x2 + 2, PADDLE_Y + 6);
-    sprite_update(5, paddle_x1 + 2, PADDLE_Y + 8, 0, paddle_x2 + 2, PADDLE_Y + 8);
-    sprite_update(5, paddle_x1 + SPRITE_STEP, PADDLE_Y, 0, paddle_x2 + SPRITE_STEP, PADDLE_Y);
-    sprite_update(5, paddle_x1 - 2, PADDLE_Y, 0, paddle_x2 - 2, PADDLE_Y);
-}
-
-void ship_left_draw(void)
-{
-    sprite_update(0, paddle_x1 + 4, PADDLE_Y - 2, 5, paddle_x2 + 4, PADDLE_Y - 2);
-    sprite_update(0, paddle_x1 + 4, PADDLE_Y + 6, 5, paddle_x2 + 4, PADDLE_Y + 6);
-    sprite_update(0, paddle_x1 - 2, PADDLE_Y + 2, 5, paddle_x2 - 2, PADDLE_Y + 2);
-    sprite_update(0, paddle_x1 - 4, PADDLE_Y + 2, 5, paddle_x2 - 4, PADDLE_Y + 2);
-}
-
-void ship_left_erase(void)
-{
-    sprite_update(5, paddle_x1 + 4, PADDLE_Y - 2, 0, paddle_x2 + 4, PADDLE_Y - 2);
-    sprite_update(5, paddle_x1 + 4, PADDLE_Y + 6, 0, paddle_x2 + 4, PADDLE_Y + 6);
-    sprite_update(5, paddle_x1 - 2, PADDLE_Y + 2, 0, paddle_x2 - 2, PADDLE_Y + 2);
-    sprite_update(5, paddle_x1 - 4, PADDLE_Y + 2, 0, paddle_x2 - 4, PADDLE_Y + 2);
-}
-
-void ship_right_draw(void)
-{
-    sprite_update(0, paddle_x1, PADDLE_Y - 2, 5, paddle_x2, PADDLE_Y - 2);
-    sprite_update(0, paddle_x1, PADDLE_Y + 6, 5, paddle_x2, PADDLE_Y + 6);
-    sprite_update(0, paddle_x1 + 6, PADDLE_Y + 2, 5, paddle_x2 + 6, PADDLE_Y + 2);
-    sprite_update(0, paddle_x1 + 8, PADDLE_Y + 2, 5, paddle_x2 + 8, PADDLE_Y + 2);
-}
-
-void ship_right_erase(void)
-{
-    sprite_update(5, paddle_x1, PADDLE_Y - 2, 0, paddle_x2, PADDLE_Y - 2);
-    sprite_update(5, paddle_x1, PADDLE_Y + 6, 0, paddle_x2, PADDLE_Y + 6);
-    sprite_update(5, paddle_x1 + 6, PADDLE_Y + 2, 0, paddle_x2 + 6, PADDLE_Y + 2);
-    sprite_update(5, paddle_x1 + 8, PADDLE_Y + 2, 0, paddle_x2 + 8, PADDLE_Y + 2);
+    sprite_update(a, SHIP_X, SHIP_Y - 2, b, SHIP_X, SHIP_Y - 2);
+    sprite_update(a, SHIP_X, SHIP_Y + 6, b, SHIP_X, SHIP_Y + 6);
+    sprite_update(a, SHIP_X + 6, SHIP_Y + 2, b, SHIP_X + 6, SHIP_Y + 2);
+    sprite_update(a, SHIP_X + 8, SHIP_Y + 2, b, SHIP_X + 8, SHIP_Y + 2);
 }
 
 void ship_update(void)
@@ -222,32 +181,32 @@ void ship_update(void)
     switch (ship_direction)
     {
         case DIRECTION_UP:
-            ship_up_erase();
+            ship_up_draw(SPRITE_ON, SPRITE_OFF);
             break;
         case DIRECTION_DOWN:
-            ship_down_erase();
+            ship_down_draw(SPRITE_ON, SPRITE_OFF);
             break;
         case DIRECTION_LEFT:
-            ship_left_erase();
+            ship_left_draw(SPRITE_ON, SPRITE_OFF);
             break;
         case DIRECTION_RIGHT:
-            ship_right_erase();
+            ship_right_draw(SPRITE_ON, SPRITE_OFF);
             break;
     }
 
     switch (ship_direction_new)
     {
         case DIRECTION_UP:
-            ship_up_draw();
+            ship_up_draw(SPRITE_OFF, SPRITE_ON);
             break;
         case DIRECTION_DOWN:
-            ship_down_draw();
+            ship_down_draw(SPRITE_OFF, SPRITE_ON);
             break;
         case DIRECTION_LEFT:
-            ship_left_draw();
+            ship_left_draw(SPRITE_OFF, SPRITE_ON);
             break;
         case DIRECTION_RIGHT:
-            ship_right_draw();
+            ship_right_draw(SPRITE_OFF, SPRITE_ON);
             break;
     }
 
@@ -311,10 +270,10 @@ void main(void)
     score_draw();
     high_score_draw();
 
+    sprite_update(0, 100, 100, 15, 100, 100);
+
     while(1)
     {
-         paddle_x1 = paddle_x2;
-
         joystick_run();
 
         if (joystick_up_get())
@@ -352,7 +311,7 @@ void main(void)
                 hires_clr();
                 hbox();
                 ship_init();
-                ship_up_draw();
+                ship_up_draw(0, 5);
                 score_draw();
                 high_score_draw();
             }
