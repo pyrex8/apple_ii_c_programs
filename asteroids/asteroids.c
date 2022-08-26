@@ -35,6 +35,7 @@ const uint8_t mod7[] = {MOD7};
 #define MISSILE_SPEED 4
 #define MISSILE_X_INIT 122
 #define MISSILE_Y_INIT 92
+#define MISSILE_OFFSET 10
 
 #define X_MIN 38
 #define X_MAX 210
@@ -353,23 +354,30 @@ void main(void)
 
         if (joystick_fire_get() && missile_ready)
         {
-            missile_ready = 0;
-            sprite_update(0, missile_x1, missile_y1, MISSILE_SPRITE, missile_x2, missile_y2);
             switch (ship_direction)
             {
                 case DIRECTION_UP:
                     missile_dy_n = MISSILE_SPEED;
+                    missile_y1 -= MISSILE_OFFSET;
                     break;
                 case DIRECTION_DOWN:
                     missile_dy_p = MISSILE_SPEED;
+                    missile_y1 += MISSILE_OFFSET;
                     break;
                 case DIRECTION_LEFT:
                     missile_dx_n = MISSILE_SPEED;
+                    missile_x1 -= MISSILE_OFFSET;
                     break;
                 case DIRECTION_RIGHT:
                     missile_dx_p = MISSILE_SPEED;
+                    missile_x1 += MISSILE_OFFSET;
                     break;
             }
+
+            missile_ready = 0;
+            missile_x2 = missile_x1;
+            missile_y2 = missile_y1;
+            sprite_update(0, missile_x1, missile_y1, MISSILE_SPRITE, missile_x2, missile_y2);
 
             pulses = SOUND_BOUNCE;
             if (start == 0)
