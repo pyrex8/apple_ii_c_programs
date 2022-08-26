@@ -31,14 +31,15 @@ const uint8_t mod7[] = {MOD7};
 #define SPRITE_ON 5
 #define SPRITE_OFF 0
 
-#define FIRE_SPRITE 5
-#define FIRE_X_INIT 122
-#define FIRE_Y_INIT 92
+#define MISSILE_SPRITE 5
+#define MISSILE_SPEED 4
+#define MISSILE_X_INIT 122
+#define MISSILE_Y_INIT 92
 
-#define X_MIN 58
-#define X_MAX 188
-#define Y_MIN 58
-#define Y_MAX 188
+#define X_MIN 38
+#define X_MAX 210
+#define Y_MIN 4
+#define Y_MAX 176
 
 #define SCORE_Y 0
 
@@ -66,14 +67,15 @@ static uint8_t high_hundreds;
 static uint8_t ship_direction;
 static uint8_t ship_direction_new;
 
-static uint8_t fire_x1;
-static uint8_t fire_y1;
-static uint8_t fire_x2;
-static uint8_t fire_y2;
-static uint8_t fire_dx_p;
-static uint8_t fire_dx_n;
-static uint8_t fire_dy_p;
-static uint8_t fire_dy_n;
+static uint8_t missile_ready;
+static uint8_t missile_x1;
+static uint8_t missile_y1;
+static uint8_t missile_x2;
+static uint8_t missile_y2;
+static uint8_t missile_dx_p;
+static uint8_t missile_dx_n;
+static uint8_t missile_dy_p;
+static uint8_t missile_dy_n;
 
 static void pointers_init(void)
 {
@@ -121,14 +123,15 @@ void game_init(void)
     ship_direction = DIRECTION_NONE;
     ship_direction_new = DIRECTION_UP;
 
-    fire_x1 = FIRE_X_INIT;
-    fire_x2 = fire_x1;
-    fire_y1 = FIRE_Y_INIT;
-    fire_y2 = fire_y1;
-    fire_dx_p = 4;
-    fire_dx_n = 0;
-    fire_dy_p = 0;
-    fire_dy_n = 0;
+    missile_ready = 1;
+    missile_x1 = MISSILE_X_INIT;
+    missile_x2 = missile_x1;
+    missile_y1 = MISSILE_Y_INIT;
+    missile_y2 = missile_y1;
+    missile_dx_p = 0;
+    missile_dx_n = 0;
+    missile_dy_p = 0;
+    missile_dy_n = 0;
 
     if (score > high_score)
     {
@@ -295,35 +298,34 @@ void main(void)
     high_score_draw();
 
     sprite_update(0, 100, 100, 15, 100, 100);
-    sprite_update(0, fire_x1, fire_y1, FIRE_SPRITE, fire_x2, fire_y2);
-
 
     while(1)
     {
-
-        sprite_update(FIRE_SPRITE, fire_x1, fire_y1, FIRE_SPRITE, fire_x2, fire_y2);
-
-        fire_x1 = fire_x2;
-        fire_y1 = fire_y2;
-
-        if ((fire_x2 < X_MIN) || (fire_x2 > X_MAX) || (fire_y2 < Y_MIN) || (fire_y2 > Y_MAX))
+        if (!missile_ready)
         {
-            fire_dx_p = 0;
-            fire_dx_n = 0;
-            fire_dy_p = 0;
-            fire_dy_n = 0;
-            sprite_update(FIRE_SPRITE, fire_x1, fire_y1, 0, fire_x2, fire_y2);
-
-            fire_x1 = FIRE_X_INIT;
-            fire_y1 = FIRE_Y_INIT;
-            fire_x2 = fire_x1;
-            fire_y2 = fire_y1;
-
-            sprite_update(0, fire_x1, fire_y1, FIRE_SPRITE, fire_x2, fire_y2);
+            sprite_update(MISSILE_SPRITE, missile_x1, missile_y1, MISSILE_SPRITE, missile_x2, missile_y2);
         }
 
-        fire_x2 += fire_dx_p - fire_dx_n;
-        fire_y2 += fire_dy_p - fire_dy_n;
+        missile_x1 = missile_x2;
+        missile_y1 = missile_y2;
+
+        if ((missile_x2 < X_MIN) || (missile_x2 > X_MAX) || (missile_y2 < Y_MIN) || (missile_y2 > Y_MAX))
+        {
+            missile_ready = 1;
+            missile_dx_p = 0;
+            missile_dx_n = 0;
+            missile_dy_p = 0;
+            missile_dy_n = 0;
+            sprite_update(MISSILE_SPRITE, missile_x1, missile_y1, 0, missile_x2, missile_y2);
+
+            missile_x1 = MISSILE_X_INIT;
+            missile_y1 = MISSILE_Y_INIT;
+            missile_x2 = missile_x1;
+            missile_y2 = missile_y1;
+        }
+
+        missile_x2 += missile_dx_p - missile_dx_n;
+        missile_y2 += missile_dy_p - missile_dy_n;
 
         joystick_run();
 
@@ -349,9 +351,26 @@ void main(void)
 
         ship_update();
 
-        if (joystick_fire_get())
+        if (joystick_fire_get() && missile_ready)
         {
-            fire_dx_p = 4;
+            missile_ready = 0;
+            sprite_update(0, missile_x1, missile_y1, MISSILE_SPRITE, missile_x2, missile_y2);
+            switch (ship_direction)
+            {
+                case DIRECTION_UP:
+                    missile_dy_n = MISSILE_SPEED;
+                    break;
+                case DIRECTION_DOWN:
+                    missile_dy_p = MISSILE_SPEED;
+                    break;
+                case DIRECTION_LEFT:
+                    missile_dx_n = MISSILE_SPEED;
+                    break;
+                case DIRECTION_RIGHT:
+                    missile_dx_p = MISSILE_SPEED;
+                    break;
+            }
+
             pulses = SOUND_BOUNCE;
             if (start == 0)
             {
