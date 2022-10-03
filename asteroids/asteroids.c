@@ -33,9 +33,14 @@ const uint8_t mod7[] = {MOD7};
 
 #define MISSILE_SPRITE 5
 #define MISSILE_SPEED 4
-#define MISSILE_X_INIT 122
-#define MISSILE_Y_INIT 92
-#define MISSILE_OFFSET 10
+#define MISSILE_X_INIT 120
+#define MISSILE_Y_INIT 90
+#define MISSILE_OFFSET 4
+
+#define ASTEROID_SPRITE 15
+#define ASTEROID_SPEED 1
+#define ASTEROID_X_INIT 100
+#define ASTEROID_Y_INIT 50
 
 #define X_MIN 38
 #define X_MAX 210
@@ -77,6 +82,15 @@ static uint8_t missile_dx_p;
 static uint8_t missile_dx_n;
 static uint8_t missile_dy_p;
 static uint8_t missile_dy_n;
+
+static uint8_t asteroid_x1;
+static uint8_t asteroid_y1;
+static uint8_t asteroid_x2;
+static uint8_t asteroid_y2;
+static uint8_t asteroid_dx_p;
+static uint8_t asteroid_dx_n;
+static uint8_t asteroid_dy_p;
+static uint8_t asteroid_dy_n;
 
 static void pointers_init(void)
 {
@@ -134,6 +148,15 @@ void game_init(void)
     missile_dy_p = 0;
     missile_dy_n = 0;
 
+    asteroid_x1 = ASTEROID_X_INIT;
+    asteroid_x2 = asteroid_x1;
+    asteroid_y1 = ASTEROID_Y_INIT;
+    asteroid_y2 = asteroid_y1;
+    asteroid_dx_p = 0;
+    asteroid_dx_n = 0;
+    asteroid_dy_p = ASTEROID_SPEED;
+    asteroid_dy_n = 0;
+
     if (score > high_score)
     {
         high_score = score;
@@ -164,39 +187,39 @@ void high_score_draw(void)
 
 void ship_init(void)
 {
-    sprite_update(0, SHIP_X, SHIP_Y, 15, SHIP_X, SHIP_Y);
+    sprite_update(0, SHIP_X, SHIP_Y, SPRITE_ON, SHIP_X, SHIP_Y);
 }
 
 void ship_up_draw(uint8_t a, int8_t b)
 {
-    sprite_update(a, SHIP_X + 2, SHIP_Y - 2, b, SHIP_X + 2, SHIP_Y - 2);
-    sprite_update(a, SHIP_X + 2, SHIP_Y - 4, b, SHIP_X + 2, SHIP_Y - 4);
-    sprite_update(a, SHIP_X + 6, SHIP_Y + 4, b, SHIP_X + 6, SHIP_Y + 4);
-    sprite_update(a, SHIP_X - 2, SHIP_Y + 4, b, SHIP_X - 2, SHIP_Y + 4);
+    sprite_update(a, SHIP_X, SHIP_Y - 2, b, SHIP_X, SHIP_Y - 2);
+
+    sprite_update(a, SHIP_X + 2, SHIP_Y + 2, b, SHIP_X + 2, SHIP_Y + 2);
+    sprite_update(a, SHIP_X - 2, SHIP_Y + 2, b, SHIP_X - 2, SHIP_Y + 2);
 }
 
 void ship_down_draw(uint8_t a, int8_t b)
 {
-    sprite_update(a, SHIP_X + 2, SHIP_Y + 6, b, SHIP_X + 2, SHIP_Y + 6);
-    sprite_update(a, SHIP_X + 2, SHIP_Y + 8, b, SHIP_X + 2, SHIP_Y + 8);
-    sprite_update(a, SHIP_X + 6, SHIP_Y, b, SHIP_X + 6, SHIP_Y);
-    sprite_update(a, SHIP_X - 2, SHIP_Y, b, SHIP_X - 2, SHIP_Y);
+    sprite_update(a, SHIP_X, SHIP_Y + 2, b, SHIP_X, SHIP_Y + 2);
+
+    sprite_update(a, SHIP_X + 2, SHIP_Y - 2, b, SHIP_X + 2, SHIP_Y - 2);
+    sprite_update(a, SHIP_X - 2, SHIP_Y - 2, b, SHIP_X - 2, SHIP_Y - 2);
 }
 
 void ship_left_draw(uint8_t a, int8_t b)
 {
-    sprite_update(a, SHIP_X + 4, SHIP_Y - 2, b, SHIP_X + 4, SHIP_Y - 2);
-    sprite_update(a, SHIP_X + 4, SHIP_Y + 6, b, SHIP_X + 4, SHIP_Y + 6);
-    sprite_update(a, SHIP_X - 2, SHIP_Y + 2, b, SHIP_X - 2, SHIP_Y + 2);
-    sprite_update(a, SHIP_X - 4, SHIP_Y + 2, b, SHIP_X - 4, SHIP_Y + 2);
+    sprite_update(a, SHIP_X - 2, SHIP_Y, b, SHIP_X - 2, SHIP_Y);
+
+    sprite_update(a, SHIP_X + 2, SHIP_Y - 2, b, SHIP_X + 2, SHIP_Y - 2);
+    sprite_update(a, SHIP_X + 2, SHIP_Y + 2, b, SHIP_X + 2, SHIP_Y + 2);
 }
 
 void ship_right_draw(uint8_t a, int8_t b)
 {
-    sprite_update(a, SHIP_X, SHIP_Y - 2, b, SHIP_X, SHIP_Y - 2);
-    sprite_update(a, SHIP_X, SHIP_Y + 6, b, SHIP_X, SHIP_Y + 6);
-    sprite_update(a, SHIP_X + 6, SHIP_Y + 2, b, SHIP_X + 6, SHIP_Y + 2);
-    sprite_update(a, SHIP_X + 8, SHIP_Y + 2, b, SHIP_X + 8, SHIP_Y + 2);
+    sprite_update(a, SHIP_X + 2, SHIP_Y, b, SHIP_X + 2, SHIP_Y);
+
+    sprite_update(a, SHIP_X - 2, SHIP_Y - 2, b, SHIP_X - 2, SHIP_Y - 2);
+    sprite_update(a, SHIP_X - 2, SHIP_Y + 2, b, SHIP_X - 2, SHIP_Y + 2);
 }
 
 void ship_update(void)
@@ -298,14 +321,16 @@ void main(void)
     score_draw();
     high_score_draw();
 
-    sprite_update(0, 100, 100, 15, 100, 100);
+    sprite_update(0, asteroid_x1, asteroid_y1, ASTEROID_SPRITE, asteroid_x2, asteroid_y2);
 
     while(1)
     {
-        if (!missile_ready)
-        {
-            sprite_update(MISSILE_SPRITE, missile_x1, missile_y1, MISSILE_SPRITE, missile_x2, missile_y2);
-        }
+        sprite_update(MISSILE_SPRITE, missile_x1, missile_y1, MISSILE_SPRITE, missile_x2, missile_y2);
+
+        sprite_update(ASTEROID_SPRITE, asteroid_x1, asteroid_y1, ASTEROID_SPRITE, asteroid_x2, asteroid_y2);
+
+        asteroid_x1 = asteroid_x2;
+        asteroid_y1 = asteroid_y2;
 
         missile_x1 = missile_x2;
         missile_y1 = missile_y2;
@@ -327,6 +352,9 @@ void main(void)
 
         missile_x2 += missile_dx_p - missile_dx_n;
         missile_y2 += missile_dy_p - missile_dy_n;
+
+        asteroid_x2 += asteroid_dx_p - asteroid_dx_n;
+        asteroid_y2 += asteroid_dy_p - asteroid_dy_n;
 
         joystick_run();
 
