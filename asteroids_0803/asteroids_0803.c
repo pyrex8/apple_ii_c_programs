@@ -37,7 +37,7 @@ const uint8_t mod7[] = {MOD7};
 #define MISSILE_Y_INIT 90
 #define MISSILE_OFFSET 4
 
-#define ASTEROID_SPRITE 15
+#define ASTEROID_SPRITE 5
 #define ASTEROID_SPEED 1
 #define ASTEROID_X_INIT 100
 #define ASTEROID_Y_INIT 50
