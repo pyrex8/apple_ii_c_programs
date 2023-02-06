@@ -24,6 +24,8 @@ const uint8_t mod7[] = {MOD7};
 #define BYTE_HIGH_BITS 8
 #define SOUND_BOUNCE 5
 #define SOUND_END 30
+#define SOUND_PULSES 10
+#define SOUND_DELAY 6
 
 #define PADDLE_SPRITE 10
 #define SPRITE_STEP 6
@@ -36,6 +38,7 @@ const uint8_t mod7[] = {MOD7};
 #define PADDLE_CENTER 4
 #define PADDLE_COLLISION_MIN (PADDLE_Y - PADDLE_CENTER)
 #define PADDLE_COLLISION_MAX PADDLE_Y
+#define PADDLE_UPDATE_DELAY 3
 
 
 #define BALL_SPRITE 10
@@ -68,6 +71,7 @@ const uint8_t mod7[] = {MOD7};
 static uint8_t pulses;
 static uint8_t paddle_x1;
 static uint8_t paddle_x2;
+static uint8_t paddle_update;
 static uint8_t ball_x1;
 static uint8_t ball_x2;
 static uint8_t ball_y1;
@@ -461,19 +465,24 @@ void main(void)
 
         joystick_run();
 
-        if (joystick_left_get())
+        paddle_update++;
+        if (paddle_update == PADDLE_UPDATE_DELAY)
         {
-            if (paddle_x2 > PADDLE_X_MIN)
+            paddle_update = 0;
+            if (joystick_left_get())
             {
-                paddle_x2 -= SPRITE_STEP;
+                if (paddle_x2 > PADDLE_X_MIN)
+                {
+                    paddle_x2 -= SPRITE_STEP;
+                }
             }
-        }
 
-        if (joystick_right_get())
-        {
-            if (paddle_x2 < PADDLE_X_MAX)
+            if (joystick_right_get())
             {
-                paddle_x2 += SPRITE_STEP;
+                if (paddle_x2 < PADDLE_X_MAX)
+                {
+                    paddle_x2 += SPRITE_STEP;
+                }
             }
         }
 
@@ -482,7 +491,7 @@ void main(void)
             if (start == 0)
             {
                 start = 1;
-                ball_speed_y = 4;
+                ball_speed_y = 2;
                 ball_dy_p = ball_speed_y;
             }
             if (end == 1)
@@ -500,7 +509,7 @@ void main(void)
 
         if (pulses > 0)
         {
-            sound(pulses);
+            sound(SOUND_PULSES, SOUND_DELAY);
             pulses--;
         }
     }
